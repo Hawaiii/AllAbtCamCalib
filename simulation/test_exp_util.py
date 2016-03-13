@@ -7,7 +7,7 @@ import math
 class TestExpUtilMethods(unittest.TestCase):
 	# def test_euler2mat():
 
-	def test_gen_calib_board():
+	def test_gen_calib_board(self):
 		#@TODO
 
 		# Board at (0,0,0) on x-y plane

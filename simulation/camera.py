@@ -91,16 +91,20 @@ class Camera:
 		cam_str += str(self.size)
 		return cam_str
 
+	@staticmethod
+	def make_pinhole_camera():
+		"""
+		Make a camera whose intrinsics and distortion coefficients are computed 
+		from a real experiment.
 
-def make_pinhole_camera():
-	"""
-	Make a camera with given intrinsics and distortion coefficients
-	"""
-	intri_mat = np.array([[6.1578617661522037e+02, 0., 6.1058715036731826e+02], \
-		[0., 6.1238350456764329e+02, 5.2959938173888008e+02],\
-		[0., 0., 1.]])
-	radial_dist = np.array([-1.8871087691827788e-02, 3.1035356528952687e-02, -1.2440956825625479e-02])
-	tang_dist = np.array([1.1627819998974306e-03, -1.8172149748173956e-04])
-	intri = Intrinsics(intri_mat, radial_dist, tang_dist)
+		Returns:
+			a Camera.
+		"""
+		intri_mat = np.array([[6.1578617661522037e+02, 0., 6.1058715036731826e+02], \
+			[0., 6.1238350456764329e+02, 5.2959938173888008e+02],\
+			[0., 0., 1.]])
+		radial_dist = np.array([-1.8871087691827788e-02, 3.1035356528952687e-02, -1.2440956825625479e-02])
+		tang_dist = np.array([1.1627819998974306e-03, -1.8172149748173956e-04])
+		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
 
-	return Camera(intri, None, (1264, 1016),"pinhole")
+		return Camera(intri, None, (1264, 1016),"pinhole")
