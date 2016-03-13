@@ -1,10 +1,10 @@
 """
 Utility functions for dealing with 3D objects.
 """
-
 import numpy as np
+import math
 
-# # A Control Point in 3D space (in world frame), containing an id for matching 
+# # A Control Point in 3D space (in world frame), containing an id for matching
 # #the same points
 # class ControlPoint
 #   loc = np.zeros(1,3)
@@ -13,6 +13,120 @@ import numpy as np
 #         self.loc = location
 #         self.id_num = id_num
 
+def euler2mat(e_angles):
+    """
+    Returns the rotation matrix for given Euler angle (rx, ry, rz)
+    Args:
+        e_angles: 1x3 numpy array
+
+    Returns:
+        rot_mat: rotation matrix of given euler angles
+    """
+    rot_mat = np.eye(3)
+    cosz = math.cos(e_angles[2])
+    sinz = math.sin(e_angles[2])
+    zmat = np.array([[cosz, -sinz, 0], [sinz, cosz, 0],[0, 0, 1]])
+
+    cosy = math.cos(e_angles[1])
+    siny = math.sin(e_angles[1])
+    ymat = np.array([[cosy, 0, siny], [0, 1, 0], [-siny, 0, cosy]])
+
+    cosx = math.cos(e_angles[0])
+    sinx = math.sin(e_angles[0])
+    xmat = np.array([[1, 0, 0], [0, cosx, -sinx], [0, sinx, cosx]])
+
+    return np.dot(xmat, np.dot(ymat, zmat))
+
+def mat2euler(M, cy_thresh=None):
+    ''' Discover Euler angle vector from 3x3 matrix
+
+    Uses the conventions above.
+
+    Parameters
+    ----------
+    M : array-like, shape (3,3)
+    cy_thresh : None or scalar, optional
+       threshold below which to give up on straightforward arctan for
+       estimating x rotation.  If None (default), estimate from
+       precision of input.
+
+    Returns
+    -------
+    z : scalar
+    y : scalar
+    x : scalar
+       Rotations in radians around z, y, x axes, respectively
+
+    Notes
+    -----
+    If there was no numerical error, the routine could be derived using
+    Sympy expression for z then y then x rotation matrix, which is::
+
+      [                       cos(y)*cos(z),                       -cos(y)*sin(z),         sin(y)],
+      [cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x)],
+      [sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y)]
+
+    with the obvious derivations for z, y, and x
+
+       z = atan2(-r12, r11)
+       y = asin(r13)
+       x = atan2(-r23, r33)
+
+    Problems arise when cos(y) is close to zero, because both of::
+
+       z = atan2(cos(y)*sin(z), cos(y)*cos(z))
+       x = atan2(cos(y)*sin(x), cos(x)*cos(y))
+
+    will be close to atan2(0, 0), and highly unstable.
+
+    The ``cy`` fix for numerical instability below is from: *Graphics
+    Gems IV*, Paul Heckbert (editor), Academic Press, 1994, ISBN:
+    0123361559.  Specifically it comes from EulerAngles.c by Ken
+    Shoemake, and deals with the case where cos(y) is close to zero:
+
+    See: http://www.graphicsgems.org/
+
+    The code appears to be licensed (from the website) as "can be used
+    without restrictions".
+    '''
+    M = np.asarray(M)
+    if cy_thresh is None:
+        try:
+            cy_thresh = np.finfo(M.dtype).eps * 4
+        except ValueError:
+            cy_thresh = _FLOAT_EPS_4
+    r11, r12, r13, r21, r22, r23, r31, r32, r33 = M.flat
+    # cy: sqrt((cos(y)*cos(z))**2 + (cos(x)*cos(y))**2)
+    cy = math.sqrt(r33*r33 + r23*r23)
+    if cy > cy_thresh: # cos(y) not close to zero, standard form
+        z = math.atan2(-r12,  r11) # atan2(cos(y)*sin(z), cos(y)*cos(z))
+        y = math.atan2(r13,  cy) # atan2(sin(y), cy)
+        x = math.atan2(-r23, r33) # atan2(cos(y)*sin(x), cos(x)*cos(y))
+    else: # cos(y) (close to) zero, so x -> 0.0 (see above)
+        # so r21 -> sin(z), r22 -> cos(z) and
+        z = math.atan2(r21,  r22)
+        y = math.atan2(r13,  cy) # atan2(sin(y), cy)
+        x = 0.0
+    return z, y, x
+
+def rotation_matrix(axis, theta):
+    """    
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+
+    From: http://stackoverflow.com/questions/6802577/python-rotation-of-3d-vector
+    """
+    axis = np.asarray(axis)
+    theta = np.asarray(theta)
+    axis = axis/math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta/2.0)
+    b, c, d = -axis*math.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
 def rotate_and_translate(pts, r_mat, t_vec):
     """
     Returns the new location of point after rotation and translation
@@ -20,12 +134,10 @@ def rotate_and_translate(pts, r_mat, t_vec):
     # @TODO
     pass
 
-# 
-# I
 def gen_calib_board(board_height, board_width, sqsize, \
                     location, orientation, noise3d):
     """
-    Generate a calibration board placed at give location with given direction, 
+    Generate a calibration board placed at give location with given direction,
     with given number of points on a plane.
     Args:
         board_height: positive integer, number of control points in vertical direction
@@ -40,21 +152,30 @@ def gen_calib_board(board_height, board_width, sqsize, \
     """
     board = {}
 
+    # Make board whose top-left point is at (0,0,0) and lies on x-y plane
     pt_id = 0
     for x in xrange(board_height):
         for y in xrange(board_width):
-            board[pt_id] = np.array([x * sqsize, y * sqsize, 0])
+            board[pt_id] = np.array([x * sqsize, y * sqsize, 1], np.float32)
             pt_id += 1
 
-    # @TODO location, orientation, add noise3d
-    print "@TODO: haven't implemented location, orientation, and noise3d of board!"
+    # Rotate board to given orientation and move to given location
+    rot_mat = euler2mat(orientation - np.array([0,0,1]))
+    for pt in board.keys():
+        board[pt] = rot_mat.dot(board[pt]) + location
+
+    # Add noise3d
+    if noise3d > 0:
+        noises = np.random.normal(0, noise3d, (board_height*board_width,3))
+        for ipt in xrange(len(board)):
+            board[board.keys()[ipt]] += noises[ipt, :]
+
     return board
 
 
 """
 Utility functions for running experiments.
 """
-
 def compute_estimation_diff(est_cam, true_cam, true_extrin):
     """
     Compute the difference between estimated result and true value
