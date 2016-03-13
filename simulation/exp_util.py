@@ -225,9 +225,36 @@ def move_board(board, location):
         A dictionary keyed by point id, whose values are 3D points
     """
     offset = location - board[0]
+    newboard = {}
     for pt in board.keys():
-        board[pt] = board[pt] + offset
-    return board
+        newboard[pt] = board[pt] + offset
+    return newboard
+
+def board_dict2array(board, board_dim):
+    """
+    Converts the dictionary representation of board into X,Y,Z array format  
+
+    Args:
+        board: a dictionary keyed by point id, whose values are 3D points, keyed 
+               in the following order: starting from top-left point, move right 
+               alone each row, and down for all rows, ending at bottom-right
+        board_dim: (board_height, board_width)
+
+    Returns:
+        X,Y,Z: each a 2D numpy array, specifying the location in the 
+               corresponding dimension of each point
+    """
+    X = np.empty(board_dim)
+    Y = np.empty(board_dim)
+    Z = np.empty(board_dim)
+    for pt in board.keys():
+        x = pt / board_dim[1]
+        y = pt % board_dim[1]
+        X[x,y] = board[pt][0]
+        Y[x,y] = board[pt][1]
+        Z[x,y] = board[pt][2]
+    return X, Y, Z
+
 
 """
 Utility functions for running experiments.

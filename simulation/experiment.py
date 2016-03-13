@@ -4,6 +4,8 @@ Runs experiment on calibration.
 
 import exp_util as util
 import camera as cam
+import vis
+
 import numpy as np
 import math
 
@@ -63,13 +65,16 @@ def target_at_layered_grids(nlayer, grid_size, aov, board, board_size):
 				cur_board = util.move_board(board, np.array([cur_x, cur_y, \
 					cur_depth]))
 				targets.append(cur_board)
+				print targets[-1][0]
 	return targets
 
 """
 Running the experiment.
 """
-noise3d_lvls = [0, 0.5, 1, 2]
-noise2d_lvls = [0, 0.5, 1, 2]
+noise3d_lvls = [0.5]
+noise2d_lvls = [0]
+# noise3d_lvls = [0, 0.5, 1, 2]
+# noise2d_lvls = [0, 0.5, 1, 2]
 board_height = 5
 board_width = 7
 board_sqsize = 23
@@ -90,6 +95,8 @@ for noise3d in noise3d_lvls:
 		# Move the calibration target on different grid layers
 		layered_grids = target_at_layered_grids(3, (5, 7), true_cam.aov, board,\
 			(board_height*board_sqsize, board_width*board_sqsize))
+		vis.plot_calib_boards(layered_grids, (board_height, board_width))
+
 		img_pts = true_cam.capture_images(layered_grids)
 
 		# Estimate camera parameters from captured images
