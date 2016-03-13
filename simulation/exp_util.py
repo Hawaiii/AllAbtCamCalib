@@ -208,6 +208,26 @@ def gen_calib_board(board_height, board_width, sqsize, \
 
     return board
 
+def move_board(board, location):
+    """
+    Move a generated board to a given location.
+    TODO: rotate a board to a given orientation
+
+    Args:
+        board: a dictionary keyed by point id, whose values are 3D points (1x3 
+               numpy arrays)
+        location: 1x3 numpy array, desired 3D location of the top-left corner 
+                  of board
+        orientation: 1x3 numpy array, desired 3D orientation of the board, 
+                     (rx,ry,rz)
+
+    Returns:
+        A dictionary keyed by point id, whose values are 3D points
+    """
+    offset = location - board[0]
+    for pt in board.keys():
+        board[pt] = board[pt] + offset
+    return board
 
 """
 Utility functions for running experiments.
