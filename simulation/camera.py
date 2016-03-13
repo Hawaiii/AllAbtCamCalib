@@ -55,17 +55,32 @@ class Camera:
 	intriniscs = None #Intrinsics
 	extrinsics = [] #list of extrinsics - change into dictionary keyed by time?
 	size = None #(height, width) of image size, in pixels
+	aov = None #(angle_of_view_vertical, angle_of_view_horizontal), in degree
 	name = None #A string that could be used for identifying the camera
 
-	def __init__(self, intrinsics, extrinsics, img_size, name):
+	def __init__(self, intrinsics, extrinsics, img_size, aov, name):
 		self.intrinsics = intrinsics
 		if extrinsics != None:
 			self.extrinsics = extrinsics
 		self.size = img_size
+		self.aov = aov
 		self.name = name
 
-	def project_points(self, points):
+	def __repr__(self):
+		cam_str = 'Camera ' + self.name + ':\n\tIntrinsics:\n' + \
+		str(self.intrinsics) + '\n\tExtrinsics:\n'
+		for ext in self.extrinsics:
+			cam_str += '\n\t\t'
+			cam_str += str(self.extrinsics)
+		cam_str += '\n\tAngle of view: '
+		cam_str += str(self.aov)
+		cam_str += '\n\tImage size: '
+		cam_str += str(self.size)
+		return cam_str
+	
+	def capture_images(self, points):
 		# @TODO
+		print "capture_images not yet implemented!"
 		pass
 
 	@staticmethod
@@ -80,16 +95,6 @@ class Camera:
 		# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(board, img_pts, img_size, None, None)
 		# print 'OK'
 		pass # return a camera
-
-	def __repr__(self):
-		cam_str = 'Camera ' + self.name + ':\n\tIntrinsics:\n' + \
-		str(self.intrinsics) + '\n\tExtrinsics:\n'
-		for ext in self.extrinsics:
-			cam_str += '\n\t\t'
-			cam_str += str(self.extrinsics)
-		cam_str += '\nimage size: '
-		cam_str += str(self.size)
-		return cam_str
 
 	@staticmethod
 	def make_pinhole_camera():
@@ -107,4 +112,5 @@ class Camera:
 		tang_dist = np.array([1.1627819998974306e-03, -1.8172149748173956e-04])
 		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
 
-		return Camera(intri, None, (1264, 1016),"pinhole")
+		#@TODO: look up actual Ximea camera angle of view
+		return Camera(intri, None, (1016,1264),(53.8,84.1),"pinhole")
