@@ -77,11 +77,14 @@ class Camera:
 		cam_str += '\n\tImage size: '
 		cam_str += str(self.size)
 		return cam_str
-	
+
+	def capture_image(self, point):
+		
 	def capture_images(self, points):
 		# @TODO
 		print "capture_images not yet implemented!"
 		pass
+
 
 	@staticmethod
 	def calibrate_camera(img_pts, board, img_size):

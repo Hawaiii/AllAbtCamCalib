@@ -15,7 +15,7 @@ class TestExpUtilMethods(unittest.TestCase):
 
 		# Rotate 30 degrees around x axis
 		# Points should be at (0,0,0), (1,0,0), (0,sqrt(3)/2,-1/2), (1,sqrt(3)/2,-1/2)
-		bx30 = util.gen_calib_board(2,2,1,np.array([0,0,0]), np.array([0,1./2, math.sqrt(3)/2]),0)
+		bx30 = util.gen_calib_board(2,2,1,np.array([0,0,0]), np.array([0,-1./2, math.sqrt(3)/2]),0)
 
 		# Rotate 30 degrees around y axis
 		# Points should be at (0,0,0), (sqrt(3)/2,0,-1/2), (0,1,0), (sqrt(3)/2,1,-1/2)
