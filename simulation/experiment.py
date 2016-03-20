@@ -94,7 +94,7 @@ for noise3d in noise3d_lvls:
 		# Move the calibration target on different grid layers
 		layered_grids = target_at_layered_grids(3, (5, 7), true_cam.aov, board,\
 			(board_height*board_sqsize, board_width*board_sqsize))
-		# vis.plot_calib_boards(layered_grids, (board_height, board_width))
+		vis.plot_calib_boards(layered_grids, (board_height, board_width))
 
 		img_pts = true_cam.capture_images(layered_grids)
 

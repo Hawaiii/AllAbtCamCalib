@@ -79,6 +79,8 @@ class Camera:
 		return cam_str
 
 	def capture_image(self, point):
+		# @TODO
+		pass
 		
 	def capture_images(self, points):
 		# @TODO
