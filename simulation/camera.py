@@ -129,8 +129,20 @@ class Camera:
 		# @TODO
 		print "calibrate_camera not yet implemented!"
 		# print 'Eric start:'
+		board_list = list()
+		img_pts_list = list()
+		for i in range(len(img_pts)):
+			pts_id = img_pts[i].keys();
+			if len(pts_id) == 0:
+				continue
+			board_list.append( np.asarray( [ board[x] for x in pts_id ] ) )
+			# board_list.append(  [ board[x].tolist() for x in pts_id ]  )
+			img_pts_list.append( np.asarray( [img_pts[i][x][0:2].flatten().tolist() for x in pts_id]) )
+			# print str(board_list[-1].shape) + " == " + str(img_pts_list[-1].shape)
+			pass
 
-		# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(board, img_pts, img_size, None, None)
+		import pdb; pdb.set_trace()
+		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera( board_list, img_pts_list, img_size, None, None)
 		# print 'OK'
 		pass # return a camera
 

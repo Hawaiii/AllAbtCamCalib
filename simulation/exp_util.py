@@ -110,15 +110,15 @@ import math
 #     return z, y, x
 
 # def unit_vector(vector):
-#     """ 
+#     """
 #     http://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional
 #     -vectors-in-python
-#     Returns the unit vector of the vector.  
+#     Returns the unit vector of the vector.
 #     """
 #     return vector / np.linalg.norm(vector)
 
 # def angle_between(v1, v2):
-#     """ 
+#     """
 #     http://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional
 #     -vectors-in-python
 #     Returns the angle in radians between vectors 'v1' and 'v2'::
@@ -141,7 +141,7 @@ import math
 #     return angle
 
 def rotation_matrix(axis, theta):
-    """    
+    """
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta radians.
 
@@ -214,11 +214,11 @@ def move_board(board, location):
     TODO: rotate a board to a given orientation
 
     Args:
-        board: a dictionary keyed by point id, whose values are 3D points (1x3 
+        board: a dictionary keyed by point id, whose values are 3D points (1x3
                numpy arrays)
-        location: 1x3 numpy array, desired 3D location of the top-left corner 
+        location: 1x3 numpy array, desired 3D location of the top-left corner
                   of board
-        orientation: 1x3 numpy array, desired 3D orientation of the board, 
+        orientation: 1x3 numpy array, desired 3D orientation of the board,
                      (rx,ry,rz)
 
     Returns:
@@ -232,16 +232,16 @@ def move_board(board, location):
 
 def board_dict2array(board, board_dim):
     """
-    Converts the dictionary representation of board into X,Y,Z array format  
+    Converts the dictionary representation of board into X,Y,Z array format
 
     Args:
-        board: a dictionary keyed by point id, whose values are 3D points, keyed 
-               in the following order: starting from top-left point, move right 
+        board: a dictionary keyed by point id, whose values are 3D points, keyed
+               in the following order: starting from top-left point, move right
                alone each row, and down for all rows, ending at bottom-right
         board_dim: (board_height, board_width)
 
     Returns:
-        X,Y,Z: each a 2D numpy array, specifying the location in the 
+        X,Y,Z: each a 2D numpy array, specifying the location in the
                corresponding dimension of each point
     """
     X = np.empty(board_dim)

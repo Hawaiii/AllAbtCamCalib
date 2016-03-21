@@ -97,9 +97,8 @@ for noise3d in noise3d_lvls:
 		layered_grids = target_at_layered_grids(3, (5, 7), true_cam.aov, board,\
 			(board_height*board_sqsize, board_width*board_sqsize))
 		# vis.plot_calib_boards(layered_grids, (board_height, board_width))
-
 		img_pts = true_cam.capture_images(layered_grids)
-		vis.plot_all_chessboards_in_camera(img_pts,true_cam)
+		# vis.plot_all_chessboards_in_camera(img_pts,true_cam)
 
 		# Estimate camera parameters from captured images
 		esti_cam = cam.Camera.calibrate_camera(img_pts, board, true_cam.size)
