@@ -38,7 +38,8 @@ class Extrinsics:
 
 	@classmethod
 	def init_with_rotation_vec(cls, trans_vec, rot_vec):
-		return cls(trans_vec, rot_vec, None)
+		tmp,_ = cv2.Rodrigues(rot_vec)
+		return cls(trans_vec, rot_vec, tmp)
 		# @TODO: convert to rot_mat
 
 	@classmethod
@@ -81,12 +82,43 @@ class Camera:
 	def capture_image(self, point):
 		# @TODO
 		pass
-		
+
 	def capture_images(self, points):
 		# @TODO
 		print "capture_images not yet implemented!"
-		pass
+		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
+									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
+									np.eye(3), \
+									self.intrinsics.intri_mat, \
+									self.size,\
+									cv2.CV_32FC1)
 
+		img_pts = list()
+		for chessboard in points:
+			img_pts_per_chessboard = {};
+			for point_id in chessboard:
+				# self.
+				# import pdb; pdb.set_trace()
+				# perpare extrinsics matrix
+				ext = np.concatenate( (self.extrinsics[0].rot_mat, np.reshape(self.extrinsics[0].trans_vec, (-1, 1))), axis = 1)
+				#points in camera frame
+				pts = np.dot(ext, np.append(chessboard[point_id] ,1))
+				#points in image frame (distortion still !!)
+				pts = np.dot(self.intrinsics.intri_mat, pts)
+				pts = np.divide(pts, pts[-1])
+				#apply distortion
+				if(pts[0] >=0 and pts[0] < self.size[1] and pts[1] >= 0 and pts[1] < self.size[0]  ):
+					final_pts = np.ones((3,1))
+					x_ = mapx[pts[0],pts[1]]
+					y_ = mapy[pts[0],pts[1]]
+					final_pts[0] = x_ #col
+					final_pts[1] = y_ #row
+					img_pts_per_chessboard[point_id] = final_pts
+				pass
+			img_pts.append( img_pts_per_chessboard )
+			pass
+		pass
+		return img_pts
 
 	@staticmethod
 	def calibrate_camera(img_pts, board, img_size):
@@ -97,6 +129,7 @@ class Camera:
 		# @TODO
 		print "calibrate_camera not yet implemented!"
 		# print 'Eric start:'
+
 		# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(board, img_pts, img_size, None, None)
 		# print 'OK'
 		pass # return a camera
@@ -104,8 +137,10 @@ class Camera:
 	@staticmethod
 	def make_pinhole_camera():
 		"""
-		Make a camera whose intrinsics and distortion coefficients are computed 
+		Make a camera whose intrinsics and distortion coefficients are computed
 		from a real experiment.
+		//may be useful:
+		cv2.remap(src, map1, map2, interpolation[, dst[, borderMode[, borderValue]]]) dst
 
 		Returns:
 			a Camera.

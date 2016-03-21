@@ -29,3 +29,15 @@ def plot_calib_boards(boards, board_dim):
 		print X[0,0], Y[0,0], Z[0,0]
 	plt.show()
 
+def plot_all_chessboards_in_camera(img_pts, true_cam):
+	for i in range(len(img_pts)):
+		viewed_pts = np.asarray(img_pts[i].values())
+		plt.axis([0, true_cam.size[1], 0, true_cam.size[0]])
+		plt.grid(True)
+		if viewed_pts.size == 0:
+			print "chessboard " + str(i) + " is not viewable\n"
+			continue
+		plt.plot(viewed_pts[:,1,:], viewed_pts[:,0,:], 'ro')
+		plt.ylabel('chessboard' + str(i))
+		plt.show()
+	plt.close('all')
