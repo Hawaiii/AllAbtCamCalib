@@ -71,7 +71,7 @@ def target_at_layered_grids(nlayer, grid_size, aov, board, board_size):
 """
 Running the experiment.
 """
-noise3d_lvls = [0.5]
+noise3d_lvls = [0.]
 noise2d_lvls = [0]
 # noise3d_lvls = [0, 0.5, 1, 2]
 # noise2d_lvls = [0, 0.5, 1, 2]

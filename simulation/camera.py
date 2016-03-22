@@ -85,7 +85,7 @@ class Camera:
 
 	def capture_images(self, points):
 		# @TODO
-		print "capture_images not yet implemented!"
+		# print "capture_images not yet implemented!"
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
 									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
 									np.eye(3), \
@@ -98,7 +98,6 @@ class Camera:
 			img_pts_per_chessboard = {};
 			for point_id in chessboard:
 				# self.
-				# import pdb; pdb.set_trace()
 				# perpare extrinsics matrix
 				ext = np.concatenate( (self.extrinsics[0].rot_mat, np.reshape(self.extrinsics[0].trans_vec, (-1, 1))), axis = 1)
 				#points in camera frame
@@ -118,6 +117,7 @@ class Camera:
 			img_pts.append( img_pts_per_chessboard )
 			pass
 		pass
+		print "capture_images OK"
 		return img_pts
 
 	@staticmethod
@@ -127,23 +127,39 @@ class Camera:
 		intrinsics and extrinsics of camera estimated from the point coordinates.
 		"""
 		# @TODO
-		print "calibrate_camera not yet implemented!"
+		# print "calibrate_camera not yet implemented!"
 		# print 'Eric start:'
 		board_list = list()
 		img_pts_list = list()
+		view_id = list()
 		for i in range(len(img_pts)):
 			pts_id = img_pts[i].keys();
-			if len(pts_id) == 0:
+			if len(pts_id) < 35:
 				continue
-			board_list.append( np.asarray( [ board[x] for x in pts_id ] ) )
-			# board_list.append(  [ board[x].tolist() for x in pts_id ]  )
-			img_pts_list.append( np.asarray( [img_pts[i][x][0:2].flatten().tolist() for x in pts_id]) )
+			view_id.append(i)
+			board_list.append(  np.asarray( [ board[x] for x in pts_id ] , dtype=np.float32) )
+			# board_list.append(  [ np.asarray(board[x].tolist()) for x in pts_id ]  )
+			img_pts_list.append( np.reshape ( np.asarray( [img_pts[i][x][0:2].flatten().tolist() for x in pts_id], dtype=np.float32), (-1,1,2)) )
 			# print str(board_list[-1].shape) + " == " + str(img_pts_list[-1].shape)
 			pass
 
-		import pdb; pdb.set_trace()
-		ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera( board_list, img_pts_list, img_size, None, None)
-		# print 'OK'
+		# IMPORTANT
+		# board_list list of np(N, 3) float32
+		# img_pts_list list of np(N, 1, 2) float32
+		# (1260, 1080) (x, y)
+		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts_list, (img_size[1], img_size[0]), None, None)
+		#package return vale
+		intriniscs_ = Intrinsics(cameraMatrix, np.asarray( [ distCoeffs[0][0:2].tolist(), distCoeffs[0][-1] ] ) , distCoeffs[2:4]   )
+		extrinsics_ = dict()
+		for i in range(len(rvecs)):
+			extrinsics_[view_id[i]] = Extrinsics(tvecs[i], rvecs[i], cv2.Rodrigues(rvecs[i]) )
+			pass
+		size = img_size
+		aov = None
+		name = "calibrated cam pov"
+		print 'calibrate_camera OK'
+		return Camera(intriniscs_, extrinsics_, size, aov, name)
+
 		pass # return a camera
 
 	@staticmethod
