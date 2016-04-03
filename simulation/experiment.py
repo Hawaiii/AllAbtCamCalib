@@ -125,10 +125,12 @@ for noise3d in noise3d_lvls:
 			(board_height*board_sqsize, board_width*board_sqsize))
 		# vis.plot_calib_boards(layered_grids, (board_height, board_width))
 		img_pts = true_cam.capture_images(layered_grids)
-		# vis.plot_all_chessboards_in_camera(img_pts,true_cam)
+		# vis.plot_all_chessboards_in_camera(img_pts,true_cam.size)
 
 		# Estimate camera parameters from captured images
 		esti_cam = cam.Camera.calibrate_camera(img_pts, board, true_cam.size)
+		vis.compare_board_estimations(esti_cam.extrinsics, board, (board_height, board_width), \
+			layered_grids, save_name='compare_board.pdf')
 
 		# Analyze error
 		diff = util.compute_estimation_diff(esti_cam, \

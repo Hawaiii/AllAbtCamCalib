@@ -72,6 +72,7 @@ class Camera:
 	def __repr__(self):
 		cam_str = 'Camera ' + self.name + ':\n\tIntrinsics:\n' + \
 		str(self.intrinsics) + '\n\tExtrinsics:\n'
+		cam_str += '\tomitted because too long\n'
 		# for ext in self.extrinsics:
 		# 	cam_str += '\n\t\t'
 		# 	cam_str += str(ext)

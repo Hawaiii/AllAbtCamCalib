@@ -211,7 +211,7 @@ def gen_calib_board(board_height, board_width, sqsize, \
 def move_board(board, location):
     """
     Move a generated board to a given location.
-    TODO: rotate a board to a given orientation
+    @TODO: rotate a board to a given orientation
 
     Args:
         board: a dictionary keyed by point id, whose values are 3D points (1x3
@@ -224,6 +224,7 @@ def move_board(board, location):
     Returns:
         A dictionary keyed by point id, whose values are 3D points
     """
+    print 'TODO: move_board to given orientation'
     offset = location - board[0]
     newboard = {}
     for pt in board.keys():
@@ -259,10 +260,14 @@ def board_dict2array(board, board_dim):
 """
 Utility functions for running experiments.
 """
-def compute_estimation_diff(est_cam, true_cam, true_extrin):
+def compute_estimation_diff(est_cam, true_cam):
     """
     Compute the difference between estimated result and true value
     """
-    print 'est_cam', est_cam
-    print 'true_cam', true_cam
+    # compute difference between intrinsics
+
+    # compute difference between extrinsics
+
+    # plot distribution?
+
     pass
