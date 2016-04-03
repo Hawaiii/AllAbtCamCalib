@@ -68,6 +68,33 @@ def target_at_layered_grids(nlayer, grid_size, aov, board, board_size):
 				targets.append(cur_board)
 	return targets
 
+def target_on_ray_at_depth_with_orientation(camera, cam_extrin, \
+											pixel, depth, orientation, \
+											board, board_size):
+	"""
+	Returns a board in 3D whose first control point projects to pixel on the camera,
+	and is distance depth to the camera image plane. 
+
+	Args:
+		camera: Camera, containing intrinsics of camera
+		cam_extrin: current location of camera
+		pixel: (x,y), pixel location on image
+		depth: distance of first control point to the image plane
+		orientation: orientation of the board
+		board: board to be moved to given location
+		board_size: 
+
+	Returns:
+	    A dictionary keyed by point id, whose values are 3D points
+	"""
+	ray = camera.ray_from_pixel(pixel, cam_extrin)
+	print 'target_on_ray_at_depth_with_orientation not yet implemented!'
+	# @TODO
+
+	target = {}
+	return target
+
+
 """
 Running the experiment.
 """
@@ -85,7 +112,7 @@ board_orientation = [0,0,0]
 true_cam = cam.Camera.make_pinhole_camera()
 print true_cam
 cam_loc = cam.Extrinsics.init_with_numbers(0.,0.,0.,0.,0.,0.) #TODO: input numbers
-true_cam.extrinsics.append(cam_loc)
+true_cam.extrinsics[0] = cam_loc
 for noise3d in noise3d_lvls:
 	for noise2d in noise2d_lvls:
 

@@ -263,5 +263,6 @@ def compute_estimation_diff(est_cam, true_cam, true_extrin):
     """
     Compute the difference between estimated result and true value
     """
-    # @TODO
+    print 'est_cam', est_cam
+    print 'true_cam', true_cam
     pass

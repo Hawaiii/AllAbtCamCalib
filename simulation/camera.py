@@ -4,6 +4,8 @@ Camera related functions here.
 """
 import cv2
 import numpy as np
+import vis
+
 import pdb
 
 class Intrinsics:
@@ -54,7 +56,7 @@ class Extrinsics:
 
 class Camera:
 	intriniscs = None #Intrinsics
-	extrinsics = [] #list of extrinsics - change into dictionary keyed by time?
+	extrinsics = {} #dictionary of extrinsics keyed by img number
 	size = None #(height, width) of image size, in pixels
 	aov = None #(angle_of_view_vertical, angle_of_view_horizontal), in degree
 	name = None #A string that could be used for identifying the camera
@@ -70,9 +72,11 @@ class Camera:
 	def __repr__(self):
 		cam_str = 'Camera ' + self.name + ':\n\tIntrinsics:\n' + \
 		str(self.intrinsics) + '\n\tExtrinsics:\n'
-		for ext in self.extrinsics:
-			cam_str += '\n\t\t'
-			cam_str += str(self.extrinsics)
+		# for ext in self.extrinsics:
+		# 	cam_str += '\n\t\t'
+		# 	cam_str += str(ext)
+		# 	cam_str += ': '
+		# 	cam_str += str(self.extrinsics[ext])
 		cam_str += '\n\tAngle of view: '
 		cam_str += str(self.aov)
 		cam_str += '\n\tImage size: '
@@ -120,47 +124,72 @@ class Camera:
 		print "capture_images OK"
 		return img_pts
 
+	def ray_from_pixel(self, pixel, cam_extrin):
+		"""
+		Returns the light ray pixel is capturing on camera.
+
+		Args:
+			pixel: (x,y)
+			cam_extrin: Extrinsics
+		Returns:
+			pt3d: 1x3 numpy array, the 3D location of the pixel on image plane
+			ray_vec: 1x3 numpy array, a unit vector pointing in the direction of 
+			         the ray
+		"""
+		# Map pixel to undistorted pixel location
+
+		# Calculate 3D location of pixel on camera plane
+		
+		# Calculate ray from pixel from intrinsics
+
+		print 'ray_from_pixel not implemented yet!'
+		#@TODO
+		pass
+
 	@staticmethod
 	def calibrate_camera(img_pts, board, img_size):
 		"""
 		Given image coordinates of points and actual 3D points, return a list of
 		intrinsics and extrinsics of camera estimated from the point coordinates.
 		"""
-		# @TODO
-		# print "calibrate_camera not yet implemented!"
-		# print 'Eric start:'
+		# Save all seen images to file
+		#vis.plot_all_chessboards_in_camera(img_pts, img_size, save_name='debug_calibrate_camera.pdf')
+
 		board_list = list()
 		img_pts_list = list()
 		view_id = list()
 		for i in range(len(img_pts)):
-			pts_id = img_pts[i].keys();
-			if len(pts_id) < 35:
+			pts_id = img_pts[i].keys()
+			if len(pts_id) < len(board):
+				#print 'Cannot see the whole board in image', i
 				continue
 			view_id.append(i)
 			board_list.append(  np.asarray( [ board[x] for x in pts_id ] , dtype=np.float32) )
 			# board_list.append(  [ np.asarray(board[x].tolist()) for x in pts_id ]  )
 			img_pts_list.append( np.reshape ( np.asarray( [img_pts[i][x][0:2].flatten().tolist() for x in pts_id], dtype=np.float32), (-1,1,2)) )
 			# print str(board_list[-1].shape) + " == " + str(img_pts_list[-1].shape)
-			pass
 
-		# IMPORTANT
+		# Inputs format:
 		# board_list list of np(N, 3) float32
 		# img_pts_list list of np(N, 1, 2) float32
 		# (1260, 1080) (x, y)
 		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts_list, (img_size[1], img_size[0]), None, None)
-		#package return vale
-		intriniscs_ = Intrinsics(cameraMatrix, np.asarray( [ distCoeffs[0][0:2].tolist(), distCoeffs[0][-1] ] ) , distCoeffs[2:4]   )
+		print 'Calibration RMS re-projection error', retval
+
+		# package return vale
+		intriniscs_ = Intrinsics(cameraMatrix, \
+			np.concatenate( (distCoeffs[0][0:2], distCoeffs[0][4:5]), axis=0 ), \
+			distCoeffs[0][2:4])
 		extrinsics_ = dict()
 		for i in range(len(rvecs)):
-			extrinsics_[view_id[i]] = Extrinsics(tvecs[i], rvecs[i], cv2.Rodrigues(rvecs[i]) )
-			pass
+			rot_mat_, _ = cv2.Rodrigues(rvecs[i])
+			extrinsics_[view_id[i]] = Extrinsics(tvecs[i][:,0], rvecs[i][:,0], rot_mat_)
+		
 		size = img_size
 		aov = None
 		name = "calibrated cam pov"
 		print 'calibrate_camera OK'
 		return Camera(intriniscs_, extrinsics_, size, aov, name)
-
-		pass # return a camera
 
 	@staticmethod
 	def make_pinhole_camera():
