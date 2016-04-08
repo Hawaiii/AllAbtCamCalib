@@ -182,3 +182,7 @@ def plot_directions(orientations, location=np.asarray([0,0,0])):
 	ax.set_zlim(-1,1)
 	plt.show()
 
+def plot_locations(locations):
+	#TODO
+	print 'plot_locations not implemented yet!'
+	pass

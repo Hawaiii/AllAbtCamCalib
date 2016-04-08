@@ -84,6 +84,17 @@ class Camera:
 		cam_str += str(self.size)
 		return cam_str
 
+	def get_opencv_dist_coeffs(self):
+		"""
+		Returns OpenCV format distortion coefficients [k1, k2, p1, p2, k3]
+		as a 1x5 numpy array.
+		"""
+		return np.asarray([[self.intrinsics.radial_dist[0],\
+							self.intrinsics.radial_dist[1],\
+							self.intrinsics.tang_dist[0],\
+							self.intrinsics.tang_dist[1],\
+							self.intrinsics.radial_dist[2]]])
+
 	def capture_image(self, point):
 		# @TODO
 		pass
@@ -137,13 +148,18 @@ class Camera:
 			         the ray
 		"""
 		# Map pixel to undistorted pixel location
+		dist_loc = np.zeros((1,1,2), dtype=np.float32)
+		dist_loc[0,0,0] = pixel[0]
+		dist_loc[0,0,1] = pixel[1]
+		nodist_loc = cv2.undistortPoints(dist_loc, self.intrinsics.intri_mat, \
+										self.get_opencv_dist_coeffs())
 
 		# Calculate 3D location of pixel on camera plane
-		
-		# Calculate ray from pixel from intrinsics
-
-		print 'ray_from_pixel not implemented yet!'
+		print 'ray_from_pixel not fully implemented yet!'
 		#@TODO
+
+		# Calculate ray from pixel from intrinsics
+		
 		pass
 
 	@staticmethod
