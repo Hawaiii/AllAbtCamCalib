@@ -3,6 +3,7 @@ Utility functions for dealing with 3D objects.
 """
 import numpy as np
 import math
+import random
 
 # # A Control Point in 3D space (in world frame), containing an id for matching
 # #the same points
@@ -163,6 +164,23 @@ def rotate_and_translate(pts, r_mat, t_vec):
     """
     # @TODO
     pass
+
+def random_rotation():
+    """
+    Returns a random roll-pitch-yaw rotation
+
+    Returns:
+        1x3 numpy array, representing a rotation in Roll-Pitch-Yaw Euler angles
+    """
+    theta = 2*math.pi*random.random() - math.pi
+    phi = math.acos(1 - 2*random.random()) + math.pi/2.0
+    if random.random() < 0.5:
+        if phi < math.pi:
+            phi = phi + math.pi
+        else:
+            phi = phi - math.pi
+    eta = 2 * math.pi * random.random() - math.pi
+    return np.asarray([theta, phi, eta])
 
 def gen_calib_board(board_height, board_width, sqsize, \
                     location, orientation, noise3d):

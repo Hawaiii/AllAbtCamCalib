@@ -2,10 +2,22 @@
 import unittest
 import exp_util as util
 import numpy as np
+import cv2
 import math
+import vis
 
 class TestExpUtilMethods(unittest.TestCase):
 	# def test_euler2mat():
+
+	def test_random_rotation(self):
+		z_vec = np.asarray([0,0,1])
+		vecs = []
+		for i in range(1000):
+			rot = util.random_rotation()
+			rot_mat, _ =cv2.Rodrigues(rot)
+			vecs.append(rot_mat*z_vec)
+		vis.plot_directions(vecs)
+
 
 	def test_gen_calib_board(self):
 		#@TODO

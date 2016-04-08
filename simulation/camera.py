@@ -55,7 +55,7 @@ class Extrinsics:
 		str(self.rot_vec) + ', ' + str(self.rot_mat)
 
 class Camera:
-	intriniscs = None #Intrinsics
+	intrinsics = None #Intrinsics
 	extrinsics = {} #dictionary of extrinsics keyed by img number
 	size = None #(height, width) of image size, in pixels
 	aov = None #(angle_of_view_vertical, angle_of_view_horizontal), in degree
@@ -90,7 +90,6 @@ class Camera:
 
 	def capture_images(self, points):
 		# @TODO
-		# print "capture_images not yet implemented!"
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
 									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
 									np.eye(3), \
@@ -178,7 +177,7 @@ class Camera:
 		print 'Calibration RMS re-projection error', retval
 
 		# package return vale
-		intriniscs_ = Intrinsics(cameraMatrix, \
+		intrinsics_ = Intrinsics(cameraMatrix, \
 			np.concatenate( (distCoeffs[0][0:2], distCoeffs[0][4:5]), axis=0 ), \
 			distCoeffs[0][2:4])
 		extrinsics_ = dict()
@@ -190,7 +189,7 @@ class Camera:
 		aov = None
 		name = "calibrated cam pov"
 		print 'calibrate_camera OK'
-		return Camera(intriniscs_, extrinsics_, size, aov, name)
+		return Camera(intrinsics_, extrinsics_, size, aov, name)
 
 	@staticmethod
 	def make_pinhole_camera():

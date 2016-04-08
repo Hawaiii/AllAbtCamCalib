@@ -102,7 +102,7 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 
 def plot_camera_pose(extrin, save_name=None):
 	"""
-	Plots the location of the camera given camera extrinsics
+	Plots the location of the camera given extrinsics of board
 	@TODO: Currently labels image number text on the location of camera, could 
 	       add in the orientation and a 3D camera figure
 	Args:
@@ -112,3 +112,73 @@ def plot_camera_pose(extrin, save_name=None):
 	"""
 	print 'plot_camera_pose not implemented yet!'
 	pass
+
+def write_esti_results(estimations, true_cam, save_name_pre):
+	"""
+	Args:
+		estimations: list of Cameras from calibration results 
+		true_cam: actual camera parameters
+		save_name_pre: filename without .txt or .pdf extensions
+	"""
+	ftxt = open(save_name_pre+'.txt', 'w')
+	fpdf = PdfPages(save_name_pre+'.pdf')
+
+	# focal length x
+	fx_arr = np.asarray([est_cam.intrinsics.intri_mat[0,0] for est_cam in estimations])
+	print >> ftxt, 'focal length x\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.intri_mat[0,0], np.mean(fx_arr), np.std(fx_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(fx_arr)), fx_arr)
+	plt.ylabel('focal length x') 
+	fpdf.savefig()
+
+	# focal length y
+	fy_arr = np.asarray([est_cam.intrinsics.intri_mat[1,1] for est_cam in estimations])
+	print >> ftxt, 'focal length y\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.intri_mat[1,1], np.mean(fy_arr), np.std(fy_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(fy_arr)), fy_arr)
+	plt.ylabel('focal length y') 
+	fpdf.savefig()
+
+	# principal point x
+	px_arr = np.asarray([est_cam.intrinsics.intri_mat[0,2] for est_cam in estimations])
+	print >> ftxt, 'principal point x\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.intri_mat[0,2], np.mean(px_arr), np.std(px_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(px_arr)), px_arr)
+	plt.ylabel('principal point x') 
+	fpdf.savefig()
+
+	# principal point y
+	py_arr = np.asarray([est_cam.intrinsics.intri_mat[1,2] for est_cam in estimations])
+	print >> ftxt, 'principal point y\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.intri_mat[1,2], np.mean(py_arr), np.std(py_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(py_arr)), py_arr)
+	plt.ylabel('principal point y') 
+	fpdf.savefig()
+
+	# extrinsics diff r1
+	# extrinsics diff r2
+	# extrinsics diff r3
+	# extrinsics diff t1
+	# extrinsics diff t2
+	# extrinsics diff t3
+
+	ftxt.close()
+	fpdf.close()
+	
+	print 'write_esti_results not FULLY implemented yet!'
+	
+def plot_directions(orientations, location=np.asarray([0,0,0])):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	for orient in orientations:
+		ax.quiver(location[0], location[1], location[2], \
+			orient[0], orient[1], orient[2], pivot='tail')
+	ax.set_xlim(-1,1)
+	ax.set_ylim(-1,1)
+	ax.set_zlim(-1,1)
+	plt.show()
+
