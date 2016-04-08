@@ -100,19 +100,6 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 	else:
 		plt.close('all')
 
-def plot_camera_pose(extrin, save_name=None):
-	"""
-	Plots the location of the camera given extrinsics of board
-	@TODO: Currently labels image number text on the location of camera, could 
-	       add in the orientation and a 3D camera figure
-	Args:
-		extrin: a dictionary keyed by image number, whose values are Extrinsics
-		save_name: if save_name is provided, figure will be saved to that name; 
-		           otherwise, the figure will be shown on screen
-	"""
-	print 'plot_camera_pose not implemented yet!'
-	pass
-
 def write_esti_results(estimations, true_cam, save_name_pre):
 	"""
 	Args:
@@ -191,3 +178,33 @@ def plot_locations(locations):
 	ax.plot(x, y, z, label='locations')
 	ax.legend()
 	plt.show()
+
+def plot_poses(extrinsics, connectpath=True):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	x = [ext.trans_vec[0] for ext in extrinsics]
+	y = [ext.trans_vec[1] for ext in extrinsics]
+	z = [ext.trans_vec[2] for ext in extrinsics]
+	z_vec = np.asarray([0,0,1])
+	u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
+	v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
+	w = [np.dot(ext.rot_mat[2,:],z_vec) for ext in extrinsics]
+	
+	if connectpath:
+		ax.plot(x,y,z,label='path')
+	ax.quiver(x,y,z,u,v,w,pivot='tail')
+	plt.show()
+	
+
+def plot_camera_pose(extrin, save_name=None):
+	"""
+	Plots the location of the camera given extrinsics of board
+	@TODO: Currently labels image number text on the location of camera, could 
+	       add in the orientation and a 3D camera figure
+	Args:
+		extrin: a dictionary keyed by image number, whose values are Extrinsics
+		save_name: if save_name is provided, figure will be saved to that name; 
+		           otherwise, the figure will be shown on screen
+	"""
+	print 'plot_camera_pose not implemented yet!'
+	pass
