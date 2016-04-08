@@ -183,6 +183,11 @@ def plot_directions(orientations, location=np.asarray([0,0,0])):
 	plt.show()
 
 def plot_locations(locations):
-	#TODO
-	print 'plot_locations not implemented yet!'
-	pass
+	fig = plt.figure()
+	ax = fig.gca(projection='3d')
+	x = [loc[0] for loc in locations]
+	y = [loc[1] for loc in locations]
+	z = [loc[2] for loc in locations]
+	ax.plot(x, y, z, label='locations')
+	ax.legend()
+	plt.show()
