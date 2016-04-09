@@ -64,7 +64,7 @@ def target_at_layered_grids(nlayer, grid_size, aov, board, board_size):
 				cur_x = x_grid * x_step - x_lim
 				cur_y = y_grid * y_step - y_lim
 				cur_board = util.move_board(board, np.array([cur_x, cur_y, \
-					cur_depth]))
+					cur_depth]), np.asarray([0.,0.,0.]))
 				targets.append(cur_board)
 	return targets
 
@@ -94,7 +94,6 @@ def target_on_ray_at_depth_with_orientation(camera, cam_extrin, \
 	target = {}
 	return target
 
-
 """
 Running the experiment.
 """
@@ -107,7 +106,7 @@ board_height = 5
 board_width = 7
 board_sqsize = 23
 board_location = [0,0,0]
-board_orientation = [0,0,0]
+board_orientation = np.asarray([0.,0.,0.])
 
 
 true_cam = cam.Camera.make_pinhole_camera()

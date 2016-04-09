@@ -143,9 +143,10 @@ class Camera:
 			pixel: (x,y)
 			cam_extrin: Extrinsics
 		Returns:
-			pt3d: 1x3 numpy array, the 3D location of the pixel on image plane
+			pt3d: 1x3 numpy array, the 3D location of camear center
 			ray_vec: 1x3 numpy array, a unit vector pointing in the direction of 
 			         the ray
+			(pt3d + a * ray_vec, where a is a scalar, gives a point on the ray)
 		"""
 		# Map pixel to undistorted pixel location
 		dist_loc = np.zeros((1,1,2), dtype=np.float32)
@@ -154,12 +155,10 @@ class Camera:
 		nodist_loc = cv2.undistortPoints(dist_loc, self.intrinsics.intri_mat, \
 										self.get_opencv_dist_coeffs())
 
-		# Calculate 3D location of pixel on camera plane
-		print 'ray_from_pixel not fully implemented yet!'
-		#@TODO
-
 		# Calculate ray from pixel from intrinsics
-		
+
+		print 'ray_from_pixel not fully implemented yet!'
+		#@TODO		
 		pass
 
 	@staticmethod
