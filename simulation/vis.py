@@ -179,12 +179,23 @@ def plot_locations(locations):
 	ax.legend()
 	plt.show()
 
-def plot_poses(extrinsics, connectpath=True):
+def plot_poses(extrinsics, invert=False, connectpath=True):
+	"""
+	Args:
+		extrinsics: a list of Extrinsics
+		invert: plots location of -Rt when true; plots location of t when false
+		connectpath: draws a path that connects the locations when true
+	"""
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
-	x = [ext.trans_vec[0] for ext in extrinsics]
-	y = [ext.trans_vec[1] for ext in extrinsics]
-	z = [ext.trans_vec[2] for ext in extrinsics]
+	if invert:
+		x = [-np.dot(ext.rot_mat[0,:], ext.trans_vec) for ext in extrinsics]
+		y = [-np.dot(ext.rot_mat[1,:], ext.trans_vec) for ext in extrinsics]
+		z = [-np.dot(ext.rot_mat[2,:], ext.trans_vec) for ext in extrinsics]
+	else:
+		x = [ext.trans_vec[0] for ext in extrinsics]
+		y = [ext.trans_vec[1] for ext in extrinsics]
+		z = [ext.trans_vec[2] for ext in extrinsics]
 	z_vec = np.asarray([0,0,1])
 	u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
 	v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
