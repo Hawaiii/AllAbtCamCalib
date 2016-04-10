@@ -112,7 +112,7 @@ class Camera:
 		# @TODO
 		pass
 
-	def capture_images(self, points):
+	def capture_images(self, points, noise2d):
 		# @TODO
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
 									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
@@ -141,10 +141,13 @@ class Camera:
 					final_pts[0] = x_ #col
 					final_pts[1] = y_ #row
 					img_pts_per_chessboard[point_id] = final_pts
-				pass
+					# add noise
+					if noise2d > 0:
+						noises = np.concatenate((np.random.normal(0, noise2d, (2,1)),\
+												np.zeros((1,1))), axis=0)
+						img_pts_per_chessboard[point_id] += noises
 			img_pts.append( img_pts_per_chessboard )
-			pass
-		pass
+
 		print "capture_images OK"
 		return img_pts
 
@@ -158,7 +161,7 @@ class Camera:
 		Returns:
 			pt3d: 1x3 numpy array, the 3D location of camear center
 			ray_vec: 1x3 numpy array, a unit vector pointing in the direction of 
-			         the ray
+					 the ray
 			(pt3d + a * ray_vec, where a is a scalar, gives a point on the ray)
 		"""
 		# Map pixel to undistorted pixel location
@@ -177,7 +180,7 @@ class Camera:
 
 		# Calculate ray from pixel from intrinsics
 		ray_vec = np.dot(np.dot(cam_extrin.get_Rt_matrix_inv(),\
-		 				np.linalg.inv(self.intrinsics.intri_mat)), \
+						np.linalg.inv(self.intrinsics.intri_mat)), \
 						np.array([[nodist_loc[0,0,0],nodist_loc[0,0,1],1.]]).T)
 		ray_vec = util.unit_vector(ray_vec)
 

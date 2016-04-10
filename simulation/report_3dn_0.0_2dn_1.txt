@@ -1,0 +1,4 @@
+focal length x	ground truth:615.786176615	estimation mean:7874.13190216	estimation std:3042.10881794
+focal length y	ground truth:612.383504568	estimation mean:7909.87440525	estimation std:3050.59362233
+principal point x	ground truth:610.587150367	estimation mean:614.764836588	estimation std:38.4872100868
+principal point y	ground truth:529.599381739	estimation mean:546.951977553	estimation std:26.2966395873
