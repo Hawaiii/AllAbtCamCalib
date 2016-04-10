@@ -204,6 +204,7 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		x = [ext.trans_vec[0] for ext in extrinsics]
 		y = [ext.trans_vec[1] for ext in extrinsics]
 		z = [ext.trans_vec[2] for ext in extrinsics]
+
 	z_vec = np.asarray([0,0,1])
 	u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
 	v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
@@ -211,11 +212,10 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 
 	if connectpath:
 		ax.plot(x,y,z,label='path')
-	ax.quiver(x,y,z,u,v,w,pivot='tail')
-	if not fax:
-		plt.show()
+	ax.quiver(x,y,z,u,v,w,pivot='tail',length=100)
+
 	return ax
-	
+
 def plot_camera_pose(extrin, save_name=None):
 	"""
 	Plots the location of the camera given extrinsics of board
