@@ -32,6 +32,7 @@ def plot_calib_boards(boards, board_dim, fax=None):
 		#print X[0,0], Y[0,0], Z[0,0]
 	if not fax:
 		plt.show()
+	return ax
 
 def compare_board_estimations(esti_extrinsics, board, board_dim, \
 								actual_boards, save_name=None):
@@ -213,6 +214,7 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 	ax.quiver(x,y,z,u,v,w,pivot='tail')
 	if not fax:
 		plt.show()
+	return ax
 	
 def plot_camera_pose(extrin, save_name=None):
 	"""
