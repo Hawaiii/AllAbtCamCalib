@@ -1,5 +1,6 @@
 import camera as cam
 import numpy as np
+import exp_util as util
 
 def spiral_motion():
 	"""
@@ -17,9 +18,11 @@ def spiral_motion():
 	y = r * np.sin(theta*1.5)
 	z = r * np.sin(theta*1.2)
 
+	board = util.gen_calib_board(7,8,23, np.asarray([[10,0,0]]), np.zeros([1,3]), 0)
+
 	for i in range(len(theta)):
 		trans_vec = np.asarray([x[i], y[i], z[i]])
 		ext = cam.Extrinsics(trans_vec, None, np.eye(3))
 		extrins.append(ext)
 
-	return extrins
+	return extrins, board
