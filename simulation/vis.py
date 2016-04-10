@@ -25,7 +25,6 @@ def plot_calib_boards(boards, board_dim, fax=None):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 	clist = colors.cnames.keys()
-
 	for i in xrange(len(boards)):
 		board = boards[i]
 		X, Y, Z = util.board_dict2array(board, board_dim)
@@ -88,12 +87,12 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 		if len(img_pts[i]) > tot_pts_num:
 			tot_pts_num = len(img_pts[i])
 	plt.axis([0, img_size[1], 0, img_size[0]])
-	plt.grid(True)		
+	plt.grid(True)
 	for i in range(len(img_pts)):
 		if len(img_pts[i]) == tot_pts_num:
 			viewed_pts = np.asarray(img_pts[i].values())
 			plt.plot(viewed_pts[:,1,:], viewed_pts[:,0,:], 'ro')
-	plt.ylabel('all points used') 
+	plt.ylabel('all points used')
 	if pp:
 		pp.savefig()
 	else:
@@ -107,7 +106,7 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 def write_esti_results(estimations, true_cam, save_name_pre):
 	"""
 	Args:
-		estimations: list of Cameras from calibration results 
+		estimations: list of Cameras from calibration results
 		true_cam: actual camera parameters
 		save_name_pre: filename without .txt or .pdf extensions
 	"""
@@ -120,7 +119,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 		true_cam.intrinsics.intri_mat[0,0], np.mean(fx_arr), np.std(fx_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(fx_arr)), fx_arr)
-	plt.ylabel('focal length x') 
+	plt.ylabel('focal length x')
 	fpdf.savefig()
 
 	# focal length y
@@ -129,7 +128,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 		true_cam.intrinsics.intri_mat[1,1], np.mean(fy_arr), np.std(fy_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(fy_arr)), fy_arr)
-	plt.ylabel('focal length y') 
+	plt.ylabel('focal length y')
 	fpdf.savefig()
 
 	# principal point x
@@ -138,7 +137,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 		true_cam.intrinsics.intri_mat[0,2], np.mean(px_arr), np.std(px_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(px_arr)), px_arr)
-	plt.ylabel('principal point x') 
+	plt.ylabel('principal point x')
 	fpdf.savefig()
 
 	# principal point y
@@ -147,7 +146,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 		true_cam.intrinsics.intri_mat[1,2], np.mean(py_arr), np.std(py_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(py_arr)), py_arr)
-	plt.ylabel('principal point y') 
+	plt.ylabel('principal point y')
 	fpdf.savefig()
 
 	# extrinsics diff r1
@@ -159,9 +158,9 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 
 	ftxt.close()
 	fpdf.close()
-	
+
 	print 'write_esti_results not FULLY implemented yet!'
-	
+
 def plot_directions(orientations, location=np.asarray([0,0,0])):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
@@ -208,22 +207,21 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 	u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
 	v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
 	w = [np.dot(ext.rot_mat[2,:],z_vec) for ext in extrinsics]
-	
+
 	if connectpath:
 		ax.plot(x,y,z,label='path')
 	ax.quiver(x,y,z,u,v,w,pivot='tail')
 	if not fax:
 		plt.show()
 	
-
 def plot_camera_pose(extrin, save_name=None):
 	"""
 	Plots the location of the camera given extrinsics of board
-	@TODO: Currently labels image number text on the location of camera, could 
+	@TODO: Currently labels image number text on the location of camera, could
 	       add in the orientation and a 3D camera figure
 	Args:
 		extrin: a dictionary keyed by image number, whose values are Extrinsics
-		save_name: if save_name is provided, figure will be saved to that name; 
+		save_name: if save_name is provided, figure will be saved to that name;
 		           otherwise, the figure will be shown on screen
 	"""
 	print 'plot_camera_pose not implemented yet!'
