@@ -1,6 +1,8 @@
-import unittest
 import camera as cam
 import exp_util as util
+import vis
+
+import unittest
 import numpy as np
 import pdb
 
@@ -56,8 +58,14 @@ class TestCameraMethods(unittest.TestCase):
     def test_ray_from_pixel(self):
         camera = cam.Camera.make_pinhole_camera()
         cam_loc = cam.Extrinsics.init_with_numbers(0.,0.,0.,0.,0.,0.)
-        ray = camera.ray_from_pixel((0,0), cam_loc)
-        #ray = camera.ray_from_pixel(np.asarray([[0,0]]), cam_loc)
+        ray0 = camera.ray_from_pixel((0,0), cam_loc)
+        ray1 = camera.ray_from_pixel((10,0), cam_loc)
+        ray2 = camera.ray_from_pixel((0,10), cam_loc)
+        ray3 = camera.ray_from_pixel((10,10), cam_loc)
+        ray4 = camera.ray_from_pixel((700,700), cam_loc)
+        ray5 = camera.ray_from_pixel((32,78), cam_loc)
+        vis.plot_camera_with_rays(cam_loc, [ray0, ray1, ray2, ray3, ray4, ray5], invert=False)
+
 
 
     # if __name__ == '__main__':

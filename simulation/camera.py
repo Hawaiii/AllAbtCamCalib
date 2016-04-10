@@ -3,8 +3,10 @@ Camera models, estimating camera parameters, etc.
 Camera related functions here.
 """
 import cv2
-import numpy as np
+import exp_util as util
 import vis
+
+import numpy as np
 
 import pdb
 
@@ -35,24 +37,35 @@ class Extrinsics:
 
 	@classmethod
 	def init_with_rotation_matrix(cls, trans_vec, rot_mat):
-		return cls(trans_vec, None, rot_mat)
-		# @TODO: convert rot_vec
+		tmp,_ = cv2.Rodrigues(rot_mat)
+		return cls(trans_vec, tmp.T, rot_mat)
 
 	@classmethod
 	def init_with_rotation_vec(cls, trans_vec, rot_vec):
 		tmp,_ = cv2.Rodrigues(rot_vec)
 		return cls(trans_vec, rot_vec, tmp)
-		# @TODO: convert to rot_mat
 
 	@classmethod
 	def init_with_numbers(cls, x, y, z, rx, ry, rz):
 		# return cls(np.array([x,y,z]), np.array([rx,ry,rz]), None)
-		return cls.init_with_rotation_vec(np.array([x,y,z]), \
-			np.array([rx,ry,rz]))
+		return cls.init_with_rotation_vec(np.array([[x,y,z]]), \
+			np.array([[rx,ry,rz]]))
 
 	def __repr__(self):
 		return 'translation: ' + str(self.trans_vec) + ' rotation: ' + \
 		str(self.rot_vec) + ', ' + str(self.rot_mat)
+
+	def get_Rt_matrix(self):
+		"""
+		Returns 3x4 matrix [R|t]
+		"""
+		return np.concatenate((self.rot_mat, self.trans_vec.T), axis=1)
+
+	def get_Rt_matrix_inv(self):
+		"""
+		Returns 4x3 matrix ([R'|-R't])'
+		"""
+		return np.concatenate((self.rot_mat, -np.dot(self.trans_vec, self.rot_mat)), axis=0)
 
 class Camera:
 	intrinsics = None #Intrinsics
@@ -153,13 +166,21 @@ class Camera:
 		dist_loc[0,0,0] = pixel[0]
 		dist_loc[0,0,1] = pixel[1]
 		nodist_loc = cv2.undistortPoints(dist_loc, self.intrinsics.intri_mat, \
-										self.get_opencv_dist_coeffs())
+										self.get_opencv_dist_coeffs()) #1x1x2 np array
+		nodist_loc[0,0,0] = nodist_loc[0,0,0] * self.intrinsics.intri_mat[0,0] + self.intrinsics.intri_mat[0,2]
+		nodist_loc[0,0,1] = nodist_loc[0,0,1] * self.intrinsics.intri_mat[1,1] + self.intrinsics.intri_mat[1,2]
+		print nodist_loc
+
+		# Camera center is at -Rt from extrinsics
+		pt3d = -np.dot(cam_extrin.rot_mat, cam_extrin.trans_vec.T)
 
 		# Calculate ray from pixel from intrinsics
+		ray_vec = np.dot(np.dot(cam_extrin.get_Rt_matrix_inv(),\
+		 				np.linalg.inv(self.intrinsics.intri_mat)), \
+						np.array([[nodist_loc[0,0,0],nodist_loc[0,0,1],1.]]).T)
+		ray_vec = util.unit_vector(ray_vec)
 
-		print 'ray_from_pixel not fully implemented yet!'
-		#@TODO		
-		pass
+		return pt3d, ray_vec
 
 	@staticmethod
 	def calibrate_camera(img_pts, board, img_size):

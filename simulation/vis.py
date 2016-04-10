@@ -219,3 +219,39 @@ def plot_camera_pose(extrin, save_name=None):
 	"""
 	print 'plot_camera_pose not implemented yet!'
 	pass
+
+def plot_camera_with_rays(cam_extrin, rays, invert=True):
+	"""
+	Args:
+		cam_extrin: Extrinsics
+		rays: list of tuples, (pt3d, ray_vec) as returned by ray_from_pixel
+		invert: plots camera center at -Rt when true
+	"""
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	# plot camera
+	if invert:
+		x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
+		y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
+		z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
+	else:
+		x = [cam_extrin.trans_vec[0,0]]
+		y = [cam_extrin.trans_vec[0,1]]
+		z = [cam_extrin.trans_vec[0,2]]
+	z_vec = np.asarray([0,0,1])
+	u = [np.dot(cam_extrin.rot_mat[0,:],z_vec)]
+	v = [np.dot(cam_extrin.rot_mat[1,:],z_vec)]
+	w = [np.dot(cam_extrin.rot_mat[2,:],z_vec)]
+	ax.quiver(x,y,z,u,v,w,pivot='tail',length=0.5)
+	ax.text(x[0]+u[0],y[0]+v[0],z[0]+w[0],'camera',None)
+
+	# plot rays
+	for ray in rays:
+		ax.quiver(ray[0][0], ray[0][1], ray[0][2], ray[1][0], ray[1][1], ray[1][2], \
+			pivot='tail',color='m')
+
+	ax.set_xlim(ray[0][0]-1,ray[0][0]+1)
+	ax.set_ylim(ray[0][1]-1,ray[0][1]+1)
+	ax.set_zlim(ray[0][2]-1,ray[0][2]+1)
+
+	plt.show()

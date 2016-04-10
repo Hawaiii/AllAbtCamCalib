@@ -111,13 +111,14 @@ import random
 #         x = 0.0
 #     return z, y, x
 
-# def unit_vector(vector):
-#     """
-#     http://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional
-#     -vectors-in-python
-#     Returns the unit vector of the vector.
-#     """
-#     return vector / np.linalg.norm(vector)
+def unit_vector(vector):
+    """
+    Returns the unit vector of the vector.
+    """
+    norm = np.linalg.norm(vector)
+    if norm == 0:
+        return vector
+    return vector / norm
 
 # def angle_between(v1, v2):
 #     """
