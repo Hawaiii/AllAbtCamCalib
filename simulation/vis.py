@@ -11,7 +11,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import exp_util as util
 
-def plot_calib_boards(boards, board_dim):
+def plot_calib_boards(boards, board_dim, fax=None):
 	"""
 	Plots a board in 3D
 
@@ -19,8 +19,11 @@ def plot_calib_boards(boards, board_dim):
 		boards: a list of dictionaries, where each dictionary is a board
 		board_dim: (board_height, board_width)
 	"""
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
+	if fax:
+		ax = fax
+	else:
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
 	clist = colors.cnames.keys()
 
 	for i in xrange(len(boards)):
@@ -28,7 +31,8 @@ def plot_calib_boards(boards, board_dim):
 		X, Y, Z = util.board_dict2array(board, board_dim)
 		ax.plot_wireframe(X, Y, Z, color=clist[i])
 		#print X[0,0], Y[0,0], Z[0,0]
-	plt.show()
+	if not fax:
+		plt.show()
 
 def compare_board_estimations(esti_extrinsics, board, board_dim, \
 								actual_boards, save_name=None):
@@ -179,15 +183,19 @@ def plot_locations(locations):
 	ax.legend()
 	plt.show()
 
-def plot_poses(extrinsics, invert=False, connectpath=True):
+def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 	"""
 	Args:
 		extrinsics: a list of Extrinsics
 		invert: plots location of -Rt when true; plots location of t when false
 		connectpath: draws a path that connects the locations when true
 	"""
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
+	if fax:
+		ax = fax
+	else:
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
 	if invert:
 		x = [-np.dot(ext.rot_mat[0,:], ext.trans_vec) for ext in extrinsics]
 		y = [-np.dot(ext.rot_mat[1,:], ext.trans_vec) for ext in extrinsics]
@@ -204,7 +212,8 @@ def plot_poses(extrinsics, invert=False, connectpath=True):
 	if connectpath:
 		ax.plot(x,y,z,label='path')
 	ax.quiver(x,y,z,u,v,w,pivot='tail')
-	plt.show()
+	if not fax:
+		plt.show()
 	
 
 def plot_camera_pose(extrin, save_name=None):

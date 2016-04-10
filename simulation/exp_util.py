@@ -6,15 +6,6 @@ import numpy as np
 import math
 import random
 
-# # A Control Point in 3D space (in world frame), containing an id for matching
-# #the same points
-# class ControlPoint
-#   loc = np.zeros(1,3)
-#   id_num = -1
-#   def __init__(self, location, idnum):
-#         self.loc = location
-#         self.id_num = id_num
-
 # def euler2mat(e_angles):
 #     """
 #     Returns the rotation matrix for given Euler angle (rx, ry, rz)
@@ -280,23 +271,23 @@ def board_dict2array(board, board_dim):
     for pt in board.keys():
         x = pt / board_dim[1]
         y = pt % board_dim[1]
-        X[x,y] = board[pt][0]
-        Y[x,y] = board[pt][1]
-        Z[x,y] = board[pt][2]
+        X[x,y] = board[pt][0,0]
+        Y[x,y] = board[pt][0,1]
+        Z[x,y] = board[pt][0,2]
     return X, Y, Z
 
 
-"""
-Utility functions for running experiments.
-"""
-def compute_estimation_diff(est_cam, true_cam):
-    """
-    Compute the difference between estimated result and true value
-    """
-    # compute difference between intrinsics
+# """
+# Utility functions for running experiments.
+# """
+# def compute_estimation_diff(est_cam, true_cam):
+#     """
+#     Compute the difference between estimated result and true value
+#     """
+#     # compute difference between intrinsics
 
-    # compute difference between extrinsics
+#     # compute difference between extrinsics
 
-    # plot distribution?
+#     # plot distribution?
 
-    pass
+#     pass

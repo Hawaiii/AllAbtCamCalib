@@ -167,9 +167,10 @@ class Camera:
 		dist_loc[0,0,1] = pixel[1]
 		nodist_loc = cv2.undistortPoints(dist_loc, self.intrinsics.intri_mat, \
 										self.get_opencv_dist_coeffs()) #1x1x2 np array
-		nodist_loc[0,0,0] = nodist_loc[0,0,0] * self.intrinsics.intri_mat[0,0] + self.intrinsics.intri_mat[0,2]
-		nodist_loc[0,0,1] = nodist_loc[0,0,1] * self.intrinsics.intri_mat[1,1] + self.intrinsics.intri_mat[1,2]
-		print nodist_loc
+		nodist_loc[0,0,0] = nodist_loc[0,0,0] * self.intrinsics.intri_mat[0,0] \
+							 + self.intrinsics.intri_mat[0,2]
+		nodist_loc[0,0,1] = nodist_loc[0,0,1] * self.intrinsics.intri_mat[1,1] \
+							 + self.intrinsics.intri_mat[1,2]
 
 		# Camera center is at -Rt from extrinsics
 		pt3d = -np.dot(cam_extrin.rot_mat, cam_extrin.trans_vec.T)
