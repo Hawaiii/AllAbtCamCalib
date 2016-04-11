@@ -112,8 +112,15 @@ class Camera:
 		# @TODO
 		pass
 
-	def capture_images(self, points, noise2d):
-		# @TODO
+	def capture_images(self, extrin, points, noise2d):
+		"""
+		Args:
+			extrin: Extrinsics
+			points: list of dictionaries, each dictionary representing a board
+			nosie2d: std. dev. of point detection
+		Returns:
+			a list of dictionaries, each representing a captured board
+		"""
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
 									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
 									np.eye(3), \
@@ -127,7 +134,7 @@ class Camera:
 			for point_id in chessboard:
 				# self.
 				# perpare extrinsics matrix
-				ext = np.concatenate( (self.extrinsics[0].rot_mat, np.reshape(self.extrinsics[0].trans_vec, (-1, 1))), axis = 1)
+				ext = np.concatenate( (extrin.rot_mat, np.reshape(extrin.trans_vec, (-1, 1))), axis = 1)
 				#points in camera frame
 				pts = np.dot(ext, np.append(chessboard[point_id] ,1))
 				#points in image frame (distortion still !!)

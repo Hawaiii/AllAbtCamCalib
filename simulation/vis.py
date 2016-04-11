@@ -65,6 +65,7 @@ def compare_board_estimations(esti_extrinsics, board, board_dim, \
 def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 	if save_name:
 		pp = PdfPages(save_name)
+	plt.clf()
 
 	for i in range(len(img_pts)):
 		viewed_pts = np.asarray(img_pts[i].values())
@@ -187,7 +188,8 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 	"""
 	Args:
 		extrinsics: a list of Extrinsics
-		invert: plots location of -Rt when true; plots location of t when false
+		invert: plots location of -Rt and orientation of R' when true; 
+		        plots location of t and orientations of R when false
 		connectpath: draws a path that connects the locations when true
 	"""
 	if fax:
@@ -197,18 +199,23 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		ax = fig.add_subplot(111, projection='3d')
 
 	if invert:
-		x = [-np.dot(ext.rot_mat[0,:], ext.trans_vec) for ext in extrinsics]
-		y = [-np.dot(ext.rot_mat[1,:], ext.trans_vec) for ext in extrinsics]
-		z = [-np.dot(ext.rot_mat[2,:], ext.trans_vec) for ext in extrinsics]
+		x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec) for ext in extrinsics]
+		y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec) for ext in extrinsics]
+		z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec) for ext in extrinsics]
 	else:
 		x = [ext.trans_vec[0] for ext in extrinsics]
 		y = [ext.trans_vec[1] for ext in extrinsics]
 		z = [ext.trans_vec[2] for ext in extrinsics]
 
 	z_vec = np.asarray([0,0,1])
-	u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
-	v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
-	w = [np.dot(ext.rot_mat[2,:],z_vec) for ext in extrinsics]
+	if invert:
+		u = [np.dot(ext.rot_mat.T[0,:],z_vec) for ext in extrinsics]
+		v = [np.dot(ext.rot_mat.T[1,:],z_vec) for ext in extrinsics]
+		w = [np.dot(ext.rot_mat.T[2,:],z_vec) for ext in extrinsics]
+	else:
+		u = [np.dot(ext.rot_mat[0,:],z_vec) for ext in extrinsics]
+		v = [np.dot(ext.rot_mat[1,:],z_vec) for ext in extrinsics]
+		w = [np.dot(ext.rot_mat[2,:],z_vec) for ext in extrinsics]
 
 	if connectpath:
 		ax.plot(x,y,z,label='path')

@@ -11,7 +11,7 @@ import math
 import matplotlib.pyplot as plt
 
 """
-Functions for running experiment and analyzing experiment results.
+Experiment and related 
 """
 
 # def rotate_to_match_corners(board, true_cam, cam_loc, detection_noise):
@@ -98,7 +98,7 @@ def target_on_ray_at_depth_with_orientation(camera, cam_extrin, \
 Running the experiment.
 """
 exp_repeat_times = 50
-noise3d_lvls = [0.]
+noise3d_lvls = [0]
 # noise2d_lvls = [0]
 # noise3d_lvls = [0, 0.5, 1, 2]
 noise2d_lvls = [0, 0.5, 1, 2]
@@ -127,7 +127,7 @@ for noise3d in noise3d_lvls:
 			layered_grids = target_at_layered_grids(3, (5, 7), true_cam.aov, board,\
 				(board_height*board_sqsize, board_width*board_sqsize))
 			# vis.plot_calib_boards(layered_grids, (board_height, board_width))
-			img_pts = true_cam.capture_images(layered_grids, noise2d)
+			img_pts = true_cam.capture_images(cam_loc, layered_grids, noise2d)
 			# vis.plot_all_chessboards_in_camera(img_pts,true_cam.size)
 
 			# Estimate camera parameters from captured images
