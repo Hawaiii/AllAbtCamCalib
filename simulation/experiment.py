@@ -139,5 +139,5 @@ for noise3d in noise3d_lvls:
 
 		# Analyze error
 		vis.write_esti_results(estimations, true_cam, \
-			save_name_pre='report_3dn_'+str(noise3d)+'_2dn_'+str(noise2d))
+			save_name_pre='results/report_3dn_'+str(noise3d)+'_2dn_'+str(noise2d))
 print "experiment DONE"
