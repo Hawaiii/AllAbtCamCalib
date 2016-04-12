@@ -29,11 +29,13 @@ class Extrinsics:
 	trans_vec = None #np array 1x3
 	rot_vec = None #np array 1x3
 	rot_mat = None #np array 3x3
+	time_stamp = None #in ms (10^-3s)
 
-	def __init__(self, trans_vec, rot_vec, rot_mat):
+	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None):
 		self.trans_vec = trans_vec
 		self.rot_vec = rot_vec
 		self.rot_mat = rot_mat
+		self.time_stamp = time_stamp
 
 	@classmethod
 	def init_with_rotation_matrix(cls, trans_vec, rot_mat):
@@ -102,17 +104,17 @@ class Camera:
 		Returns OpenCV format distortion coefficients [k1, k2, p1, p2, k3]
 		as a 1x5 numpy array.
 		"""
-		return np.asarray([[self.intrinsics.radial_dist[0],\
-							self.intrinsics.radial_dist[1],\
-							self.intrinsics.tang_dist[0],\
-							self.intrinsics.tang_dist[1],\
-							self.intrinsics.radial_dist[2]]])
+		return np.asarray([[self.intrinsics.radial_dist[0,0],\
+							self.intrinsics.radial_dist[0,1],\
+							self.intrinsics.tang_dist[0,0],\
+							self.intrinsics.tang_dist[0,1],\
+							self.intrinsics.radial_dist[0,2]]])
 
 	def capture_image(self, point):
 		# @TODO
 		pass
 
-	def capture_images(self, extrin, points, noise2d):
+	def capture_images(self, extrin, points, noise2d=0.0):
 		"""
 		Args:
 			extrin: Extrinsics
@@ -122,7 +124,8 @@ class Camera:
 			a list of dictionaries, each representing a captured board
 		"""
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
-									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
+									#np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
+									self.get_opencv_dist_coeffs(), \
 									np.eye(3), \
 									self.intrinsics.intri_mat, \
 									self.size,\
@@ -155,7 +158,7 @@ class Camera:
 						img_pts_per_chessboard[point_id] += noises
 			img_pts.append( img_pts_per_chessboard )
 
-		print "capture_images OK"
+		#print "capture_images OK"
 		return img_pts
 
 	def ray_from_pixel(self, pixel, cam_extrin):

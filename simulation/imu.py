@@ -5,15 +5,19 @@ import exp_util as util
 import cv2
 import math
 
-def spiral_motion():
+def spiral_motion(board):
 	"""
 	A hard coded motion.
 	Generates location with sine in each axis.
 	Generates orientation while keeping target in view.
 	TODO: generate time stamp
 
+	Args:
+		board: dictionary keyed by point id whose values are 3D position of 
+				control points
+
 	Returns:
-		a list of (TODO: time-stamped) extrinsics
+		extrins: a list of (TODO: time-stamped) extrinsics
 	"""
 	extrins = []
 
@@ -25,10 +29,9 @@ def spiral_motion():
 	z = r * np.sin(theta*1.2)
 
 	# Generate orientation
-	board = util.gen_calib_board(7,8,23, np.asarray([[0,0,1000]]), np.zeros([1,3]), 0)
 	fov = (120.0, 80.0) # (x,y)degrees x->width
 	sensor_ratio = 0.8 # height/width
-	increment_ratio = 0.05
+	increment_ratio = 0.09
 	fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
 	fake_fy = sensor_ratio / (2 * math.tan( (fov[1]/180)*3.14 /2  ) )
 	fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
@@ -59,4 +62,4 @@ def spiral_motion():
 		
 		extrins.append(ext)
 
-	return extrins, board
+	return extrins
