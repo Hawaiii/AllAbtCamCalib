@@ -7,8 +7,9 @@ import math
 
 def spiral_motion():
 	"""
-	Generating location with sin in each axis.
-	TODO: generate orientation
+	A hard coded motion.
+	Generates location with sine in each axis.
+	Generates orientation while keeping target in view.
 	TODO: generate time stamp
 
 	Returns:
@@ -51,12 +52,9 @@ def spiral_motion():
 			for i in range(4):
 				if projection[0,i] > 1 or projection[1,i] > sensor_ratio or projection[0,i] < 0 or projection[1,i] < 0:
 					flag = True
-					print projection
-					print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
-					pass
-				pass
-			pass
-		# R_last = np.eye(3)
+					#print projection
+					#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
+					
 		ext = cam.Extrinsics.init_with_rotation_matrix(-R_last.dot(trans_vec), R_last)
 		
 		extrins.append(ext)

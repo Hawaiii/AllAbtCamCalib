@@ -14,8 +14,11 @@ class TestIMUMethods(unittest.TestCase):
 		plt.show()
 
 		camera = cam.Camera.make_pinhole_camera()
+		all_pts = []
 		for i in xrange(len(extrins)):
 			img_pts = camera.capture_images(extrins[i], [board], 0)
-			vis.plot_all_chessboards_in_camera(img_pts, camera.size, 'test_imu_captures'+str(i)+'.pdf')
+			for ipts in img_pts:
+				all_pts.append(ipts)
+		vis.plot_all_chessboards_in_camera(all_pts, camera.size, 'results/test_imu_captures.pdf')
 
 		
