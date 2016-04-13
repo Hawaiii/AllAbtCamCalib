@@ -10,7 +10,7 @@ def spiral_motion(board, board_dim):
 	A hard coded motion.
 	Generates location with sine in each axis.
 	Generates orientation while keeping target in view.
-	TODO: generate time stamp
+	Generates even time stamp.
 
 	Args:
 		board: dictionary keyed by point id whose values are 3D position of 
@@ -52,9 +52,9 @@ def spiral_motion(board, board_dim):
 		while flag:
 			flag = False
 			R_increment = cv2.Rodrigues(np.random.randn(3,1) * increment_ratio)[0]
-			R_last = R_increment.dot(R_last)
+			R_last_test = R_increment.dot(R_last)
 			
-			projection = R_last.dot( boundary)  + matlib.repmat(-R_last.dot(trans_vec), 4, 1).T
+			projection = R_last_test.dot( boundary)  + matlib.repmat(-R_last_test.dot(trans_vec), 4, 1).T
 			projection = fake_k.dot(projection)
 			projection = projection / matlib.repmat( projection[-1,:],3,1)
 
@@ -62,6 +62,8 @@ def spiral_motion(board, board_dim):
 			for j in range(4):
 				if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
 					flag = True
+				else:
+					R_last = R_last_test
 					#print projection
 					#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
 		ext = cam.Extrinsics.init_with_rotation_matrix(np.array([-R_last.dot(trans_vec)]), R_last, ts[i])
@@ -72,5 +74,34 @@ def spiral_motion(board, board_dim):
 
 def transform_motion(orig_motion, rel_extrin):
 	"""
-	If orig_motion is camera motion and rel_extrin specifies 
+	If orig_motion is camera motion and rel_extrin specifies transformation from 
+	camera to imu then this function returns the imu motion.
+	@TODO: add time stamp offset from rel_extrin
+
+	Args:
+		orig_motion: a list of time-stamped Extrinsics
+		rel_extrin: Extrinsics, relative pose ([R|t] transforms from camera to imu)
+	Returns:
+		new_motion: a list of time-stamped Extrinsics
 	"""
+	new_motion = []
+	imu_loc_in_camera = -rel_extrin.rot_mat.T.dot(rel_extrin.trans_vec.T)
+	imu_loc_in_camera = np.concatenate((imu_loc_in_camera, np.ones((1,1))), axis=0)
+	imu_orien_to_camera = rel_extrin.rot_mat.T
+	# print 'imu_loc_in_cam', imu_loc_in_camera
+	# print 'imu_orien_to_cam', imu_orien_to_camera
+
+	for orig_e in orig_motion:
+		imu_loc_in_world = orig_e.get_homo_trans_matrix_inv().dot(imu_loc_in_camera)
+		imu_loc_in_world = imu_loc_in_world / matlib.repmat( imu_loc_in_world[-1,:], 4, 1)
+		imu_loc_in_world = imu_loc_in_world[0:3,:]
+
+		imu_orien_to_world = orig_e.rot_mat.dot(imu_orien_to_camera)
+
+		# print orig_e.trans_vec, (-imu_orien_to_world.dot(imu_loc_in_world)).T
+		# print
+		
+		new_e = cam.Extrinsics.init_with_rotation_matrix(\
+			(-imu_orien_to_world.dot(imu_loc_in_world)).T, imu_orien_to_world, orig_e.time_stamp)
+		new_motion.append(new_e)
+	return new_motion

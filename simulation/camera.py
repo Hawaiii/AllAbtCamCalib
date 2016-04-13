@@ -56,7 +56,7 @@ class Extrinsics:
 
 	def __repr__(self):
 		selfstr = ''
-		if time_stamp:
+		if self.time_stamp:
 			selfstr += 'time: ' + str(self.time_stamp)
 		selfstr += 'translation: ' + str(self.trans_vec) + ' rotation: ' + \
 		str(self.rot_vec) + ', ' + str(self.rot_mat)
@@ -75,6 +75,17 @@ class Extrinsics:
 		Returns 4x3 matrix ([R'|-R't])'
 		"""
 		return np.concatenate((self.rot_mat, -np.dot(self.trans_vec, self.rot_mat)), axis=0)
+
+	def get_homo_trans_matrix(self):
+		"""
+		Returns 4x4 matrix 
+		[R|t]
+		[0|1]
+		"""
+		return np.concatenate((self.get_Rt_matrix(), np.array([[0.,0.,0.,1.]])), axis=0)
+
+	def get_homo_trans_matrix_inv(self):
+		return np.linalg.inv(self.get_homo_trans_matrix())
 
 class Camera:
 	intrinsics = None #Intrinsics
