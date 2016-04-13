@@ -39,24 +39,28 @@ class Extrinsics:
 		self.time_stamp = time_stamp
 
 	@classmethod
-	def init_with_rotation_matrix(cls, trans_vec, rot_mat):
+	def init_with_rotation_matrix(cls, trans_vec, rot_mat, time_stamp=None):
 		tmp,_ = cv2.Rodrigues(rot_mat)
-		return cls(trans_vec, tmp.T, rot_mat)
+		return cls(trans_vec, tmp.T, rot_mat, time_stamp)
 
 	@classmethod
-	def init_with_rotation_vec(cls, trans_vec, rot_vec):
+	def init_with_rotation_vec(cls, trans_vec, rot_vec, time_stamp=None):
 		tmp,_ = cv2.Rodrigues(rot_vec)
-		return cls(trans_vec, rot_vec, tmp)
+		return cls(trans_vec, rot_vec, tmp, time_stamp)
 
 	@classmethod
-	def init_with_numbers(cls, x, y, z, rx, ry, rz):
+	def init_with_numbers(cls, x, y, z, rx, ry, rz, time_stamp=None):
 		# return cls(np.array([x,y,z]), np.array([rx,ry,rz]), None)
 		return cls.init_with_rotation_vec(np.array([[x,y,z]]), \
-			np.array([[rx,ry,rz]]))
+			np.array([[rx,ry,rz]]), time_stamp)
 
 	def __repr__(self):
-		return 'translation: ' + str(self.trans_vec) + ' rotation: ' + \
+		selfstr = ''
+		if time_stamp:
+			selfstr += 'time: ' + str(self.time_stamp)
+		selfstr += 'translation: ' + str(self.trans_vec) + ' rotation: ' + \
 		str(self.rot_vec) + ', ' + str(self.rot_mat)
+		return selfstr
 
 	def get_Rt_matrix(self):
 		"""
@@ -112,15 +116,15 @@ class Camera:
 							self.intrinsics.tang_dist[0,0],\
 							self.intrinsics.tang_dist[0,1],\
 							self.intrinsics.radial_dist[0,2]]])
+
 	def get_opencv_size(self, scale_factor=1):
 		"""
 		Returns (img_width*scale_factor, img_height*scale_factor) instead.
 		"""
 		scaled = []
 		for i in xrange(len(self.size)):
-			scaled.insert(0, round(self.size[i] * scale_factor))
+			scaled.insert(0, int(round(self.size[i] * scale_factor)))
 		return tuple(scaled)		
-
 
 	def capture_images(self, extrin, points, noise2d=0.0):
 		"""

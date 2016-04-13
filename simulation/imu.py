@@ -21,13 +21,18 @@ def spiral_motion(board, board_dim):
 		extrins: a list of (TODO: time-stamped) extrinsics
 	"""
 	extrins = []
-
+	
 	# Generate location
 	theta = np.linspace(-4 * np.pi, 4 * np.pi, 100)
 	r = 150
 	x = r * np.sin(theta)
 	y = r * np.sin(theta*1.5)
 	z = r * np.sin(theta*1.2)
+
+	# Generate timestamp: trying even division first?
+	tot_length = 10 * 10**9 #10s converted to ns
+	ts_s = 1
+	ts = np.round(np.linspace(ts_s, tot_length+ts_s, 100)).astype(int)
 
 	# Generate orientation
 	fov = (120.0, 80.0) # (x,y)degrees x->width
@@ -54,13 +59,12 @@ def spiral_motion(board, board_dim):
 			projection = projection / matlib.repmat( projection[-1,:],3,1)
 
 			#import pdb; pdb.set_trace()
-			for i in range(4):
-				if projection[0,i] > 1 or projection[1,i] > sensor_ratio or projection[0,i] < 0 or projection[1,i] < 0:
+			for j in range(4):
+				if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
 					flag = True
 					#print projection
 					#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
-					
-		ext = cam.Extrinsics.init_with_rotation_matrix(np.array([-R_last.dot(trans_vec)]), R_last)
+		ext = cam.Extrinsics.init_with_rotation_matrix(np.array([-R_last.dot(trans_vec)]), R_last, ts[i])
 		
 		extrins.append(ext)
 
