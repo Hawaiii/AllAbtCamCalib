@@ -10,7 +10,7 @@ import targets
 import vis
 import exp_util as util
 
-
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,5 +27,8 @@ camera = cam.Camera.make_pinhole_camera()
 camera.intrinsics.radial_dist = np.zeros((1,3))
 camera.intrinsics.tang_dist = np.zeros((1,2))
 
+board_img = cv2.imread('data/chess.png')
 Hs = camera.calc_homography(extrins, board, board_dim)
+for i in xrange(len(Hs)):
+	targets.render_chessboard_homo(board_img, Hs[i], camera.get_opencv_size(2), save_name='results/render'+str(i)+'.png')
 

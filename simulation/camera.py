@@ -112,6 +112,15 @@ class Camera:
 							self.intrinsics.tang_dist[0,0],\
 							self.intrinsics.tang_dist[0,1],\
 							self.intrinsics.radial_dist[0,2]]])
+	def get_opencv_size(self, scale_factor=1):
+		"""
+		Returns (img_width*scale_factor, img_height*scale_factor) instead.
+		"""
+		scaled = []
+		for i in xrange(len(self.size)):
+			scaled.insert(0, round(self.size[i] * scale_factor))
+		return tuple(scaled)		
+
 
 	def capture_images(self, extrin, points, noise2d=0.0):
 		"""
@@ -211,7 +220,7 @@ class Camera:
 
 			Hs.append(H)
 
-		return H
+		return Hs
 
 	def ray_from_pixel(self, pixel, cam_extrin):
 		"""
