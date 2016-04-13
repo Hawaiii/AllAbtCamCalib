@@ -7,6 +7,7 @@ import exp_util as util
 import vis
 
 import numpy as np
+import numpy.matlib as matlib
 
 import pdb
 
@@ -61,6 +62,8 @@ class Extrinsics:
 		"""
 		Returns 3x4 matrix [R|t]
 		"""
+		# print self.rot_mat
+		# print self.trans_vec
 		return np.concatenate((self.rot_mat, self.trans_vec.T), axis=1)
 
 	def get_Rt_matrix_inv(self):
@@ -169,8 +172,12 @@ class Camera:
 		if not nodistortion:
 			print "project_point with distortion not implemented!"
 		else:
-			return self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
-
+			if point.shape == (1,3):
+				point = np.concatenate((point.T, np.ones((1,1))), axis=0)
+			loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
+			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
+			return loc[0:2].T
+			
 	def calc_homography(self, extrins, board, board_dim):
 		"""
 		Calculates homography that transforms the image to board. Ignores distortion.
@@ -187,7 +194,7 @@ class Camera:
 		im_edges[1,1] = self.size[1]-1
 		im_edges[2,0] = self.size[0]-1
 		im_edges[3,0] = self.size[0]-1
-		im_edges[3,2] = self.size[1]-1
+		im_edges[3,1] = self.size[1]-1
 
 		# For each pose, project four corner locations onto image
 		for extrin in extrins:

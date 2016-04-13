@@ -5,7 +5,7 @@ import exp_util as util
 import cv2
 import math
 
-def spiral_motion(board):
+def spiral_motion(board, board_dim):
 	"""
 	A hard coded motion.
 	Generates location with sine in each axis.
@@ -15,6 +15,7 @@ def spiral_motion(board):
 	Args:
 		board: dictionary keyed by point id whose values are 3D position of 
 				control points
+		board_dim: (board_height, board_width)
 
 	Returns:
 		extrins: a list of (TODO: time-stamped) extrinsics
@@ -37,7 +38,8 @@ def spiral_motion(board):
 	fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
 	R_init = np.eye(3)
 	R_last = R_init
-	boundary = np.asarray( [ board[0], board[6], board[49], board[55] ] ).reshape(4,3).T
+	boundary = np.asarray( [ board[0], board[board_dim[1]-1], \
+		board[(board_dim[0]-1)*board_dim[1]], board[board_dim[0]*board_dim[1]-1] ] ).reshape(4,3).T
 
 	for i in range(len(theta)):
 		trans_vec = np.asarray([x[i], y[i], z[i]])
@@ -58,7 +60,7 @@ def spiral_motion(board):
 					#print projection
 					#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
 					
-		ext = cam.Extrinsics.init_with_rotation_matrix(-R_last.dot(trans_vec), R_last)
+		ext = cam.Extrinsics.init_with_rotation_matrix(np.array([-R_last.dot(trans_vec)]), R_last)
 		
 		extrins.append(ext)
 
@@ -66,5 +68,5 @@ def spiral_motion(board):
 
 def transform_motion(orig_motion, rel_extrin):
 	"""
-	
+	If orig_motion is camera motion and rel_extrin specifies 
 	"""

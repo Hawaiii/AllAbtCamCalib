@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 
 class TestIMUMethods(unittest.TestCase):
 	def test_spiral_motion(self):
-		board = util.gen_calib_board(7,8,23, np.asarray([[0,0,600]]), np.zeros([1,3]), 0)
+		board_dim = (7,8)
+		board = util.gen_calib_board(board_dim[0],board_dim[1],23, np.asarray([[0,0,600]]), np.zeros([1,3]), 0)
 
-		extrins = imu.spiral_motion(board)
+		extrins = imu.spiral_motion(board, board_dim)
 		ax = vis.plot_poses(extrins, invert = True)
 		ax = vis.plot_calib_boards( [ board ], (7,8), fax=ax)
 		ax.set_aspect('equal')
