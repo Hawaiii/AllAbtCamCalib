@@ -63,3 +63,8 @@ def spiral_motion(board):
 		extrins.append(ext)
 
 	return extrins
+
+def transform_motion(orig_motion, rel_extrin):
+	"""
+	
+	"""

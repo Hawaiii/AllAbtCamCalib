@@ -29,7 +29,7 @@ class Extrinsics:
 	trans_vec = None #np array 1x3
 	rot_vec = None #np array 1x3
 	rot_mat = None #np array 3x3
-	time_stamp = None #in ms (10^-3s)
+	time_stamp = None #in ns (10^-9s)
 
 	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None):
 		self.trans_vec = trans_vec
@@ -110,10 +110,6 @@ class Camera:
 							self.intrinsics.tang_dist[0,1],\
 							self.intrinsics.radial_dist[0,2]]])
 
-	def capture_image(self, point):
-		# @TODO
-		pass
-
 	def capture_images(self, extrin, points, noise2d=0.0):
 		"""
 		Args:
@@ -160,6 +156,55 @@ class Camera:
 
 		#print "capture_images OK"
 		return img_pts
+
+	def project_point(self, extrin, point, nodistortion=True):
+		"""
+			Project a 3D point onto camera.
+			Args:
+				extrin: Extrinsics
+				point: a 3D point
+				nodistortion: ignores distortion coefficients if True
+			Returns: 1x2 numpy array
+		"""
+		if not nodistortion:
+			print "project_point with distortion not implemented!"
+		else:
+			return self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
+
+	def calc_homography(self, extrins, board, board_dim):
+		"""
+		Calculates homography that transforms the image to board. Ignores distortion.
+		Args:
+			extrins: list of Extrinsics
+			board: a dictionary keyed by control point ID whose values are 3D points
+			board_dim: (board_height, board_width)
+		Returns:
+			Hs: a list of 3x3 homography matrices
+		"""
+		Hs = []
+		# Find image edge points
+		im_edges = np.zeros((4,2), dtype=np.float32)
+		im_edges[1,1] = self.size[1]-1
+		im_edges[2,0] = self.size[0]-1
+		im_edges[3,0] = self.size[0]-1
+		im_edges[3,2] = self.size[1]-1
+
+		# For each pose, project four corner locations onto image
+		for extrin in extrins:
+			edges = np.zeros((4,2), dtype=np.float32)
+			edges[0,:] = self.project_point(extrin, board[0], nodistortion=True)
+			edges[1,:] = self.project_point(extrin, board[board_dim[1]-1], nodistortion=True)
+			edges[2,:] = self.project_point(extrin, board[(board_dim[0]-1)*board_dim[1]], \
+															nodistortion=True)
+			edges[3,:] = self.project_point(extrin, board[board_dim[0]*board_dim[1]-1], \
+															nodistortion=True)
+
+			# Calculate homography
+			H, mask = cv2.findHomography(im_edges, edges)
+
+			Hs.append(H)
+
+		return H
 
 	def ray_from_pixel(self, pixel, cam_extrin):
 		"""
