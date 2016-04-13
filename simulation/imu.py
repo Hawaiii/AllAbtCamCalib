@@ -32,7 +32,7 @@ def spiral_motion(board, board_dim):
 	# Generate timestamp: trying even division first?
 	tot_length = 10 * 10**9 #10s converted to ns
 	ts_s = 1
-	ts = np.round(np.linspace(ts_s, tot_length+ts_s, 100)).astype(int)
+	ts = np.round(np.linspace(ts_s, tot_length+ts_s, len(theta))).astype(int)
 
 	# Generate orientation
 	fov = (120.0, 80.0) # (x,y)degrees x->width
@@ -105,3 +105,25 @@ def transform_motion(orig_motion, rel_extrin):
 			(-imu_orien_to_world.dot(imu_loc_in_world)).T, imu_orien_to_world, orig_e.time_stamp)
 		new_motion.append(new_e)
 	return new_motion
+
+def gen_imu_readings(imu_motion, save_name='imu0.csv'):
+	"""
+	Generate imu readings and write to csv file.
+	Args:
+		imu_motion: a list of time-stamped Extrinsics
+	Returns: 
+		reading: N x 7 numpy array, where columns are: timestamp, gyroscope x, 
+				gyroscope y, gyroscope z, accelerometer x, accelerometer y, 
+				accelerometer z
+	Also writes reading to csv file of given name.
+	"""
+	reading = np.zeros((len(imu_motion), 7))
+
+	for i in xrange(len(imu_motion)):
+		reading[i,0] = imu_motion[i].time_stamp
+		# TODO: Gyroscope measurements
+		
+		# TODO: acceleration - gravity measurements 
+
+	print "gen_imu_readings TODO"
+	pass
