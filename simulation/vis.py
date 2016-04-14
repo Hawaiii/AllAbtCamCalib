@@ -125,6 +125,7 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 
 def write_esti_results(estimations, true_cam, save_name_pre):
 	"""
+	TODO: compare extrinsics
 	Args:
 		estimations: list of Cameras from calibration results
 		true_cam: actual camera parameters
@@ -278,8 +279,8 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 		z = xyz[2,0]
 	else:
 		x = [cam_extrin.trans_vec[0,0]]
-		y = [cam_extrin.trans_vec[0,1]]
-		z = [cam_extrin.trans_vec[0,2]]
+		y = [cam_extrin.trans_vec[1,0]]
+		z = [cam_extrin.trans_vec[2,0]]
 		
 	z_vec = np.asarray([0,0,1])
 	u = [np.dot(cam_extrin.rot_mat[0,:],z_vec)]

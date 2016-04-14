@@ -13,8 +13,8 @@ import pdb
 
 class Intrinsics:
 	intri_mat = None #np array 3x3
-	radial_dist = None #np array 1x3
-	tang_dist = None #np array 1x2
+	radial_dist = None #np vector 1x3
+	tang_dist = None #np vector 1x2
 
 	def __init__(self, intri_mat, radial_dist, tang_dist):
 		self.intri_mat = intri_mat
@@ -26,14 +26,26 @@ class Intrinsics:
 		'\nradial distortion: ' + str(self.radial_dist) + \
 		'\ntangential distortion: ' + str(self.tang_dist)
 
+	def fx(self):
+		return self.intri_mat[0,0]
+
+	def fy(self):
+		return self.intri_mat[1,1]
+
+	def cx(self):
+		return self.intri_mat[0,2]
+
+	def cy(self):
+		return self.intri_mat[1,2]
+
 class Extrinsics:
-	trans_vec = None #np array 1x3
-	rot_vec = None #np array 1x3
+	trans_vec = None #np array 3x1
+	rot_vec = None #np vector 1x3
 	rot_mat = None #np array 3x3
 	time_stamp = None #in ns (10^-9s)
 
 	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None):
-		self.trans_vec = trans_vec
+		self.trans_vec = trans_vec.reshape(3,1)
 		self.rot_vec = rot_vec
 		self.rot_mat = rot_mat
 		self.time_stamp = time_stamp
@@ -50,9 +62,8 @@ class Extrinsics:
 
 	@classmethod
 	def init_with_numbers(cls, x, y, z, rx, ry, rz, time_stamp=None):
-		# return cls(np.array([x,y,z]), np.array([rx,ry,rz]), None)
-		return cls.init_with_rotation_vec(np.array([[x,y,z]]), \
-			np.array([[rx,ry,rz]]), time_stamp)
+		return cls.init_with_rotation_vec(np.array([x,y,z]), \
+			np.array([rx,ry,rz]), time_stamp)
 
 	def __repr__(self):
 		selfstr = ''
@@ -66,15 +77,13 @@ class Extrinsics:
 		"""
 		Returns 3x4 matrix [R|t]
 		"""
-		# print self.rot_mat
-		# print self.trans_vec
-		return np.concatenate((self.rot_mat, self.trans_vec.T), axis=1)
+		return np.concatenate((self.rot_mat, self.trans_vec), axis=1)
 
 	def get_Rt_matrix_inv(self):
 		"""
 		Returns 4x3 matrix ([R'|-R't])'
 		"""
-		return np.concatenate((self.rot_mat, -np.dot(self.trans_vec, self.rot_mat)), axis=0)
+		return np.concatenate((self.rot_mat, -self.trans_vec.T.dot(self.rot_mat)), axis=0)
 
 	def get_homo_trans_matrix(self):
 		"""
@@ -91,7 +100,7 @@ class Extrinsics:
 		"""
 		Returns -Rt as a 1x3 numpy array
 		"""
-		return -self.rot_mat.dot(self.trans_vec.T).reshape(1,3)
+		return -self.rot_mat.dot(self.trans_vec).reshape(1,3)
 
 class Camera:
 	intrinsics = None #Intrinsics
@@ -110,7 +119,8 @@ class Camera:
 
 	def __repr__(self):
 		cam_str = 'Camera ' + self.name + ':\n\tIntrinsics:\n' + \
-		str(self.intrinsics) + '\n\tExtrinsics:\n'
+		str(self.intrinsics) 
+		cam_str += '\n\tExtrinsics:\n'
 		cam_str += '\tomitted because too long\n'
 		# for ext in self.extrinsics:
 		# 	cam_str += '\n\t\t'
@@ -128,20 +138,20 @@ class Camera:
 		Returns OpenCV format distortion coefficients [k1, k2, p1, p2, k3]
 		as a 1x5 numpy array.
 		"""
-		return np.asarray([[self.intrinsics.radial_dist[0,0],\
-							self.intrinsics.radial_dist[0,1],\
-							self.intrinsics.tang_dist[0,0],\
-							self.intrinsics.tang_dist[0,1],\
-							self.intrinsics.radial_dist[0,2]]])
+		return np.asarray([[self.intrinsics.radial_dist[0],\
+							self.intrinsics.radial_dist[1],\
+							self.intrinsics.tang_dist[0],\
+							self.intrinsics.tang_dist[1],\
+							self.intrinsics.radial_dist[2]]])
 
-	def get_opencv_size(self, scale_factor=1):
+	def scale_size(self, scale_factor=1):
 		"""
-		Returns (img_width*scale_factor, img_height*scale_factor) instead.
+		Returns (img_width*scale_factor, img_height*scale_factor).
 		"""
 		scaled = []
 		for i in xrange(len(self.size)):
-			scaled.insert(0, int(round(self.size[i] * scale_factor)))
-		return tuple(scaled)		
+			scaled.append( int(round(self.size[i] * scale_factor)) )
+		return tuple(scaled)
 
 	def capture_images(self, extrin, points, noise2d=0.0):
 		"""
@@ -158,32 +168,35 @@ class Camera:
 									np.eye(3), \
 									self.intrinsics.intri_mat, \
 									self.size,\
-									cv2.CV_32FC1)
-
+									cv2.CV_32FC1)		
 		img_pts = list()
 		for chessboard in points:
-			img_pts_per_chessboard = {};
+			img_pts_per_chessboard = {}
 			for point_id in chessboard:
-				# self.
-				# perpare extrinsics matrix
-				ext = np.concatenate( (extrin.rot_mat, np.reshape(extrin.trans_vec, (-1, 1))), axis = 1)
-				#points in camera frame
-				pts = np.dot(ext, np.append(chessboard[point_id] ,1))
-				#points in image frame (distortion still !!)
-				pts = np.dot(self.intrinsics.intri_mat, pts)
-				pts = np.divide(pts, pts[-1])
+				
+				# # perpare extrinsics matrix
+				# # ext = np.concatenate( (extrin.rot_mat, np.reshape(extrin.trans_vec, (-1, 1))), axis = 1)
+				# ext = extrin.get_Rt_matrix()
+				# #points in camera frame
+				# pts = np.dot(ext, np.append(chessboard[point_id] ,1))
+				# #points in image frame (distortion still !!)
+				# pts = np.dot(self.intrinsics.intri_mat, pts)
+				# pts = np.divide(pts, pts[-1])
+				pts = self.project_point(extrin, chessboard[point_id])
 				#apply distortion
-				if(pts[0] >=0 and pts[0] < self.size[1] and pts[1] >= 0 and pts[1] < self.size[0]  ):
-					final_pts = np.ones((3,1))
-					x_ = mapx[pts[0],pts[1]]
-					y_ = mapy[pts[0],pts[1]]
-					final_pts[0] = x_ #col
-					final_pts[1] = y_ #row
+				if(pts[0,0] >=0 and pts[0,0] < self.size[0] and pts[1,0] >= 0 and pts[1,0] < self.size[1] ):
+					# final_pts = np.zeros((2,1))
+					x_ = mapx[pts[1,0],pts[0,0]]
+					y_ = mapy[pts[1,0],pts[0,0]]
+					# final_pts[0] = x_ #col
+					# final_pts[1] = y_ #row
+					final_pts = np.array([x_, y_]).reshape(2,1)
 					img_pts_per_chessboard[point_id] = final_pts
 					# add noise
 					if noise2d > 0:
-						noises = np.concatenate((np.random.normal(0, noise2d, (2,1)),\
-												np.zeros((1,1))), axis=0)
+						# noises = np.concatenate((np.random.normal(0, noise2d, (2,1)),\
+						# 						np.zeros((1,1))), axis=0)
+						noises = np.random.normal(0, noise2d, (2,1))
 						img_pts_per_chessboard[point_id] += noises
 			img_pts.append( img_pts_per_chessboard )
 
@@ -192,21 +205,23 @@ class Camera:
 
 	def project_point(self, extrin, point, nodistortion=True):
 		"""
-			Project a 3D point onto camera.
+			Project 3D points onto camera.
 			Args:
 				extrin: Extrinsics
-				point: 1x3 numpy array, a 3D point
+				point: 3xN numpy array, a 3D point
 				nodistortion: ignores distortion coefficients if True
-			Returns: 1x2 numpy array
+			Returns: 2xN numpy array
 		"""
 		if not nodistortion:
 			print "project_point with distortion not implemented!"
 		else:
-			if point.shape == (1,3):
-				point = np.concatenate((point.T, np.ones((1,1))), axis=0)
+			if point.shape[0] != 3:
+				print 'point', point, 'dimension is not 3xN!'
+				return None
+			point = np.concatenate((point, np.ones((1,point.shape[1]))), axis=0)
 			loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
 			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
-			return loc[0:2].T
+			return loc[0:2]
 			
 	def calc_homography(self, extrins, board, board_dim):
 		"""
@@ -248,11 +263,11 @@ class Camera:
 		Returns the light ray pixel is capturing on camera.
 
 		Args:
-			pixel: (x,y)
+			pixel: (x,y), first col then row
 			cam_extrin: Extrinsics
 		Returns:
-			pt3d: 1x3 numpy array, the 3D location of camear center
-			ray_vec: 1x3 numpy array, a unit vector pointing in the direction of 
+			pt3d: 3x1 numpy array, the 3D location of camear center
+			ray_vec: 3x1 numpy array, a unit vector pointing in the direction of 
 					 the ray
 			(pt3d + a * ray_vec, where a is a scalar, gives a point on the ray)
 		"""
@@ -262,18 +277,17 @@ class Camera:
 		dist_loc[0,0,1] = pixel[1]
 		nodist_loc = cv2.undistortPoints(dist_loc, self.intrinsics.intri_mat, \
 										self.get_opencv_dist_coeffs()) #1x1x2 np array
-		nodist_loc[0,0,0] = nodist_loc[0,0,0] * self.intrinsics.intri_mat[0,0] \
-							 + self.intrinsics.intri_mat[0,2]
-		nodist_loc[0,0,1] = nodist_loc[0,0,1] * self.intrinsics.intri_mat[1,1] \
-							 + self.intrinsics.intri_mat[1,2]
+		nodist_loc[0,0,0] = nodist_loc[0,0,0] * self.intrinsics.fx() \
+							 + self.intrinsics.cx()
+		nodist_loc[0,0,1] = nodist_loc[0,0,1] * self.intrinsics.fy() \
+							 + self.intrinsics.cy()
 
 		# Camera center is at -Rt from extrinsics
-		pt3d = -np.dot(cam_extrin.rot_mat, cam_extrin.trans_vec.T)
+		pt3d = -cam_extrin.rot_mat.dot(cam_extrin.trans_vec)
 
 		# Calculate ray from pixel from intrinsics
-		ray_vec = np.dot(np.dot(cam_extrin.get_Rt_matrix_inv(),\
-						np.linalg.inv(self.intrinsics.intri_mat)), \
-						np.array([[nodist_loc[0,0,0],nodist_loc[0,0,1],1.]]).T)
+		ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
+						.dot(np.concatenate((nodist_loc.reshape(2,1), np.ones((1,1))),axis=0))
 		ray_vec = util.unit_vector(ray_vec)
 
 		return pt3d, ray_vec
@@ -283,6 +297,10 @@ class Camera:
 		"""
 		Given image coordinates of points and actual 3D points, return a list of
 		intrinsics and extrinsics of camera estimated from the point coordinates.
+		Args:
+			img_pts:
+			board:
+			img_size: (img_width, img_height)
 		"""
 		# Save all seen images to file
 		#vis.plot_all_chessboards_in_camera(img_pts, img_size, save_name='debug_calibrate_camera.pdf')
@@ -319,8 +337,8 @@ class Camera:
 		
 		size = img_size
 		aov = None
-		name = "calibrated cam pov"
-		print 'calibrate_camera OK'
+		name = "calibrated cam"
+		# print 'calibrate_camera OK'
 		return Camera(intrinsics_, extrinsics_, size, aov, name)
 
 	@staticmethod
@@ -349,7 +367,8 @@ class Camera:
 		radial_dist = np.array([-0.00187587, 0.00898923, 0.0])
 		tang_dist = np.array([0.0018697, 0.00093728])
 		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
-		cam_size = (1016, 1264)
+		cam_size = (1264, 1016)
 
 		#@TODO: look up actual Ximea camera angle of view
-		return Camera(intri, None, cam_size,(0,0),"pinhole")
+		return Camera(intri, None, cam_size,(53.8, 84.1),"pinhole")
+		
