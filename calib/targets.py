@@ -27,8 +27,8 @@ def make_chessboard(screen_res, chess_dim, orig_name='chess.png', inv_name='ches
 					for j in xrange(hblock*dim_pxl, (hblock+1)*dim_pxl):
 						board[i][j] = 0
 	inv_board = np.invert(board, dtype=np.uint8)
-	cv2.imwrite(orig_name, board)
-	cv2.imwrite(inv_name, inv_board)
+	# cv2.imwrite(orig_name, board)
+	# cv2.imwrite(inv_name, inv_board)
 	
 	return board, inv_board
 #make_chessboard((1264*2, 1016*2), (8,5), noboarder=True)
