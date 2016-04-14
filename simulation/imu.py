@@ -140,12 +140,11 @@ def gen_imu_readings(imu_motion, gravity, save_name='imu0.csv'):
 		
 		# Gyroscope measurements
 		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/dt
-		reading[i,1:4] = drdt
+		reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt)
 		
 		# Acceleration - gravity measurements 
 		acc = (imu_motion[i+1].get_inv_location() - imu_motion[i-1].get_inv_location())/(dt*dt)
-		grav = imu_motion[i].rot_mat.dot(gravity)
-		reading[i,4:7] = acc - grav
+		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - grav)
 
 	if save_name:
 		np.savetxt(save_name, reading, delimiter=',')
