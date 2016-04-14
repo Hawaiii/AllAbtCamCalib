@@ -225,7 +225,7 @@ class Camera:
 			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
 			return loc[0:2]
 			
-	def calc_homography(self, extrins, board, board_dim):
+	def calc_homography(self, extrins, board, board_dim, board_to_world_T):
 		"""
 		Calculates homography that transforms the image to board. Ignores distortion.
 		Args:
@@ -236,6 +236,7 @@ class Camera:
 			Hs: a list of 3x3 homography matrices
 		"""
 		Hs = []
+
 		# Find image edge points
 		im_edges = np.zeros((4,2), dtype=np.float32)
 		im_edges[1,1] = self.size[0]-1
@@ -256,6 +257,9 @@ class Camera:
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)
 
+			Hd = self.intrinsics.intri_mat.dot(extrin.get_Rt_matrix().dot(board_to_world_T))[:, [0,1,3]]
+
+			import pdb; pdb.set_trace()
 			Hs.append(H)
 
 		return Hs

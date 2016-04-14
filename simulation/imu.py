@@ -20,20 +20,21 @@ def spiral_motion(board, board_dim, camera):
 		board_dim: (board_width, board_height)
 		camera: a Camera
 
+
 	Returns:
 		extrins: a list of time-stamped extrinsics
 	"""
 	extrins = []
 	
 	# Generate location
-	theta = np.linspace(-4 * np.pi, 4 * np.pi, 6000)
+	theta = np.linspace(-4 * np.pi, 4 * np.pi, 600)
 	r = 150
 	x = r * np.sin(theta)
 	y = r * np.sin(theta*1.5)
 	z = r * np.sin(theta*1.2)
 
 	# Generate timestamp: trying even division first?
-	tot_length = 30 * 10**9 #10s converted to ns
+	tot_length = 3 * 10**9 #10s converted to ns
 	ts_s = 1
 	ts = np.round(np.linspace(ts_s, tot_length+ts_s, len(theta))).astype(int)
 
@@ -140,16 +141,19 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		reading[i,0] = imu_motion[i].time_stamp
 
 		# time in seconds
-		dt = (imu_motion[i+1].time_stamp - imu_motion[i-1].time_stamp) * (10**-9)
+		# d2t = (imu_motion[i+1].time_stamp - imu_motion[i-1].time_stamp) * (10**-9)
+		dt1 = (imu_motion[i+1].time_stamp - imu_motion[i].time_stamp) * (10**-9)
+		dt2 = (imu_motion[i].time_stamp - imu_motion[i-1].time_stamp) * (10**-9)
+		d2t = dt1 + dt2
 		
 		# Gyroscope measurements
-		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/dt
+		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/d2t
 		reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt.reshape(3,1)).reshape(1,3)
 		
 		# Acceleration - gravity measurements 
-		v1 = (imu_motion[i+1].get_inv_location() - imu_motion[i].get_inv_location())/dt
-		v2 = (imu_motion[i].get_inv_location() - imu_motion[i-1].get_inv_location())/dt
-		acc = (v1-v2)/dt
+		v1 = (imu_motion[i+1].get_inv_location() - imu_motion[i].get_inv_location())/dt1
+		v2 = (imu_motion[i].get_inv_location() - imu_motion[i-1].get_inv_location())/dt2
+		acc = (v1-v2)*2/d2t - np.cross(drdt, v1+v2)
 		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
 
 		if save_name:
