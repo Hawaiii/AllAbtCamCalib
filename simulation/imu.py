@@ -5,7 +5,7 @@ import exp_util as util
 import cv2
 import math
 
-def spiral_motion(board, board_dim):
+def spiral_motion(board, board_dim, camera):
 	"""
 	A hard coded motion.
 	Generates location with sine in each axis.
@@ -16,6 +16,7 @@ def spiral_motion(board, board_dim):
 		board: dictionary keyed by point id whose values are 3D position of 
 				control points
 		board_dim: (board_height, board_width)
+		camera: a Camera
 
 	Returns:
 		extrins: a list of (TODO: time-stamped) extrinsics
@@ -35,38 +36,49 @@ def spiral_motion(board, board_dim):
 	ts = np.round(np.linspace(ts_s, tot_length+ts_s, len(theta))).astype(int)
 
 	# Generate orientation
-	fov = (120.0, 80.0) # (x,y)degrees x->width
-	sensor_ratio = 0.8 # height/width
 	increment_ratio = 0.09
-	fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
-	fake_fy = sensor_ratio / (2 * math.tan( (fov[1]/180)*3.14 /2  ) )
-	fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
 	R_init = np.eye(3)
 	R_last = R_init
 	boundary = np.asarray( [ board[0], board[board_dim[1]-1], \
 		board[(board_dim[0]-1)*board_dim[1]], board[board_dim[0]*board_dim[1]-1] ] ).reshape(4,3).T
-
+	# fov = (120.0, 80.0) # (x,y)degrees x->width
+	# sensor_ratio = 0.8 # height/width
+	# fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
+	# fake_fy = sensor_ratio / (2 * math.tan( (fov[1]/180)*3.14 /2  ) )
+	# fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
+	
 	for i in range(len(theta)):
-		trans_vec = np.asarray([x[i], y[i], z[i]])
+		trans_vec = np.asarray([[x[i], y[i], z[i]]])
 		flag = True
 		while flag:
 			flag = False
 			R_increment = cv2.Rodrigues(np.random.randn(3,1) * increment_ratio)[0]
 			R_last_test = R_increment.dot(R_last)
 			
-			projection = R_last_test.dot( boundary)  + matlib.repmat(-R_last_test.dot(trans_vec), 4, 1).T
-			projection = fake_k.dot(projection)
-			projection = projection / matlib.repmat( projection[-1,:],3,1)
-
-			#import pdb; pdb.set_trace()
 			for j in range(4):
-				if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
+				projection = camera.project_point(\
+					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec.T)).T, \
+															R_last_test), \
+												boundary[:,j].reshape(1,3))
+				if projection[0,0] >= camera.size[0] or projection[0,0] < 0 or \
+					projection[0,1] >= camera.size[1] or projection[0,1] < 0:
 					flag = True
 				else:
 					R_last = R_last_test
-					#print projection
-					#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
-		ext = cam.Extrinsics.init_with_rotation_matrix(np.array([-R_last.dot(trans_vec)]), R_last, ts[i])
+
+			# projection = R_last_test.dot( boundary)  + matlib.repmat(-R_last_test.dot(trans_vec), 4, 1).T
+			# projection = fake_k.dot(projection)
+			# projection = projection / matlib.repmat( projection[-1,:],3,1)
+			# for j in range(4):
+			# 	if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
+			# 		flag = True
+			# 	else:
+			# 		R_last = R_last_test
+			# 		#print projection
+			# 		#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
+		ext = cam.Extrinsics.init_with_rotation_matrix(\
+			-R_last.dot(trans_vec.T).reshape(1,3), R_last, ts[i])
+		# print ext
 		
 		extrins.append(ext)
 
@@ -106,11 +118,12 @@ def transform_motion(orig_motion, rel_extrin):
 		new_motion.append(new_e)
 	return new_motion
 
-def gen_imu_readings(imu_motion, save_name='imu0.csv'):
+def gen_imu_readings(imu_motion, gravity, save_name='imu0.csv'):
 	"""
 	Generate imu readings and write to csv file.
 	Args:
 		imu_motion: a list of time-stamped Extrinsics
+		gravity: 1x3 numpy array, gravity in target coordinate
 	Returns: 
 		reading: N x 7 numpy array, where columns are: timestamp, gyroscope x, 
 				gyroscope y, gyroscope z, accelerometer x, accelerometer y, 
@@ -119,11 +132,22 @@ def gen_imu_readings(imu_motion, save_name='imu0.csv'):
 	"""
 	reading = np.zeros((len(imu_motion), 7))
 
-	for i in xrange(len(imu_motion)):
+	for i in xrange(1,len(imu_motion)-1):
 		reading[i,0] = imu_motion[i].time_stamp
-		# TODO: Gyroscope measurements
-		
-		# TODO: acceleration - gravity measurements 
 
-	print "gen_imu_readings TODO"
-	pass
+		# time in seconds
+		dt = (imu_motion[i+1].time_stamp - imu_motion[i-1].time_stamp) * (10**-9)
+		
+		# Gyroscope measurements
+		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/dt
+		reading[i,1:4] = drdt
+		
+		# Acceleration - gravity measurements 
+		acc = (imu_motion[i+1].get_inv_location() - imu_motion[i-1].get_inv_location())/(dt*dt)
+		grav = imu_motion[i].rot_mat.dot(gravity)
+		reading[i,4:7] = acc - grav
+
+	if save_name:
+		np.savetxt(save_name, reading, delimiter=',')
+
+	return reading

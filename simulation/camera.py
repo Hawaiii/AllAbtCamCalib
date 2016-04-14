@@ -57,7 +57,7 @@ class Extrinsics:
 	def __repr__(self):
 		selfstr = ''
 		if self.time_stamp:
-			selfstr += 'time: ' + str(self.time_stamp)
+			selfstr += 'time: ' + str(self.time_stamp) + ' '
 		selfstr += 'translation: ' + str(self.trans_vec) + ' rotation: ' + \
 		str(self.rot_vec) + ', ' + str(self.rot_mat)
 		return selfstr
@@ -86,6 +86,12 @@ class Extrinsics:
 
 	def get_homo_trans_matrix_inv(self):
 		return np.linalg.inv(self.get_homo_trans_matrix())
+
+	def get_inv_location(self):
+		"""
+		Returns -Rt as a 1x3 numpy array
+		"""
+		return -self.rot_mat.dot(self.trans_vec.T).reshape(1,3)
 
 class Camera:
 	intrinsics = None #Intrinsics
@@ -189,7 +195,7 @@ class Camera:
 			Project a 3D point onto camera.
 			Args:
 				extrin: Extrinsics
-				point: a 3D point
+				point: 1x3 numpy array, a 3D point
 				nodistortion: ignores distortion coefficients if True
 			Returns: 1x2 numpy array
 		"""
@@ -328,12 +334,22 @@ class Camera:
 		Returns:
 			a Camera.
 		"""
-		intri_mat = np.array([[6.1578617661522037e+02, 0., 6.1058715036731826e+02], \
-			[0., 6.1238350456764329e+02, 5.2959938173888008e+02],\
+		# intri_mat = np.array([[6.1578617661522037e+02, 0., 6.1058715036731826e+02], \
+		# 	[0., 6.1238350456764329e+02, 5.2959938173888008e+02],\
+		# 	[0., 0., 1.]])
+		# radial_dist = np.array([-1.8871087691827788e-02, 3.1035356528952687e-02, -1.2440956825625479e-02])
+		# tang_dist = np.array([1.1627819998974306e-03, -1.8172149748173956e-04])
+		#intri = Intrinsics(intri_mat, radial_dist, tang_dist)
+		#return Camera(intri, None, (1016,1264),(53.8,84.1),"pinhole")
+
+		# Xi camera calibrated on the week of April 11th pinhole-radtan model with Kalibr
+		intri_mat = np.array([[619.9510108, 0., 630.46715704], \
+			[0., 620.83866653, 530.26694171],\
 			[0., 0., 1.]])
-		radial_dist = np.array([-1.8871087691827788e-02, 3.1035356528952687e-02, -1.2440956825625479e-02])
-		tang_dist = np.array([1.1627819998974306e-03, -1.8172149748173956e-04])
+		radial_dist = np.array([-0.00187587, 0.00898923, 0.0])
+		tang_dist = np.array([0.0018697, 0.00093728])
 		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
+		cam_size = (1016, 1264)
 
 		#@TODO: look up actual Ximea camera angle of view
-		return Camera(intri, None, (1016,1264),(53.8,84.1),"pinhole")
+		return Camera(intri, None, cam_size,(0,0),"pinhole")
