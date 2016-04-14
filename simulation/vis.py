@@ -1,6 +1,9 @@
 """
 For visualizing calibration targets, cameras, etc.
 """
+import numpy as np
+import exp_util as util
+
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mpl_toolkits.mplot3d import axes3d
 
@@ -8,8 +11,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
 
-import numpy as np
-import exp_util as util
 
 def plot_calib_boards(boards, board_dim, fax=None):
 	"""
@@ -17,19 +18,21 @@ def plot_calib_boards(boards, board_dim, fax=None):
 
 	Args:
 		boards: a list of dictionaries, where each dictionary is a board
-		board_dim: (board_height, board_width)
+		board_dim: (board_width, board_height)
 	"""
 	if fax:
 		ax = fax
 	else:
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
+
 	clist = colors.cnames.keys()
 	for i in xrange(len(boards)):
 		board = boards[i]
 		X, Y, Z = util.board_dict2array(board, board_dim)
+
 		ax.plot_wireframe(X, Y, Z, color=clist[i])
-		#print X[0,0], Y[0,0], Z[0,0]
+	
 	if not fax:
 		plt.show()
 	return ax
@@ -38,14 +41,17 @@ def compare_board_estimations(esti_extrinsics, board, board_dim, \
 								actual_boards, save_name=None):
 	"""
 	Plots true and estimated boards on the same figure
-	@TODO: Doesn't save figure. Can 3D figure be saved?
 	Args:
 		esti_extrinsics: dictionary, keyed by image number, values are Extrinsics
 		board:
-		board_dim: (board_height, board_width)
+		board_dim: (board_width, board_height)
 		actual_boards: list of dictionaries
 		save_name: filename, string
 	"""
+	if save_name:
+		pp = PdfPages(save_name)
+	plt.clf()
+
 	for i in xrange(len(actual_boards)):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
@@ -60,21 +66,33 @@ def compare_board_estimations(esti_extrinsics, board, board_dim, \
 			eX, eY, eZ = util.board_dict2array(esti_board, board_dim)
 			ax.plot_wireframe(eX, eY, eZ, color='r')
 
-		plt.show()
+		if pp:
+			pp.savefig()
+		else:
+			plt.show()
+	if pp:
+		pp.close()
 
 def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
+	"""
+	Args:
+		img_pts: list of dictionaries, each representing a captured board
+		img_size: (img_width, img_height)
+		save_name: string, filename to save plot pdf to.
+	"""
 	if save_name:
 		pp = PdfPages(save_name)
 	plt.clf()
 
 	for i in range(len(img_pts)):
 		viewed_pts = np.asarray(img_pts[i].values())
-		plt.axis([0, img_size[1], 0, img_size[0]])
+		plt.axis([0, img_size[0], 0, img_size[1]])
 		plt.grid(True)
 		if viewed_pts.size == 0:
 			print "chessboard " + str(i) + " is not seen in camera\n"
 		else:
-			plt.plot(viewed_pts[:,1,:], viewed_pts[:,0,:], 'ro')
+			plt.plot(viewed_pts[:,0,:], viewed_pts[:,1,:], 'ro')
+		plt.gca().invert_yaxis()
 		plt.ylabel('chessboard' + str(i))
 		if pp:
 			pp.savefig()
@@ -88,12 +106,12 @@ def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 	for i in range(len(img_pts)):
 		if len(img_pts[i]) > tot_pts_num:
 			tot_pts_num = len(img_pts[i])
-	plt.axis([0, img_size[1], 0, img_size[0]])
+	plt.axis([0, img_size[0], 0, img_size[1]])
 	plt.grid(True)
 	for i in range(len(img_pts)):
 		if len(img_pts[i]) == tot_pts_num:
 			viewed_pts = np.asarray(img_pts[i].values())
-			plt.plot(viewed_pts[:,1,:], viewed_pts[:,0,:], 'ro')
+			plt.plot(viewed_pts[:,0,:], viewed_pts[:,1,:], 'ro')
 	plt.ylabel('all points used')
 	if pp:
 		pp.savefig()
@@ -163,26 +181,26 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 
 	print 'write_esti_results not FULLY implemented yet!'
 
-def plot_directions(orientations, location=np.asarray([0,0,0])):
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-	for orient in orientations:
-		ax.quiver(location[0], location[1], location[2], \
-			orient[0], orient[1], orient[2], pivot='tail')
-	ax.set_xlim(-1,1)
-	ax.set_ylim(-1,1)
-	ax.set_zlim(-1,1)
-	plt.show()
+# def plot_directions(orientations, location=np.asarray([0,0,0])):
+# 	fig = plt.figure()
+# 	ax = fig.add_subplot(111, projection='3d')
+# 	for orient in orientations:
+# 		ax.quiver(location[0], location[1], location[2], \
+# 			orient[0], orient[1], orient[2], pivot='tail')
+# 	ax.set_xlim(-1,1)
+# 	ax.set_ylim(-1,1)
+# 	ax.set_zlim(-1,1)
+# 	plt.show()
 
-def plot_locations(locations):
-	fig = plt.figure()
-	ax = fig.gca(projection='3d')
-	x = [loc[0] for loc in locations]
-	y = [loc[1] for loc in locations]
-	z = [loc[2] for loc in locations]
-	ax.plot(x, y, z, label='locations')
-	ax.legend()
-	plt.show()
+# def plot_locations(locations):
+# 	fig = plt.figure()
+# 	ax = fig.gca(projection='3d')
+# 	x = [loc[0] for loc in locations]
+# 	y = [loc[1] for loc in locations]
+# 	z = [loc[2] for loc in locations]
+# 	ax.plot(x, y, z, label='locations')
+# 	ax.legend()
+# 	plt.show()
 
 def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 	"""
@@ -199,9 +217,13 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		ax = fig.add_subplot(111, projection='3d')
 
 	if invert:
-		x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec.T)[0] for ext in extrinsics]
-		y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec.T)[0] for ext in extrinsics]
-		z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec.T)[0] for ext in extrinsics]
+		# x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec.T)[0] for ext in extrinsics]
+		# y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec.T)[0] for ext in extrinsics]
+		# z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec.T)[0] for ext in extrinsics]
+		xyz = [ext.get_inv_location() for ext in extrinsics]
+		x = [loc[0,0] for loc in xyz]
+		y = [loc[1,0] for loc in xyz]
+		z = [loc[2,0] for loc in xyz]
 	else:
 		x = [ext.trans_vec[0] for ext in extrinsics]
 		y = [ext.trans_vec[1] for ext in extrinsics]
@@ -247,13 +269,18 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 	ax = fig.add_subplot(111, projection='3d')
 	# plot camera
 	if invert:
-		x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
-		y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
-		z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
+		# x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
+		# y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
+		# z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
+		xyz = cam_ext.get_inv_location()
+		x = xyz[0,0]
+		y = xyz[1,0]
+		z = xyz[2,0]
 	else:
 		x = [cam_extrin.trans_vec[0,0]]
 		y = [cam_extrin.trans_vec[0,1]]
 		z = [cam_extrin.trans_vec[0,2]]
+		
 	z_vec = np.asarray([0,0,1])
 	u = [np.dot(cam_extrin.rot_mat[0,:],z_vec)]
 	v = [np.dot(cam_extrin.rot_mat[1,:],z_vec)]
