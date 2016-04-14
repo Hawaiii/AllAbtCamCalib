@@ -151,7 +151,10 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
 
 		if save_name:
-			writer.writerow(reading[i,:])
+			to_write = [str(reading[i,0])]
+			for j in xrange(1, 7):
+				to_write.append(reading[i,j])
+			writer.writerow(to_write)
 	# if save_name:
 		# np.savetxt(save_name, reading, delimiter=',')
 
