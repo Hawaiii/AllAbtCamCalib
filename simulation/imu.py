@@ -15,11 +15,11 @@ def spiral_motion(board, board_dim, camera):
 	Args:
 		board: dictionary keyed by point id whose values are 3D position of 
 				control points
-		board_dim: (board_height, board_width)
+		board_dim: (board_width, board_height)
 		camera: a Camera
 
 	Returns:
-		extrins: a list of (TODO: time-stamped) extrinsics
+		extrins: a list of time-stamped extrinsics
 	"""
 	extrins = []
 	
@@ -39,8 +39,8 @@ def spiral_motion(board, board_dim, camera):
 	increment_ratio = 0.09
 	R_init = np.eye(3)
 	R_last = R_init
-	boundary = np.asarray( [ board[0], board[board_dim[1]-1], \
-		board[(board_dim[0]-1)*board_dim[1]], board[board_dim[0]*board_dim[1]-1] ] ).reshape(4,3).T
+	boundary = np.concatenate( ( board[0], board[board_dim[0]-1], \
+		board[(board_dim[1]-1)*board_dim[0]], board[board_dim[1]*board_dim[0]-1] ), axis=1)
 	# fov = (120.0, 80.0) # (x,y)degrees x->width
 	# sensor_ratio = 0.8 # height/width
 	# fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
@@ -48,7 +48,7 @@ def spiral_motion(board, board_dim, camera):
 	# fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
 	
 	for i in range(len(theta)):
-		trans_vec = np.asarray([[x[i], y[i], z[i]]])
+		trans_vec = np.asarray([x[i], y[i], z[i]]).reshape(3,1)
 		flag = True
 		while flag:
 			flag = False
@@ -57,11 +57,11 @@ def spiral_motion(board, board_dim, camera):
 			
 			for j in range(4):
 				projection = camera.project_point(\
-					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec.T)).T, \
+					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec)), \
 															R_last_test), \
-												boundary[:,j].reshape(1,3))
+												boundary[:,j])
 				if projection[0,0] >= camera.size[0] or projection[0,0] < 0 or \
-					projection[0,1] >= camera.size[1] or projection[0,1] < 0:
+					projection[1,0] >= camera.size[1] or projection[1,0] < 0:
 					flag = True
 				else:
 					R_last = R_last_test
@@ -77,9 +77,7 @@ def spiral_motion(board, board_dim, camera):
 			# 		#print projection
 			# 		#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
 		ext = cam.Extrinsics.init_with_rotation_matrix(\
-			-R_last.dot(trans_vec.T).reshape(1,3), R_last, ts[i])
-		# print ext
-		
+			-R_last.dot(trans_vec).reshape(1,3), R_last, ts[i])		
 		extrins.append(ext)
 
 	return extrins

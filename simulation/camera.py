@@ -98,9 +98,9 @@ class Extrinsics:
 
 	def get_inv_location(self):
 		"""
-		Returns -Rt as a 1x3 numpy array
+		Returns -R't as a 3x1 numpy array
 		"""
-		return -self.rot_mat.dot(self.trans_vec).reshape(1,3)
+		return -self.rot_mat.T.dot(self.trans_vec)
 
 class Camera:
 	intrinsics = None #Intrinsics
@@ -218,6 +218,8 @@ class Camera:
 			if point.shape[0] != 3:
 				print 'point', point, 'dimension is not 3xN!'
 				return None
+			if len(point.shape) <= 1:
+				point = point.reshape(3,1)
 			point = np.concatenate((point, np.ones((1,point.shape[1]))), axis=0)
 			loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
 			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
@@ -346,11 +348,11 @@ class Camera:
 		"""
 		Make a camera whose intrinsics and distortion coefficients are computed
 		from a real experiment.
-		//may be useful:
-		cv2.remap(src, map1, map2, interpolation[, dst[, borderMode[, borderValue]]]) dst
-
 		Returns:
 			a Camera.
+		
+		//may be useful:
+		cv2.remap(src, map1, map2, interpolation[, dst[, borderMode[, borderValue]]]) dst
 		"""
 		# intri_mat = np.array([[6.1578617661522037e+02, 0., 6.1058715036731826e+02], \
 		# 	[0., 6.1238350456764329e+02, 5.2959938173888008e+02],\

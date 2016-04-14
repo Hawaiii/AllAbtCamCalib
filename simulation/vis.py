@@ -218,9 +218,10 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		ax = fig.add_subplot(111, projection='3d')
 
 	if invert:
-		# x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec.T)[0] for ext in extrinsics]
-		# y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec.T)[0] for ext in extrinsics]
-		# z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec.T)[0] for ext in extrinsics]
+		# x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec)[0] for ext in extrinsics]
+		# y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec)[0] for ext in extrinsics]
+		# z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec)[0] for ext in extrinsics]
+		
 		xyz = [ext.get_inv_location() for ext in extrinsics]
 		x = [loc[0,0] for loc in xyz]
 		y = [loc[1,0] for loc in xyz]

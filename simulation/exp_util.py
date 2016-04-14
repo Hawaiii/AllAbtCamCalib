@@ -48,6 +48,9 @@ def gen_calib_board(board_width, board_height, sqsize, \
     Returns:
         A dictionary keyed by point id, whose values are 3D points (1x3 numpy arrays)
     """
+    if location.shape != (3,1) or orientation.shape != (3,1):
+        print 'location shape',location.shape,' orientation shape',orientation.shape,'incorrect!'
+        return None
     board = {}
 
     # Make board whose top-left point is at (0,0,0) and lies on x-y plane
