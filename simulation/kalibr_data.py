@@ -30,10 +30,10 @@ cam_motion = imu.spiral_motion(board, board_dim, camera)
 
 
 # Generate camera images
-# board_img = cv2.imread('data/chess.png')
-# Hs = camera.calc_homography(cam_motion, board, board_dim)
-# for i in xrange(len(Hs)):
-# 	targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/'+str(cam_motion[i].time_stamp)+'.png')
+board_img = cv2.imread('data/chess.png')
+Hs = camera.calc_homography(cam_motion, board, board_dim)
+for i in xrange(len(Hs)):
+	targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time_stamp)+'.png')
 
 # Relative pose from camera to imu
 rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([-20.,0.,-10.]).reshape(3,1), np.eye(3), time_stamp=None)

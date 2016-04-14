@@ -1,9 +1,11 @@
 import camera as cam
+import exp_util as util
+
 import numpy as np
 import numpy.matlib as matlib
-import exp_util as util
 import cv2
 import math
+import csv
 
 def spiral_motion(board, board_dim, camera):
 	"""
@@ -129,6 +131,10 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 	Also writes reading to csv file of given name.
 	"""
 	reading = np.zeros((len(imu_motion), 7))
+	if save_name:
+		writer=csv.writer(open(save_name,'wb'))
+		header=['timestamp','omega_x','omega_y','omega_z','alpha_x','alpha_y','alpha_z']
+		writer.writerow(header)
 
 	for i in xrange(1,len(imu_motion)-1):
 		reading[i,0] = imu_motion[i].time_stamp
@@ -144,7 +150,9 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		acc = (imu_motion[i+1].get_inv_location() - imu_motion[i-1].get_inv_location())/(dt*dt)
 		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
 
-	if save_name:
-		np.savetxt(save_name, reading, delimiter=',')
+		if save_name:
+			writer.writerow(reading[i,:])
+	# if save_name:
+		# np.savetxt(save_name, reading, delimiter=',')
 
 	return reading
