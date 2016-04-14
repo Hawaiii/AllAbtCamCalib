@@ -231,27 +231,27 @@ class Camera:
 		Args:
 			extrins: list of Extrinsics
 			board: a dictionary keyed by control point ID whose values are 3D points
-			board_dim: (board_height, board_width)
+			board_dim: (board_width, board_height)
 		Returns:
 			Hs: a list of 3x3 homography matrices
 		"""
 		Hs = []
 		# Find image edge points
 		im_edges = np.zeros((4,2), dtype=np.float32)
-		im_edges[1,1] = self.size[1]-1
-		im_edges[2,0] = self.size[0]-1
-		im_edges[3,0] = self.size[0]-1
-		im_edges[3,1] = self.size[1]-1
+		im_edges[1,1] = self.size[0]-1
+		im_edges[2,0] = self.size[1]-1
+		im_edges[3,0] = self.size[1]-1
+		im_edges[3,1] = self.size[0]-1
  
 		# For each pose, project four corner locations onto image
 		for extrin in extrins:
 			edges = np.zeros((4,2), dtype=np.float32)
-			edges[0,:] = self.project_point(extrin, board[0], nodistortion=True)
-			edges[1,:] = self.project_point(extrin, board[board_dim[1]-1], nodistortion=True)
-			edges[2,:] = self.project_point(extrin, board[(board_dim[0]-1)*board_dim[1]], \
-															nodistortion=True)
-			edges[3,:] = self.project_point(extrin, board[board_dim[0]*board_dim[1]-1], \
-															nodistortion=True)
+			edges[0,:] = self.project_point(extrin, board[0], nodistortion=True).reshape(1,2)
+			edges[1,:] = self.project_point(extrin, board[board_dim[0]-1], nodistortion=True).reshape(1,2)
+			edges[2,:] = self.project_point(extrin, board[(board_dim[1]-1)*board_dim[0]], \
+															nodistortion=True).reshape(1,2)
+			edges[3,:] = self.project_point(extrin, board[board_dim[1]*board_dim[0]-1], \
+															nodistortion=True).reshape(1,2)
 
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)
