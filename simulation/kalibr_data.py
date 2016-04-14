@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-board_dim = (5, 8) #DONT CHANGE as this is the dimension of data/chess.png
+board_dim = (8, 5) #DONT CHANGE as this is the dimension of data/chess.png
 board = util.gen_calib_board(board_dim[0],board_dim[1],23, np.asarray([[0,0,600]]), np.zeros([1,3]), 0)
 
 # ax = vis.plot_poses(cam_motion, invert = True)

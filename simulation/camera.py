@@ -225,7 +225,7 @@ class Camera:
 		im_edges[2,0] = self.size[0]-1
 		im_edges[3,0] = self.size[0]-1
 		im_edges[3,1] = self.size[1]-1
-
+ 
 		# For each pose, project four corner locations onto image
 		for extrin in extrins:
 			edges = np.zeros((4,2), dtype=np.float32)

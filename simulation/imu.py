@@ -60,8 +60,8 @@ def spiral_motion(board, board_dim, camera):
 					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec.T)).T, \
 															R_last_test), \
 												boundary[:,j].reshape(1,3))
-				if projection[0,0] >= camera.size[1] or projection[0,0] < 0 or \
-					projection[0,1] >= camera.size[0] or projection[0,1] < 0:
+				if projection[0,0] >= camera.size[0] or projection[0,0] < 0 or \
+					projection[0,1] >= camera.size[1] or projection[0,1] < 0:
 					flag = True
 				else:
 					R_last = R_last_test
