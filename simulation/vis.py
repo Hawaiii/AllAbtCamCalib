@@ -243,7 +243,7 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 
 	if connectpath:
 		ax.plot(x,y,z,label='path')
-	ax.quiver(x,y,z,u,v,w,pivot='tail',length=50)
+	#ax.quiver(x,y,z,u,v,w,pivot='tail',length=50)
 
 	return ax
 

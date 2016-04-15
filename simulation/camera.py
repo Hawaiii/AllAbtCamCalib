@@ -43,12 +43,20 @@ class Extrinsics:
 	rot_vec = None #np vector 1x3
 	rot_mat = None #np array 3x3
 	time_stamp = None #in ns (10^-9s)
+	linear_vel = None #np array 3x1
+	linear_acc = None #np array 3x1
+	ang_vel = None #np array 3x1
+	ang_acc = None #np array 3x1
 
-	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None):
+	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None, lvel=None, lacc=None, avel=None, aacc=None):
 		self.trans_vec = trans_vec.reshape(3,1)
 		self.rot_vec = rot_vec
 		self.rot_mat = rot_mat
 		self.time_stamp = time_stamp
+		self.linear_vel = lvel.reshape(3,1)
+		self.linear_acc = lacc.reshape(3,1)
+		self.ang_vel = avel.reshape(3,1)
+		self.ang_acc = aacc.reshape(3,1)
 
 	@classmethod
 	def init_with_rotation_matrix(cls, trans_vec, rot_mat, time_stamp=None):

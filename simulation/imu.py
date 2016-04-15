@@ -101,7 +101,7 @@ def read_motion(filename):
 		# 	break
 		
 		ts = int(row[0])
-		trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+		trans_vec = (10**3) * np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
 		rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
 
 		ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts)
@@ -174,13 +174,16 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		
 		# Gyroscope measurements
 		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/d2t
-		reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt.reshape(3,1)).reshape(1,3)
+		drdt = drdt.reshape(3,1)
+                reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt).reshape(1,3)
 		
 		# Acceleration - gravity measurements 
 		v1 = (imu_motion[i+1].get_inv_location() - imu_motion[i].get_inv_location())/dt1
 		v2 = (imu_motion[i].get_inv_location() - imu_motion[i-1].get_inv_location())/dt2
-		acc = (v1-v2)*2/d2t - np.cross(drdt, v1+v2)
-		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
+		acc = (v1-v2)*2/d2t - np.cross(drdt.flatten(), (v1+v2).flatten()).reshape(3,1)
+		acc = acc / (10**3) # convert back to m/s^2
+		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc).reshape(1,3)
+		#reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
 
 		if save_name:
 			to_write = [str(reading[i,0])]
