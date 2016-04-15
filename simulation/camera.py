@@ -43,27 +43,39 @@ class Extrinsics:
 	rot_vec = None #np vector 1x3
 	rot_mat = None #np array 3x3
 	time_stamp = None #in ns (10^-9s)
+	linear_vel = None #np array 3x1
+	linear_acc = None #np array 3x1
+	ang_vel = None #np array 3x1
+	ang_acc = None #np array 3x1
 
-	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None):
+	def __init__(self, trans_vec, rot_vec, rot_mat, time_stamp=None, lvel=None, lacc=None, avel=None, aacc=None):
 		self.trans_vec = trans_vec.reshape(3,1)
 		self.rot_vec = rot_vec
 		self.rot_mat = rot_mat
 		self.time_stamp = time_stamp
+		if not lvel == None:
+			self.linear_vel = lvel.reshape(3,1)
+		if not lacc == None:
+			self.linear_acc = lacc.reshape(3,1)
+		if not avel == None:
+			self.ang_vel = avel.reshape(3,1)
+		if not aacc == None:
+			self.ang_acc = aacc.reshape(3,1)
 
 	@classmethod
-	def init_with_rotation_matrix(cls, trans_vec, rot_mat, time_stamp=None):
+	def init_with_rotation_matrix(cls, trans_vec, rot_mat, time_stamp=None, lvel=None, lacc=None, avel=None, aacc=None):
 		tmp,_ = cv2.Rodrigues(rot_mat)
-		return cls(trans_vec, tmp.T, rot_mat, time_stamp)
+		return cls(trans_vec, tmp.T, rot_mat, time_stamp, lvel, lacc, avel, aacc)
 
 	@classmethod
-	def init_with_rotation_vec(cls, trans_vec, rot_vec, time_stamp=None):
+	def init_with_rotation_vec(cls, trans_vec, rot_vec, time_stamp=None, lvel=None, lacc=None, avel=None, aacc=None):
 		tmp,_ = cv2.Rodrigues(rot_vec)
-		return cls(trans_vec, rot_vec, tmp, time_stamp)
+		return cls(trans_vec, rot_vec, tmp, time_stamp, lvel, lacc, avel, aacc)
 
 	@classmethod
-	def init_with_numbers(cls, x, y, z, rx, ry, rz, time_stamp=None):
+	def init_with_numbers(cls, x, y, z, rx, ry, rz, time_stamp=None, lvel=None, lacc=None, avel=None, aacc=None):
 		return cls.init_with_rotation_vec(np.array([x,y,z]), \
-			np.array([rx,ry,rz]), time_stamp)
+			np.array([rx,ry,rz]), time_stamp, lvel, lacc, avel, aacc)
 
 	def __repr__(self):
 		selfstr = ''

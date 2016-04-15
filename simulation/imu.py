@@ -97,21 +97,27 @@ def read_motion(filename):
 			continue
 
 		# fast debugging
-		# if cnt == 300:
-		# 	break
+		if cnt == 300:
+			break
 		
 		ts = int(row[0])
-		trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+		trans_vec = (10**3) * np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
 		rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
 
-		ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts)
+		lvel = (10**3) * np.array([float(row[8]), float(row[9]), float(row[10])])
+		avel = np.array([float(row[11]), float(row[12]), float(row[13]) ])
+		lacc = (10**3) * np.array([float(row[14]), float(row[15]), float(row[16])])
+		aacc = np.array([float(row[17]), float(row[18]), float(row[19]) ])
+
+		ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts, \
+			lvel, lacc, avel, aacc)
 		extrins.append(ext)
 		cnt += 1
 	print 'total number of poses read', cnt
 	return extrins
 
 
-def transform_motion(orig_motion, rel_extrin):
+def transform_motion(orig_motion, rel_extrin, sample_ratio):
 	"""
 	If orig_motion is camera motion and rel_extrin specifies transformation from 
 	camera to imu then this function returns the imu motion.
@@ -120,6 +126,7 @@ def transform_motion(orig_motion, rel_extrin):
 	Args:
 		orig_motion: a list of time-stamped Extrinsics
 		rel_extrin: Extrinsics, relative pose ([R|t] transforms from camera to imu)
+		sample_ratio: 
 	Returns:
 		new_motion: a list of time-stamped Extrinsics
 	"""
@@ -130,19 +137,26 @@ def transform_motion(orig_motion, rel_extrin):
 	# print 'imu_loc_in_cam', imu_loc_in_camera
 	# print 'imu_orien_to_cam', imu_orien_to_camera
 
+	cnt = 0
+	pcnt = 0
 	for orig_e in orig_motion:
-		imu_loc_in_world = orig_e.get_homo_trans_matrix_inv().dot(imu_loc_in_camera)
-		imu_loc_in_world = imu_loc_in_world / matlib.repmat( imu_loc_in_world[-1,:], 4, 1)
-		imu_loc_in_world = imu_loc_in_world[0:3,:]
+		if cnt % sample_ratio == 0:
+			imu_loc_in_world = orig_e.get_homo_trans_matrix_inv().dot(imu_loc_in_camera)
+			imu_loc_in_world = imu_loc_in_world / matlib.repmat( imu_loc_in_world[-1,:], 4, 1)
+			imu_loc_in_world = imu_loc_in_world[0:3,:]
 
-		imu_orien_to_world = orig_e.rot_mat.dot(imu_orien_to_camera)
+			imu_orien_to_world = orig_e.rot_mat.dot(imu_orien_to_camera)
 
-		# print orig_e.trans_vec, (-imu_orien_to_world.dot(imu_loc_in_world)).T
-		# print
-		
-		new_e = cam.Extrinsics.init_with_rotation_matrix(\
-			(-imu_orien_to_world.dot(imu_loc_in_world)), imu_orien_to_world, orig_e.time_stamp)
-		new_motion.append(new_e)
+			# print orig_e.trans_vec, (-imu_orien_to_world.dot(imu_loc_in_world)).T
+			# print
+			
+			new_e = cam.Extrinsics.init_with_rotation_matrix(\
+				(-imu_orien_to_world.dot(imu_loc_in_world)), imu_orien_to_world, orig_e.time_stamp)
+			new_motion.append(new_e)
+			pcnt += 1
+
+		cnt += 1
+	print 'transform motion has', pcnt, 'poses.'
 	return new_motion
 
 def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
@@ -174,13 +188,16 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		
 		# Gyroscope measurements
 		drdt = (imu_motion[i+1].rot_vec - imu_motion[i-1].rot_vec)/d2t
-		reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt.reshape(3,1)).reshape(1,3)
+		drdt = drdt.reshape(3,1)
+                reading[i,1:4] = imu_motion[i].rot_mat.dot(drdt).reshape(1,3)
 		
 		# Acceleration - gravity measurements 
 		v1 = (imu_motion[i+1].get_inv_location() - imu_motion[i].get_inv_location())/dt1
 		v2 = (imu_motion[i].get_inv_location() - imu_motion[i-1].get_inv_location())/dt2
-		acc = (v1-v2)*2/d2t - np.cross(drdt, v1+v2)
-		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
+		acc = (v1-v2)*2/d2t - np.cross(drdt.flatten(), (v1+v2).flatten()).reshape(3,1)
+		acc = acc / (10**3) # convert back to m/s^2
+		reading[i,4:7] = imu_motion[i].rot_mat.dot(acc).reshape(1,3)
+		#reading[i,4:7] = imu_motion[i].rot_mat.dot(acc - gravity.reshape(3,1)).reshape(1,3)
 
 		if save_name:
 			to_write = [str(reading[i,0])]
@@ -191,3 +208,30 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 		# np.savetxt(save_name, reading, delimiter=',')
 
 	return reading
+
+def get_imu_readings(imu_motion, gravity_in_target, save_name):
+	"""
+	Writes imu readings to csv file.
+	"""
+	writer=csv.writer(open(save_name,'wb'))
+	header=['timestamp','omega_x','omega_y','omega_z','alpha_x','alpha_y','alpha_z']
+	writer.writerow(header)
+
+	for i in xrange(len(imu_motion)):
+		to_write = []
+
+		to_write.append(imu_motion[i].time_stamp)
+
+		# Gyroscope measurements: angular velocity in imu frame
+		gyro = imu_motion[i].rot_mat.dot(imu_motion[i].ang_vel)
+		for j in xrange(3):
+			to_write.append(gyro[j,0])
+
+		# Acceleration - gravity measurements 
+		acc = imu_motion[i].linear_acc / (10**3) # convert back to m/s^2
+		# acc = imu_motion[i].rot_mat.dot(acc)
+		acc = imu_motion[i].rot_mat.dot(acc-gravity_in_target.reshape(3,1))
+		for j in xrange(3):
+			to_write.append(acc[j,0])
+
+		writer.writerow(to_write)
