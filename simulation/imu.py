@@ -80,10 +80,36 @@ def spiral_motion(board, board_dim, camera):
 			# 		#print projection
 			# 		#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
 		ext = cam.Extrinsics.init_with_rotation_matrix(\
-			-R_last.dot(trans_vec).reshape(1,3), R_last, ts[i])		
+			-R_last.dot(trans_vec), R_last, ts[i])		
 		extrins.append(ext)
 
 	return extrins
+
+def read_motion(filename):
+	extrins = []
+
+	csvfile = open(filename,'rb')
+	reader = csv.reader(csvfile, delimiter=',')
+	cnt = 0
+	for row in reader: #time stamp; position x, y, z; orientation x,y,z,w
+		if cnt == 0:
+			cnt += 1
+			continue
+
+		# fast debugging
+		# if cnt == 300:
+		# 	break
+		
+		ts = int(row[0])
+		trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+		rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
+
+		ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts)
+		extrins.append(ext)
+		cnt += 1
+	print 'total number of poses read', cnt
+	return extrins
+
 
 def transform_motion(orig_motion, rel_extrin):
 	"""

@@ -32,6 +32,33 @@ def random_rotation():
     eta = 2 * math.pi * random.random() - math.pi
     return np.asarray([theta, phi, eta])
 
+def quaternion2mat(x,y,z,w):
+    """
+    https://github.com/bistromath/gr-air-modes/blob/master/python/Quaternion.py
+    """
+    xx2 = 2 * x * x
+    yy2 = 2 * y * y
+    zz2 = 2 * z * z
+    xy2 = 2 * x * y
+    wz2 = 2 * w * z
+    zx2 = 2 * z * x
+    wy2 = 2 * w * y
+    yz2 = 2 * y * z
+    wx2 = 2 * w * x
+
+    rmat = np.empty((3, 3), float)
+    rmat[0,0] = 1. - yy2 - zz2
+    rmat[0,1] = xy2 - wz2
+    rmat[0,2] = zx2 + wy2
+    rmat[1,0] = xy2 + wz2
+    rmat[1,1] = 1. - xx2 - zz2
+    rmat[1,2] = yz2 - wx2
+    rmat[2,0] = zx2 - wy2
+    rmat[2,1] = yz2 + wx2
+    rmat[2,2] = 1. - xx2 - yy2
+
+    return rmat
+    
 def gen_calib_board(board_width, board_height, sqsize, \
                     location, orientation, noise3d):
     """

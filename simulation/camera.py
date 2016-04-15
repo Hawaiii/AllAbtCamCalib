@@ -257,9 +257,9 @@ class Camera:
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)
 
-			Hd = self.intrinsics.intri_mat.dot(extrin.get_Rt_matrix().dot(board_to_world_T))[:, [0,1,3]]
+			# Hd = self.intrinsics.intri_mat.dot(extrin.get_Rt_matrix().dot(board_to_world_T))[:, [0,1,3]]
 
-			import pdb; pdb.set_trace()
+			# import pdb; pdb.set_trace()
 			Hs.append(H)
 
 		return Hs
