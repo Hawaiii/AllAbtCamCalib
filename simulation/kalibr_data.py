@@ -28,13 +28,13 @@ camera.intrinsics.radial_dist = np.zeros((1,3))
 camera.intrinsics.tang_dist = np.zeros((1,2))
 
 board_dim = (2, 2)
-board = util.gen_calib_board(board_dim[0], board_dim[1], 800, np.array([-1500,-3000,-1500]).reshape(3,1), np.zeros([3,1]), 0)
+board = util.gen_calib_board(board_dim[0], board_dim[1], 800, np.array([0,10,-2000]).reshape(3,1), np.zeros([3,1]), 0)
 
 ax = vis.plot_poses(cam_motion, invert=True)
 ax = vis.plot_poses(imu_motion, invert=True, fax=ax)
-#ax = vis.plot_calib_boards( [ board ], board_dim, fax=ax)
+# ax = vis.plot_calib_boards( [ board ], board_dim, fax=ax)
 ax.set_aspect('equal')
-plt.show()
+# plt.show()
 
 # Generate camera images
 board_img = cv2.imread('data/april_6x6.png')
@@ -44,6 +44,7 @@ Hs = camera.calc_homography(cam_motion, board, board_dim, \
 							None)
 for i in xrange(len(Hs)):
 		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time_stamp)+'.png')
+plt.show()
 
 
 # board_dim = (2, 2)
