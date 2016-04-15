@@ -50,5 +50,5 @@ ax = vis.plot_poses(imu_motion, invert=True, fax=ax)
 # ax.set_aspect('equal')
 plt.show()
 
-# gravity_in_target = np.array([0,0,-9.81])
-# imu.gen_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
+gravity_in_target = np.array([0,0,-9.81])
+imu.gen_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
