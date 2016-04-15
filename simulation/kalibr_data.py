@@ -28,11 +28,11 @@ camera.intrinsics.radial_dist = np.zeros((1,3))
 camera.intrinsics.tang_dist = np.zeros((1,2))
 
 board_dim = (2, 2)
-board = util.gen_calib_board(board_dim[0], board_dim[1], 800, np.array([-1500,-3000,1500]).reshape(3,1), np.zeros([3,1]), 0)
+board = util.gen_calib_board(board_dim[0], board_dim[1], 800, np.array([-1500,-3000,-1500]).reshape(3,1), np.zeros([3,1]), 0)
 
 ax = vis.plot_poses(cam_motion, invert=True)
 ax = vis.plot_poses(imu_motion, invert=True, fax=ax)
-ax = vis.plot_calib_boards( [ board ], board_dim, fax=ax)
+#ax = vis.plot_calib_boards( [ board ], board_dim, fax=ax)
 ax.set_aspect('equal')
 plt.show()
 

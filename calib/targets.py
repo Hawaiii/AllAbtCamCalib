@@ -71,7 +71,7 @@ def render_chessboard_homo(board, H, img_size, save_name):
 		save_name: name to save rendered board to
 	Saves rendered board
 	"""
-	warped = cv2.warpPerspective(board, H, img_size)
+	warped = cv2.warpPerspective(board, H, img_size, borderValue=np.array([127,127,127]))
 	
 	# downsample by half
 	small = cv2.resize(warped, (0,0), fx=0.5, fy=0.5) 

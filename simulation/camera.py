@@ -235,6 +235,11 @@ class Camera:
 			point = np.concatenate((point, np.ones((1,point.shape[1]))), axis=0)
 			loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
 			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
+			if len(loc.shape) > 1 and loc.shape[1] > 0:
+				for i in xrange(loc.shape[1]):
+					if loc[-1,i] <= 0:
+						loc[:-1,i] = float('nan')
+					print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
 			
 	def calc_homography(self, extrins, board, board_dim, board_to_world_T):
