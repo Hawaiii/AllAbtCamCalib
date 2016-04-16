@@ -21,8 +21,9 @@ class Board:
 
 	def __repr__(self):
 		selfstr = 'Board of width: {0} height: {1}'.format(self.size[0], self.size[1])
-		selfstr += ' with top-left point at ({0},{1},{2})'.format(\
-			self.pts[(0,0)][0,0], self.pts[(0,0)][1,0], self.pts[(0,0)][2,0])
+		# selfstr += ' with top-left point at ({0},{1},{2})'.format(\
+			# self.pts[(0,0)][0,0], self.pts[(0,0)][1,0], self.pts[(0,0)][2,0])
+		selfstr += ' with {0}'.format(self.pose)
 		return selfstr
 
 	def width(self):
