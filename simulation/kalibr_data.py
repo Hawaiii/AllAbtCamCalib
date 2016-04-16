@@ -36,16 +36,15 @@ board = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax = vis.plot_poses(cam_motion, invert=True, clr='r')
+ax = vis.plot_poses(cam_motion, invert=True, fax=ax, clr='r')
 ax = board.plot(ax, clr='b')
 ax.set_aspect('equal')
 
 # Generate camera images
-# board_img = cv2.imread('data/april_6x6.png')
-# Hs = camera.calc_homography(cam_motion, board, board_dim, \
-# 	# np.concatenate( (np.concatenate((np.eye(3), np.array([1500,3000,-1500]).reshape(3,1)), axis=1), \
-# 					# np.array([0.,0.,0.,1]).reshape(1,4)), axis=0) )
-# 							None)
+board_img = cv2.imread('data/april_6x6.png')
+Hs = camera.calc_homography(cam_motion, board)
+	# np.concatenate( (np.concatenate((np.eye(3), np.array([1500,3000,-1500]).reshape(3,1)), axis=1), \
+					# np.array([0.,0.,0.,1]).reshape(1,4)), axis=0) )
 # for i in xrange(len(Hs)):
 # 		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time_stamp)+'.png')
 plt.show()

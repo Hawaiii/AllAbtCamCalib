@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import unittest
 
 class TestBoardMethods(unittest.TestCase):
+
+
+
 	def test_gen_calib_board(self):
 		# Board at (0,0,0) on x-y plane
 		b0 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([0,0,0]),0)
@@ -37,7 +40,7 @@ class TestBoardMethods(unittest.TestCase):
 		b0.plot(ax, clr='r')
 
 		# Rotate 30 degrees around x axis
-		# Points should be at (0,0,0), (1,0,0), (0,sqrt(3)/2,-1/2), (1,sqrt(3)/2,-1/2)
+		# Points should be at (0,0,0), (1,0,0), (0,sqrt(3)/2,1/2), (1,sqrt(3)/2,1/2)
 		bx30 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([math.pi/6,0,0]),0)
 		bx30.plot(ax, clr='y')
 
@@ -62,9 +65,26 @@ class TestBoardMethods(unittest.TestCase):
 		pass
 
 	def test_get_four_corners(self):
+		# Board at (0,0,0) on x-y plane
 		b0 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([0,0,0]),0)
 		b0_corners = b0.get_four_corners()
-		#@TODO
+		assert(np.array_equal(b0_corners, np.array([[0,0,0],[0,2,0],[1,0,0],[1,2,0]]).T ))
+		
+		# Rotate 30 degrees around x axis
+		# Points should be at (0,0,0), (1,0,0), (0,sqrt(3)/2,1/2), (1,sqrt(3)/2,1/2)
+		bx30 = board.Board.gen_calib_board((2,2),1,np.array([0,0,0]), np.array([math.pi/6,0,0]),0)
+		bx30_corners = bx30.get_four_corners()
+		assert(np.allclose(bx30_corners, np.array([[0,0,0],[0,math.sqrt(3)/2,0.5],\
+												[1,0,0],[1,math.sqrt(3)/2, 0.5]]).T ))
+		
+		# Rotate 30 degrees around y axis
+		# Points should be at (0,0,0), (sqrt(3)/2,0,-1/2), (0,1,0), (sqrt(3)/2,1,-1/2)
+		by30 = board.Board.gen_calib_board((2,2),1,np.array([0,0,0]), np.array([0, math.pi/6,0]),0)
+		by30_corners = by30.get_four_corners()
+		assert(np.allclose(by30_corners, np.array([[0,0,0],[0,1,0],\
+												[math.sqrt(3)/2,0,-0.5],[math.sqrt(3)/2, 1, -0.5]]).T ))
+
+		#@TODO test non-zero translation cases
 		pass
 
 	def test_dict2array(self):

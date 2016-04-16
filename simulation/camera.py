@@ -53,13 +53,13 @@ class Extrinsics:
 		self.rot_vec = rot_vec
 		self.rot_mat = rot_mat
 		self.time_stamp = time_stamp
-		if not lvel == None:
+		if lvel is not None:
 			self.linear_vel = lvel.reshape(3,1)
-		if not lacc == None:
+		if lacc is not None:
 			self.linear_acc = lacc.reshape(3,1)
-		if not avel == None:
+		if avel is not None:
 			self.ang_vel = avel.reshape(3,1)
-		if not aacc == None:
+		if aacc is not None:
 			self.ang_acc = aacc.reshape(3,1)
 
 	@classmethod
@@ -262,13 +262,8 @@ class Camera:
  
 		# For each pose, project four corner locations onto image
 		for extrin in extrins:
-			edges = np.zeros((4,2), dtype=np.float32)
-			edges[0,:] = self.project_point(extrin, board[0], nodistortion=True).reshape(1,2)
-			edges[1,:] = self.project_point(extrin, board[board_dim[0]-1], nodistortion=True).reshape(1,2)
-			edges[2,:] = self.project_point(extrin, board[(board_dim[1]-1)*board_dim[0]], \
-															nodistortion=True).reshape(1,2)
-			edges[3,:] = self.project_point(extrin, board[board_dim[1]*board_dim[0]-1], \
-															nodistortion=True).reshape(1,2)
+			corners = board.get_four_corners()
+			edges = self.project_point(extrin, corners, nodistortion=True).T.astype(np.float32)
 
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)

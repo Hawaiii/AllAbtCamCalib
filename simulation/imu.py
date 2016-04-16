@@ -101,8 +101,8 @@ def read_motion(filename, sample_ratio=1):
 			continue
 
 		# fast debugging
-		# if cnt == 3000:
-		# 	break
+		if cnt == 300:
+			break
 		if cnt % sample_ratio == 0:
 			ts = int(row[0])
 			trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)

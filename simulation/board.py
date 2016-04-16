@@ -125,10 +125,11 @@ class Board:
 		Returns the actual location of the four corners points (accounting for 
 		the pose) as 3x4 numpy
 		"""
-		print self.pts.keys()
 		pts_arr = np.array([self.pts[(0,0)], self.pts[(self.size[0]-1, 0)], \
 			self.pts[(0, self.size[1]-1)], self.pts[(self.size[0]-1, self.size[1]-1)]])
-		return pts_arr.reshape(3,4)
+		pts_arr = self.pose.ori.dot(pts_arr.T.reshape(3,4)) + matlib.repmat(self.pose.loc, 1, 4)
+
+		return pts_arr
 
 	def dict2array(self):
 		"""
