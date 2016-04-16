@@ -14,30 +14,30 @@ import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def plot_calib_boards(boards, board_dim, fax=None):
-	"""
-	Plots a board in 3D
+# def plot_calib_boards(boards, board_dim, fax=None):
+# 	"""
+# 	Plots a board in 3D
 
-	Args:
-		boards: a list of dictionaries, where each dictionary is a board
-		board_dim: (board_width, board_height)
-	"""
-	if fax:
-		ax = fax
-	else:
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
+# 	Args:
+# 		boards: a list of dictionaries, where each dictionary is a board
+# 		board_dim: (board_width, board_height)
+# 	"""
+# 	if fax:
+# 		ax = fax
+# 	else:
+# 		fig = plt.figure()
+# 		ax = fig.add_subplot(111, projection='3d')
 
-	clist = colors.cnames.keys()
-	for i in xrange(len(boards)):
-		board = boards[i]
-		X, Y, Z = util.board_dict2array(board, board_dim)
+# 	clist = colors.cnames.keys()
+# 	for i in xrange(len(boards)):
+# 		board = boards[i]
+# 		X, Y, Z = util.board_dict2array(board, board_dim)
 
-		ax.plot_wireframe(X, Y, Z, color=clist[i])
+# 		ax.plot_wireframe(X, Y, Z, color=clist[i])
 	
-	if not fax:
-		plt.show()
-	return ax
+# 	if not fax:
+# 		plt.show()
+# 	return ax
 
 def compare_board_estimations(esti_extrinsics, board, board_dim, \
 								actual_boards, save_name=None):
@@ -205,7 +205,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 # 	ax.legend()
 # 	plt.show()
 
-def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
+def plot_poses(extrinsics, invert=False, connectpath=True, fax=None, clr=None):
 	"""
 	Args:
 		extrinsics: a list of Extrinsics
@@ -240,8 +240,8 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		w = [np.dot(ext.rot_mat[2,:],z_vec) for ext in extrinsics]
 
 	if connectpath:
-		ax.plot(x,y,z,label='path')
-	ax.quiver(x,y,z,u,v,w,pivot='tail',length=50)
+		ax.plot(x,y,z,label='path',color=clr)
+	ax.quiver(x,y,z,u,v,w,pivot='tail',length=0.05, color=clr)
 
 	return ax
 

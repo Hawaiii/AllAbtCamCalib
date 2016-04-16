@@ -19,8 +19,8 @@ imu_motion = imu.read_motion('data/pose.csv')
 gravity_in_target = np.array([0,0,-9.81])
 imu.get_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
 
-# length in mm
-rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([200.,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
+# all length in m
+rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([0.2,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
 cam_sampling_ratio = 50 # camera samples once when imu samples 50 times
 cam_motion = imu.transform_motion(imu_motion, rel_pose, cam_sampling_ratio)
 
@@ -29,16 +29,14 @@ camera.intrinsics.radial_dist = np.zeros((1,3))
 camera.intrinsics.tang_dist = np.zeros((1,2))
 
 board_dim = (2, 2)
-board_loc = np.array([0, 10, -2000]).reshape(3,1)
+board_loc = np.array([0, 0.01, -2.]).reshape(3,1)
 board_orient = np.array([[1.,0.,0.],[0.,-1.,0.],[0.,0.,1.]])
 board = board.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
 
-ax = vis.plot_poses(cam_motion, invert=True)
-ax = vis.plot_poses(imu_motion, invert=True, fax=ax)
+ax = vis.plot_poses(cam_motion, invert=True, clr='r')
+ax = vis.plot_poses(imu_motion, invert=True, fax=ax, clr='g')
 ax = board.plot(ax)
-
 ax.set_aspect('equal')
-plt.show()
 
 # Generate camera images
 # board_img = cv2.imread('data/april_6x6.png')

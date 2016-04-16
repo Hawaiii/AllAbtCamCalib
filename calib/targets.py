@@ -79,5 +79,5 @@ def render_chessboard_homo(board, H, img_size, save_name):
 	if save_name:
 		cv2.imwrite(save_name, small)
 
-cam_img_dim = (1264*2, 1016*2)
-render_chessboard_homo(make_chessboard(cam_img_dim, (8,5), noboarder=True)[0], np.eye(3), cam_img_dim, 'board_render.png')
+# cam_img_dim = (1264*2, 1016*2)
+# render_chessboard_homo(make_chessboard(cam_img_dim, (8,5), noboarder=True)[0], np.eye(3), cam_img_dim, 'board_render.png')

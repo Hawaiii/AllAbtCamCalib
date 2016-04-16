@@ -17,33 +17,32 @@ class Pose:
 
     def __init__(self, loc, ori, time=None, lvel=None, avel=None, lacc=None, aacc=None):
         # assert(loc.size == 3)
-        self.loc = loc.reshape(3,1)
+        self.loc = 1.0 * loc.reshape(3,1)
         
         assert(ori.size == 3 or ori.size == 9)
         if ori.size == 3:
             self.ori = cv2.Rodrigues(ori)[0]
         else:
-            self.ori = ori
+            self.ori = 1.0 * ori
 
         self.time = time
 
         if lvel is not None:
             # assert(lvel.size == 3)
-            self.lin_vel = lvel.reshape(3,1)
+            self.lin_vel = 1.0 * lvel.reshape(3,1)
 
         if avel is not None:
             # assert(avel.size == 3)
-            self.ang_vel = avel.reshape(3,1)
+            self.ang_vel = 1.0 * avel.reshape(3,1)
 
         if lacc is not None:
             # assert(lacc.size == 3)
-            self.lin_acc = lacc.reshape(3,1)
+            self.lin_acc = 1.0 * lacc.reshape(3,1)
 
         if aacc is not None:
             # assert(aacc.size == 3)
-            self.ang_acc = aacc.reshape(3,1)
+            self.ang_acc = 1.0 * aacc.reshape(3,1)
 
-    
 
 def unit_vector(vector):
     """

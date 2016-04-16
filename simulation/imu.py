@@ -86,6 +86,9 @@ def spiral_motion(board, board_dim, camera):
 	return extrins
 
 def read_motion(filename):
+	"""
+	All lengths in m.
+	"""
 	extrins = []
 
 	csvfile = open(filename,'rb')
@@ -101,12 +104,12 @@ def read_motion(filename):
 			break
 		
 		ts = int(row[0])
-		trans_vec = (10**3) * np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+		trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
 		rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
 
-		lvel = (10**3) * np.array([float(row[8]), float(row[9]), float(row[10])])
+		lvel = np.array([float(row[8]), float(row[9]), float(row[10])])
 		avel = np.array([float(row[11]), float(row[12]), float(row[13]) ])
-		lacc = (10**3) * np.array([float(row[14]), float(row[15]), float(row[16])])
+		lacc = np.array([float(row[14]), float(row[15]), float(row[16])])
 		aacc = np.array([float(row[17]), float(row[18]), float(row[19]) ])
 
 		ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts, \
@@ -228,7 +231,7 @@ def get_imu_readings(imu_motion, gravity_in_target, save_name):
 			to_write.append(gyro[j,0])
 
 		# Acceleration - gravity measurements 
-		acc = imu_motion[i].linear_acc / (10**3) # convert back to m/s^2
+		acc = imu_motion[i].linear_acc
 		# acc = imu_motion[i].rot_mat.dot(acc)
 		acc = imu_motion[i].rot_mat.dot(acc-gravity_in_target.reshape(3,1))
 		for j in xrange(3):
