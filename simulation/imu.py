@@ -87,25 +87,34 @@ def spiral_motion(board, board_dim, camera):
 
 def read_motion(filename, sample_ratio=1):
 	"""
-	All lengths in m.
+	Reads headset motion captured with mocap. All lengths in m.
+	Args:
+		filename: csv file to read from, column in order: 
+					time stamp; position x, y, z; orientation x,y,z,w; 
+					linear velocity x, y, z; angular velocity x, y, z;
+					linear acceleration x, y, z; angular acceleration x, y, z
+		sample_ratio: read one sample out of sample_ratio rows
+	Returns:
+		motion: a list of Poses
 	"""
-	extrins = []
+	motion = []
 
 	csvfile = open(filename,'rb')
 	reader = csv.reader(csvfile, delimiter=',')
 	cnt = 0
 	tcnt = 0
-	for row in reader: #time stamp; position x, y, z; orientation x,y,z,w
-		if cnt == 0:
+	for row in reader: 
+		if cnt == 0: # skip header
 			cnt += 1
 			continue
 
 		# fast debugging
-		if cnt == 300:
-			break
+		# if cnt == 3000:
+		# 	break
+
 		if cnt % sample_ratio == 0:
 			ts = int(row[0])
-			trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+			loc = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
 			rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
 
 			lvel = np.array([float(row[8]), float(row[9]), float(row[10])])
@@ -113,15 +122,49 @@ def read_motion(filename, sample_ratio=1):
 			lacc = np.array([float(row[14]), float(row[15]), float(row[16])])
 			aacc = np.array([float(row[17]), float(row[18]), float(row[19]) ])
 
-			ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts, \
-				lvel, lacc, avel, aacc)
-			extrins.append(ext)
+			pose = util.Pose(loc, rot_mat, ts, lvel, avel, lacc, aacc)
+			motion.append(pose)
 			tcnt += 1
 
 		cnt += 1
 	print 'read', cnt, 'poses, recorded', tcnt,'poses'
-	return extrins
+	return motion
+# def read_motion(filename, sample_ratio=1):
+# 	"""
+# 	All lengths in m.
+# 	"""
+# 	extrins = []
 
+# 	csvfile = open(filename,'rb')
+# 	reader = csv.reader(csvfile, delimiter=',')
+# 	cnt = 0
+# 	tcnt = 0
+# 	for row in reader: #time stamp; position x, y, z; orientation x,y,z,w
+# 		if cnt == 0:
+# 			cnt += 1
+# 			continue
+
+# 		# fast debugging
+# 		# if cnt == 300:
+# 		# 	break
+# 		if cnt % sample_ratio == 0:
+# 			ts = int(row[0])
+# 			trans_vec = np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)
+# 			rot_mat = util.quaternion2mat(float(row[4]), float(row[5]), float(row[6]), float(row[7]))
+
+# 			lvel = np.array([float(row[8]), float(row[9]), float(row[10])])
+# 			avel = np.array([float(row[11]), float(row[12]), float(row[13]) ])
+# 			lacc = np.array([float(row[14]), float(row[15]), float(row[16])])
+# 			aacc = np.array([float(row[17]), float(row[18]), float(row[19]) ])
+
+# 			ext = cam.Extrinsics.init_with_rotation_matrix(-rot_mat.dot(trans_vec), rot_mat, ts, \
+# 				lvel, lacc, avel, aacc)
+# 			extrins.append(ext)
+# 			tcnt += 1
+
+# 		cnt += 1
+# 	print 'read', cnt, 'poses, recorded', tcnt,'poses'
+# 	return extrins
 
 def transform_motion(orig_motion, rel_extrin, sample_ratio):
 	"""

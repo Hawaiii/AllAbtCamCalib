@@ -62,7 +62,20 @@ class Pose:
         """
         return cv2.Rodrigues(self.ori)[0]
 
-    def plot(self, fax=None, clr='b'):
+    def extrinsics(self):
+        """
+        Return the corresponding Extrinsics.
+        """
+        return cam.Extrinsics.init_with_rotation_matrix(-self.ori.dot(loc), \
+            self.ori, self.time)
+
+    def transformation(self):
+        """
+        Returns the 4x4 transformation from pose coordinate to world coordinate.
+        """
+        return self.extrinsics.get_homo_trans_matrix()
+
+    def plot(self, fax=None, clr=None, length=1.0):
         """
         Plots a arrow of z-axis indicating the pose
         """
@@ -72,11 +85,27 @@ class Pose:
             ax = fig.add_subplot(111, projection='3d')
         else:
             ax = fax
-        ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
-            z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', color=clr)
+        if clr is None:
+            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+                z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
+                length=length)
+        else:
+            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+                z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
+                color=clr, length=length)
+
         if fax is None:
             plt.show()
         return ax
+
+    @staticmethod
+    def plot_pose_seq(motion, fax=None, length=1.0, cmap='plasma'):
+        """
+        Plots a list of poses in gradient color.
+        Args:
+            motion: list of Pose
+        """
+        #TODO
 
 def unit_vector(vector):
     """
