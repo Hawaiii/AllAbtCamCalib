@@ -53,4 +53,20 @@ class TestBoardMethods(unittest.TestCase):
 
 		plt.show()
 
-	
+	def test_get_points(self):
+		#@TODO
+		pass
+
+	def test_get_points_homo(self):
+		#@TODO
+		pass
+
+	def test_get_four_corners(self):
+		b0 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([0,0,0]),0)
+		b0_corners = b0.get_four_corners()
+		#@TODO
+		pass
+
+	def test_dict2array(self):
+		#@TODO
+		pass

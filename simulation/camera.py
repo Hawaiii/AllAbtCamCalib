@@ -241,14 +241,13 @@ class Camera:
 						loc[:-1,i] = float('nan')
 					print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
-			
-	def calc_homography(self, extrins, board, board_dim, board_to_world_T):
+
+	def calc_homography(self, extrins, board):
 		"""
 		Calculates homography that transforms the image to board. Ignores distortion.
 		Args:
 			extrins: list of Extrinsics
-			board: a dictionary keyed by control point ID whose values are 3D points
-			board_dim: (board_width, board_height)
+			board: a Board
 		Returns:
 			Hs: a list of 3x3 homography matrices
 		"""
@@ -279,7 +278,45 @@ class Camera:
 			# import pdb; pdb.set_trace()
 			Hs.append(H)
 
-		return Hs
+		return Hs		
+	# def calc_homography(self, extrins, board, board_dim, board_to_world_T):
+	# 	"""
+	# 	Calculates homography that transforms the image to board. Ignores distortion.
+	# 	Args:
+	# 		extrins: list of Extrinsics
+	# 		board: a dictionary keyed by control point ID whose values are 3D points
+	# 		board_dim: (board_width, board_height)
+	# 	Returns:
+	# 		Hs: a list of 3x3 homography matrices
+	# 	"""
+	# 	Hs = []
+
+	# 	# Find image edge points
+	# 	im_edges = np.zeros((4,2), dtype=np.float32)
+	# 	im_edges[1,1] = self.size[0]-1
+	# 	im_edges[2,0] = self.size[1]-1
+	# 	im_edges[3,0] = self.size[1]-1
+	# 	im_edges[3,1] = self.size[0]-1
+ 
+	# 	# For each pose, project four corner locations onto image
+	# 	for extrin in extrins:
+	# 		edges = np.zeros((4,2), dtype=np.float32)
+	# 		edges[0,:] = self.project_point(extrin, board[0], nodistortion=True).reshape(1,2)
+	# 		edges[1,:] = self.project_point(extrin, board[board_dim[0]-1], nodistortion=True).reshape(1,2)
+	# 		edges[2,:] = self.project_point(extrin, board[(board_dim[1]-1)*board_dim[0]], \
+	# 														nodistortion=True).reshape(1,2)
+	# 		edges[3,:] = self.project_point(extrin, board[board_dim[1]*board_dim[0]-1], \
+	# 														nodistortion=True).reshape(1,2)
+
+	# 		# Calculate homography
+	# 		H, mask = cv2.findHomography(im_edges, edges)
+
+	# 		# Hd = self.intrinsics.intri_mat.dot(extrin.get_Rt_matrix().dot(board_to_world_T))[:, [0,1,3]]
+
+	# 		# import pdb; pdb.set_trace()
+	# 		Hs.append(H)
+
+	# 	return Hs
 
 	def ray_from_pixel(self, pixel, cam_extrin):
 		"""

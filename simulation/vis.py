@@ -13,68 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
 
-
-# def plot_calib_boards(boards, board_dim, fax=None):
-# 	"""
-# 	Plots a board in 3D
-
-# 	Args:
-# 		boards: a list of dictionaries, where each dictionary is a board
-# 		board_dim: (board_width, board_height)
-# 	"""
-# 	if fax:
-# 		ax = fax
-# 	else:
-# 		fig = plt.figure()
-# 		ax = fig.add_subplot(111, projection='3d')
-
-# 	clist = colors.cnames.keys()
-# 	for i in xrange(len(boards)):
-# 		board = boards[i]
-# 		X, Y, Z = util.board_dict2array(board, board_dim)
-
-# 		ax.plot_wireframe(X, Y, Z, color=clist[i])
-	
-# 	if not fax:
-# 		plt.show()
-# 	return ax
-
-def compare_board_estimations(esti_extrinsics, board, board_dim, \
-								actual_boards, save_name=None):
-	"""
-	Plots true and estimated boards on the same figure
-	Args:
-		esti_extrinsics: dictionary, keyed by image number, values are Extrinsics
-		board:
-		board_dim: (board_width, board_height)
-		actual_boards: list of dictionaries
-		save_name: filename, string
-	"""
-	if save_name:
-		pp = PdfPages(save_name)
-	plt.clf()
-
-	for i in xrange(len(actual_boards)):
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
-
-		act_board = actual_boards[i]
-		aX, aY, aZ = util.board_dict2array(act_board, board_dim)
-		ax.plot_wireframe(aX, aY, aZ, color='b')
-
-		if i in esti_extrinsics:
-			esti_loc = esti_extrinsics[i].trans_vec
-			esti_board = util.move_board(board, esti_loc)
-			eX, eY, eZ = util.board_dict2array(esti_board, board_dim)
-			ax.plot_wireframe(eX, eY, eZ, color='r')
-
-		if pp:
-			pp.savefig()
-		else:
-			plt.show()
-	if pp:
-		pp.close()
-
 def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
 	"""
 	Args:
@@ -213,11 +151,11 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None, clr=None):
 		        plots location of t and orientations of R when false
 		connectpath: draws a path that connects the locations when true
 	"""
-	if fax:
-		ax = fax
-	else:
+	if fax is None:
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
+	else:
+		ax = fax
 
 	if invert:		
 		xyz = [ext.get_inv_location() for ext in extrinsics]
@@ -245,18 +183,18 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None, clr=None):
 
 	return ax
 
-def plot_camera_pose(extrin, save_name=None):
-	"""
-	Plots the location of the camera given extrinsics of board
-	@TODO: Currently labels image number text on the location of camera, could
-	       add in the orientation and a 3D camera figure
-	Args:
-		extrin: a dictionary keyed by image number, whose values are Extrinsics
-		save_name: if save_name is provided, figure will be saved to that name;
-		           otherwise, the figure will be shown on screen
-	"""
-	print 'plot_camera_pose not implemented yet!'
-	pass
+# def plot_camera_pose(extrin, save_name=None):
+# 	"""
+# 	Plots the location of the camera given extrinsics of board
+# 	@TODO: Currently labels image number text on the location of camera, could
+# 	       add in the orientation and a 3D camera figure
+# 	Args:
+# 		extrin: a dictionary keyed by image number, whose values are Extrinsics
+# 		save_name: if save_name is provided, figure will be saved to that name;
+# 		           otherwise, the figure will be shown on screen
+# 	"""
+# 	print 'plot_camera_pose not implemented yet!'
+# 	pass
 
 def plot_camera_with_rays(cam_extrin, rays, invert=True):
 	"""
@@ -298,3 +236,5 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 	ax.set_zlim(ray[0][2]-1,ray[0][2]+1)
 
 	plt.show()
+
+

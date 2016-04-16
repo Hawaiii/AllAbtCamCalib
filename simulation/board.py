@@ -125,9 +125,10 @@ class Board:
 		Returns the actual location of the four corners points (accounting for 
 		the pose) as 3x4 numpy
 		"""
-		pts_arr = np.array([self.pts[(0,0)], self.pts[(0, self.size[0]-1)], \
-			self.pts[(self.size[1]-1, 0)], self.pts[(self.size[1]-1, self.size[0]-1)]])
-		print 'get_four_corners not implemented!'
+		print self.pts.keys()
+		pts_arr = np.array([self.pts[(0,0)], self.pts[(self.size[0]-1, 0)], \
+			self.pts[(0, self.size[1]-1)], self.pts[(self.size[0]-1, self.size[1]-1)]])
+		return pts_arr.reshape(3,4)
 
 	def dict2array(self):
 		"""
@@ -181,3 +182,68 @@ class Board:
 			plt.show()
 		return ax
 	
+	"""
+	To be refactored
+	"""
+	@staticmethod
+	def compare_board_estimations(esti_extrinsics, board, board_dim, \
+								actual_boards, save_name=None):
+		"""
+		Plots true and estimated boards on the same figure
+		Args:
+			esti_extrinsics: dictionary, keyed by image number, values are Extrinsics
+			board:
+			board_dim: (board_width, board_height)
+			actual_boards: list of dictionaries
+			save_name: filename, string
+		"""
+		if save_name:
+			pp = PdfPages(save_name)
+		plt.clf()
+
+		for i in xrange(len(actual_boards)):
+			fig = plt.figure()
+			ax = fig.add_subplot(111, projection='3d')
+
+			act_board = actual_boards[i]
+			aX, aY, aZ = util.board_dict2array(act_board, board_dim)
+			ax.plot_wireframe(aX, aY, aZ, color='b')
+
+			if i in esti_extrinsics:
+				esti_loc = esti_extrinsics[i].trans_vec
+				esti_board = util.move_board(board, esti_loc)
+				eX, eY, eZ = util.board_dict2array(esti_board, board_dim)
+				ax.plot_wireframe(eX, eY, eZ, color='r')
+
+			if pp:
+				pp.savefig()
+			else:
+				plt.show()
+		if pp:
+			pp.close()
+
+	# def plot_calib_boards(boards, board_dim, fax=None):
+# 	"""
+# 	Plots a board in 3D
+
+# 	Args:
+# 		boards: a list of dictionaries, where each dictionary is a board
+# 		board_dim: (board_width, board_height)
+# 	"""
+# 	if fax:
+# 		ax = fax
+# 	else:
+# 		fig = plt.figure()
+# 		ax = fig.add_subplot(111, projection='3d')
+
+# 	clist = colors.cnames.keys()
+# 	for i in xrange(len(boards)):
+# 		board = boards[i]
+# 		X, Y, Z = util.board_dict2array(board, board_dim)
+
+# 		ax.plot_wireframe(X, Y, Z, color=clist[i])
+	
+# 	if not fax:
+# 		plt.show()
+# 	return ax
+

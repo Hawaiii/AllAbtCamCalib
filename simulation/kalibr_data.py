@@ -7,9 +7,9 @@ sys.path.append('../calib/')
 import imu
 import camera as cam
 import targets
-import vis
 import exp_util as util
 import board as bd
+import vis
 
 import numpy as np
 import cv2
@@ -37,17 +37,7 @@ board = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax = vis.plot_poses(cam_motion, invert=True, clr='r')
-# ax = vis.plot_poses(imu_motion, invert=True, fax=ax, clr='g')
-# ax = board.plot(ax, clr='b')
-
-board0 = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, np.zeros((1,3)), 0)
-ax = board0.plot(ax, clr='r')
-board_o1 = np.array([0,math.pi/2,0])
-board1 = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_o1, 0)
-# ax = board1.plot(ax, clr='y')
-
-
-
+ax = board.plot(ax, clr='b')
 ax.set_aspect('equal')
 
 # Generate camera images
