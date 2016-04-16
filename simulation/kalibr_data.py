@@ -9,10 +9,11 @@ import camera as cam
 import targets
 import vis
 import exp_util as util
-import board
+import board as bd
 
-import cv2
 import numpy as np
+import cv2
+import math
 import matplotlib.pyplot as plt
 
 imu_motion = imu.read_motion('data/pose.csv')
@@ -30,12 +31,23 @@ camera.intrinsics.tang_dist = np.zeros((1,2))
 
 board_dim = (2, 2)
 board_loc = np.array([0, 0.01, -2.]).reshape(3,1)
-board_orient = np.array([[1.,0.,0.],[0.,-1.,0.],[0.,0.,1.]])
-board = board.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
+board_orient = np.array([0,0, math.pi/2])
+board = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
 
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 ax = vis.plot_poses(cam_motion, invert=True, clr='r')
-ax = vis.plot_poses(imu_motion, invert=True, fax=ax, clr='g')
-ax = board.plot(ax)
+# ax = vis.plot_poses(imu_motion, invert=True, fax=ax, clr='g')
+# ax = board.plot(ax, clr='b')
+
+board0 = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, np.zeros((1,3)), 0)
+ax = board0.plot(ax, clr='r')
+board_o1 = np.array([0,math.pi/2,0])
+board1 = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_o1, 0)
+# ax = board1.plot(ax, clr='y')
+
+
+
 ax.set_aspect('equal')
 
 # Generate camera images
@@ -46,7 +58,7 @@ ax.set_aspect('equal')
 # 							None)
 # for i in xrange(len(Hs)):
 # 		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time_stamp)+'.png')
-# plt.show()
+plt.show()
 
 
 

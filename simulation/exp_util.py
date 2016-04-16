@@ -66,7 +66,7 @@ class Pose:
         """
         Plots a arrow of z-axis indicating the pose
         """
-        z_vec = self.ori.dot(np.array([0,0,1]).reshape(3,1)) + self.loc
+        z_vec = self.ori.dot(np.array([0,0,1]).reshape(3,1))
         if fax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
