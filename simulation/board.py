@@ -175,6 +175,7 @@ class Board:
 		ax.plot_wireframe(X, Y, Z, color=clr)
 		# pts_arr = self.get_points()
 		# ax.plot_wireframe(pts_arr[0,:], pts_arr[1,:], pts_arr[2,:], color=clr)
+		self.pose.plot(ax, clr=clr)
 		
 		if not fax:
 			plt.show()

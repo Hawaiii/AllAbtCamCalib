@@ -62,6 +62,22 @@ class Pose:
         """
         return cv2.Rodrigues(self.ori)[0]
 
+    def plot(self, fax=None, clr='b'):
+        """
+        Plots a arrow of z-axis indicating the pose
+        """
+        z_vec = self.ori.dot(np.array([0,0,1]).reshape(3,1)) + self.loc
+        if fax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fax
+        ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+            z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', color=clr)
+        if fax is None:
+            plt.show()
+        return ax
+
 def unit_vector(vector):
     """
     Returns the unit vector of the vector.
