@@ -52,3 +52,5 @@ class TestBoardMethods(unittest.TestCase):
 		bz30.plot(ax, clr='b')
 
 		plt.show()
+
+	
