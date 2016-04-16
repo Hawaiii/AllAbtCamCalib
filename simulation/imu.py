@@ -97,8 +97,8 @@ def read_motion(filename):
 			continue
 
 		# fast debugging
-		# if cnt == 3000:
-		# 	break
+		if cnt == 3000:
+			break
 		
 		ts = int(row[0])
 		trans_vec = (10**3) * np.array([float(row[1]), float(row[2]), float(row[3])]).reshape(3,1)

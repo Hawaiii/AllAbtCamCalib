@@ -6,6 +6,45 @@ import numpy as np
 import math
 import random
 
+class Pose:
+    loc = None # location, 3x1 numpy array
+    ori = None # orientation, 3x3 rotation matrix
+    lin_vel = None # linear velocity, 3x1 numpy array
+    ang_vel = None # angular velocity, 3x1 numpy array
+    lin_acc = None # linear acceleration, 3x1 numpy array
+    ang_acc = None # angular acceleration, 3x1 numpy array
+    time = None # time stampe in ns
+
+    def __init__(self, loc, ori, time=None, lvel=None, avel=None, lacc=None, aacc=None):
+        # assert(loc.size == 3)
+        self.loc = loc.reshape(3,1)
+        
+        assert(ori.size == 3 or ori.size == 9)
+        if ori.size == 3:
+            self.ori = cv2.Rodrigues(ori)[0]
+        else:
+            self.ori = ori
+
+        self.time = time
+
+        if lvel is not None:
+            # assert(lvel.size == 3)
+            self.lin_vel = lvel.reshape(3,1)
+
+        if avel is not None:
+            # assert(avel.size == 3)
+            self.ang_vel = avel.reshape(3,1)
+
+        if lacc is not None:
+            # assert(lacc.size == 3)
+            self.lin_acc = lacc.reshape(3,1)
+
+        if aacc is not None:
+            # assert(aacc.size == 3)
+            self.ang_acc = aacc.reshape(3,1)
+
+    
+
 def unit_vector(vector):
     """
     Returns the unit vector of the vector.
@@ -59,46 +98,46 @@ def quaternion2mat(x,y,z,w):
 
     return rmat
     
-def gen_calib_board(board_width, board_height, sqsize, \
-                    location, orientation, noise3d):
-    """
-    Generate a calibration board placed at give location with given direction,
-    with given number of points on a plane.
-    Args:
-        board_width: positive integer, number of control points in horizontal direction
-        board_height: positive integer, number of control points in vertical direction
-        sqsize: positive number, size of each square, in millimeters
-        location: 3x1 numpy array, 3D location of the top-left corner of board
-        orientation: 3x1 numpy array, 3D orientation of the board, (rx,ry,rz)
-        noise3d: positive number, standard deviation of Gaussian noise added to board
+# def gen_calib_board(board_width, board_height, sqsize, \
+#                     location, orientation, noise3d):
+#     """
+#     Generate a calibration board placed at give location with given direction,
+#     with given number of points on a plane.
+#     Args:
+#         board_width: positive integer, number of control points in horizontal direction
+#         board_height: positive integer, number of control points in vertical direction
+#         sqsize: positive number, size of each square, in millimeters
+#         location: 3x1 numpy array, 3D location of the top-left corner of board
+#         orientation: 3x1 numpy array, 3D orientation of the board, (rx,ry,rz)
+#         noise3d: positive number, standard deviation of Gaussian noise added to board
 
-    Returns:
-        A dictionary keyed by point id, whose values are 3D points (1x3 numpy arrays)
-    """
-    if location.shape != (3,1) or orientation.shape != (3,1):
-        print 'location shape',location.shape,' orientation shape',orientation.shape,'incorrect!'
-        return None
-    board = {}
+#     Returns:
+#         A dictionary keyed by point id, whose values are 3D points (1x3 numpy arrays)
+#     """
+#     if location.shape != (3,1) or orientation.shape != (3,1):
+#         print 'location shape',location.shape,' orientation shape',orientation.shape,'incorrect!'
+#         return None
+#     board = {}
 
-    # Make board whose top-left point is at (0,0,0) and lies on x-y plane
-    pt_id = 0
-    for x in xrange(board_height):
-        for y in xrange(board_width):
-            board[pt_id] = np.array([[x * sqsize, y * sqsize, 0]], np.float32).T
-            pt_id += 1
+#     # Make board whose top-left point is at (0,0,0) and lies on x-y plane
+#     pt_id = 0
+#     for x in xrange(board_height):
+#         for y in xrange(board_width):
+#             board[pt_id] = np.array([[x * sqsize, y * sqsize, 0]], np.float32).T
+#             pt_id += 1
 
-    # Rotate board to given orientation and move to given location
-    rot_mat, _ = cv2.Rodrigues(orientation)
-    for pt in board.keys():
-        board[pt] = np.dot(rot_mat, board[pt]) + location
+#     # Rotate board to given orientation and move to given location
+#     rot_mat, _ = cv2.Rodrigues(orientation)
+#     for pt in board.keys():
+#         board[pt] = np.dot(rot_mat, board[pt]) + location
 
-    # Add noise3d
-    if noise3d > 0:
-        noises = np.random.normal(0, noise3d, (board_height*board_width,3))
-        for ipt in xrange(len(board)):
-            board[board.keys()[ipt]] += noises[ipt, :]
+#     # Add noise3d
+#     if noise3d > 0:
+#         noises = np.random.normal(0, noise3d, (board_height*board_width,3))
+#         for ipt in xrange(len(board)):
+#             board[board.keys()[ipt]] += noises[ipt, :]
 
-    return board
+#     return board
 
 def move_board(board, location, orientation):
     """
@@ -129,30 +168,30 @@ def move_board(board, location, orientation):
         newboard[pt] = newboard[pt] + offset
     return newboard
 
-def board_dict2array(board, board_dim):
-    """
-    Converts the dictionary representation of board into X,Y,Z array format
+# def board_dict2array(board, board_dim):
+#     """
+#     Converts the dictionary representation of board into X,Y,Z array format
 
-    Args:
-        board: a dictionary keyed by point id, whose values are 3D points, keyed
-               in the following order: starting from top-left point, move right
-               alone each row, and down for all rows, ending at bottom-right
-        board_dim: (board_width, board_height)
+#     Args:
+#         board: a dictionary keyed by point id, whose values are 3D points, keyed
+#                in the following order: starting from top-left point, move right
+#                alone each row, and down for all rows, ending at bottom-right
+#         board_dim: (board_width, board_height)
 
-    Returns:
-        X,Y,Z: each a 2D numpy array, specifying the location in the
-               corresponding dimension of each point
-    """
-    X = np.empty((board_dim[1], board_dim[0]))
-    Y = np.empty((board_dim[1], board_dim[0]))
-    Z = np.empty((board_dim[1], board_dim[0]))
-    for pt in board.keys():
-        x = pt / board_dim[0]
-        y = pt % board_dim[0]
-        X[x,y] = board[pt][0,0]
-        Y[x,y] = board[pt][1,0]
-        Z[x,y] = board[pt][2,0]
-    return X, Y, Z
+#     Returns:
+#         X,Y,Z: each a 2D numpy array, specifying the location in the
+#                corresponding dimension of each point
+#     """
+#     X = np.empty((board_dim[1], board_dim[0]))
+#     Y = np.empty((board_dim[1], board_dim[0]))
+#     Z = np.empty((board_dim[1], board_dim[0]))
+#     for pt in board.keys():
+#         x = pt / board_dim[0]
+#         y = pt % board_dim[0]
+#         X[x,y] = board[pt][0,0]
+#         Y[x,y] = board[pt][1,0]
+#         Z[x,y] = board[pt][2,0]
+#     return X, Y, Z
 
 
 """

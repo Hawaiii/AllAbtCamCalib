@@ -239,7 +239,7 @@ class Camera:
 				for i in xrange(loc.shape[1]):
 					if loc[-1,i] <= 0:
 						loc[:-1,i] = float('nan')
-					# print 'point', point,'projects to wrong side of camera'
+					print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
 			
 	def calc_homography(self, extrins, board, board_dim, board_to_world_T):

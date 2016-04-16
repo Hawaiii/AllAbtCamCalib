@@ -1,8 +1,10 @@
 """
 For visualizing calibration targets, cameras, etc.
 """
-import numpy as np
 import exp_util as util
+import board
+
+import numpy as np
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mpl_toolkits.mplot3d import axes3d
@@ -217,11 +219,7 @@ def plot_poses(extrinsics, invert=False, connectpath=True, fax=None):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 
-	if invert:
-		# x = [-np.dot(ext.rot_mat.T[0,:], ext.trans_vec)[0] for ext in extrinsics]
-		# y = [-np.dot(ext.rot_mat.T[1,:], ext.trans_vec)[0] for ext in extrinsics]
-		# z = [-np.dot(ext.rot_mat.T[2,:], ext.trans_vec)[0] for ext in extrinsics]
-		
+	if invert:		
 		xyz = [ext.get_inv_location() for ext in extrinsics]
 		x = [loc[0,0] for loc in xyz]
 		y = [loc[1,0] for loc in xyz]
