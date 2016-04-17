@@ -62,6 +62,9 @@ class Pose:
         """
         return cv2.Rodrigues(self.ori)[0]
 
+    def loc_homo(self):
+        return np.concatenate((self.loc, np.ones(1,1)), axis=0)
+
     def extrinsics(self):
         """
         Return the corresponding Extrinsics.
@@ -74,6 +77,58 @@ class Pose:
         Returns the 4x4 transformation from pose coordinate to world coordinate.
         """
         return self.extrinsics.get_homo_trans_matrix()
+
+    @staticmethod
+    def motion_regress_vel_acc(motion, window):
+        """
+        TODO: change the window from number of samples to a time-window
+        Args:
+            motion: a list of time-stamped poses
+            window: number of samples to use for each window, an odd number 
+                    greater than 1
+        Returns:
+            motion: with linear velocity and acceleration fields written
+        """
+        n = len(motion)
+        for i in xrange(n):
+            if motion[i].lin_vel is not None and motion[i].lin_acc is not None:
+                print 'skipping pose',i,'for computing linear velocity and acceleration.'
+                continue
+
+            if i - window/2 < 0 or i + window/2 > n-1:
+                continue
+
+            s_x = np.zeros(3,1)
+            s_tx = np.zeros(3,1)
+            s_t2x = np.zeros(3,1)
+            s_t = 0
+            s_t2 = 0
+            s_t3 = 0
+            s_t4 = 0
+
+            for j in xrange(i-window/2, i+window/2+1):
+                t_j = motion[j].time - motion[i].time
+                s_x += motion[j].loc
+                s_tx += motion[j].loc * t_j
+                s_t2x += motion[j].loc * t_j * t_j
+                s_t += t_j
+                s_t2 += t_j * t_j
+                s_t3 += t_j ** 3
+                s_t4 += t_j ** 4
+
+            A = window * (s_t3*s_t3 - s_t2*s_t4) + \
+                    s_t * (s_t*s_t4 - s_t2 * s_t3) + \
+                    s_t2 * (s_t2*s_t2 - s_t*s_t3)
+
+            motion[i].lin_vel = 1/A * (s_x * (s_t*s_t4 - s_t2*s_t3) + \
+                                        s_tx * (s_t2*s_t2 - n*s_t4) + \
+                                        s_t2x * (n*s_t3 - s_t*s_t2))
+            motion[i].lin_acc = 2/A * (s_x * (s_t2*s_t2 - s_t*s_t3) + \
+                                        s_tx * (n*s_t3 - s_t*s_t2) + \
+                                        s_t2x * (s_t*s_t - n*s_t2))
+
+        return motion
+
 
     def plot(self, fax=None, clr=None, length=1.0):
         """
