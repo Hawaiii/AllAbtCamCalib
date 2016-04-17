@@ -170,7 +170,6 @@ def transform_motion(orig_motion, rel_pose, sample_ratio):
 	"""
 	If orig_motion is camera motion and rel_extrin specifies transformation from 
 	camera to imu then this function returns the imu motion.
-	@TODO: add time stamp offset from rel_extrin
 
 	Args:
 		orig_motion: a list of time-stamped Extrinsics
@@ -180,33 +179,15 @@ def transform_motion(orig_motion, rel_pose, sample_ratio):
 		new_motion: a list of time-stamped Extrinsics
 	"""
 	new_motion = []
-	imu_loc_in_camera = -rel_extrin.rot_mat.T.dot(rel_extrin.trans_vec)
-	imu_loc_in_camera = np.concatenate((imu_loc_in_camera, np.ones((1,1))), axis=0)
-	imu_orien_to_camera = rel_extrin.rot_mat.T
-	# print 'imu_loc_in_cam', imu_loc_in_camera
-	# print 'imu_orien_to_cam', imu_orien_to_camera
-
-	cnt = 0
-	pcnt = 0
-	for orig_e in orig_motion:
+	for orig_p in orig_motion:
 		if cnt % sample_ratio == 0:
-			imu_loc_in_world = orig_e.get_homo_trans_matrix_inv().dot(imu_loc_in_camera)
-			imu_loc_in_world = imu_loc_in_world / matlib.repmat( imu_loc_in_world[-1,:], 4, 1)
-			imu_loc_in_world = imu_loc_in_world[0:3,:]
-
-			imu_orien_to_world = orig_e.rot_mat.dot(imu_orien_to_camera)
-
-			# print orig_e.trans_vec, (-imu_orien_to_world.dot(imu_loc_in_world)).T
-			# print
-			
-			new_e = cam.Extrinsics.init_with_rotation_matrix(\
-				(-imu_orien_to_world.dot(imu_loc_in_world)), imu_orien_to_world, orig_e.time_stamp)
-			new_motion.append(new_e)
+			new_p = orig_p.transform(rel_pose)
+			new_motion.append(new_p)
 			pcnt += 1
-
 		cnt += 1
 	print 'transform motion has', pcnt, 'poses.'
 	return new_motion
+
 # def transform_motion(orig_motion, rel_extrin, sample_ratio):
 # 	"""
 # 	If orig_motion is camera motion and rel_extrin specifies transformation from 

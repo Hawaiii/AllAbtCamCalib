@@ -78,6 +78,21 @@ class Pose:
         """
         return self.extrinsics.get_homo_trans_matrix()
 
+    def transform(self, rel_pose):
+        """
+        Transforms relative pose in current coordinate to world coordinate.
+        Only writes location, orientation, and timestamp.
+        """
+        loc = self.transformation().dot(rel_pose.loc_homo())
+        loc = loc / matlib.repmat( locd[-1,:], 4, 1)
+        loc = loc[0:3,:]
+
+        ori = self.ori().dot(rel_pose.ori())
+
+        ts = self.time+rel_pose.time
+
+        return Pose(loc, ori, time=ts)
+
     @staticmethod
     def motion_regress_vel_acc(motion, window):
         """

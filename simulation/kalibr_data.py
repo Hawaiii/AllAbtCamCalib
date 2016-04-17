@@ -28,13 +28,13 @@ for i, p in enumerate(imu_motion):
 	ax = p.plot(ax, clr=cm(1.*i/(len(imu_motion)-1)), length=0.2)
 
 # all length in m
-# rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([0.2,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
-# cam_sampling_ratio = 50 # camera samples once when imu samples 50 times
-# cam_motion = imu.transform_motion(imu_motion, rel_pose, cam_sampling_ratio)
+rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([0.2,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
+cam_sampling_ratio = 50 # camera samples once when imu samples 50 times
+cam_motion = imu.transform_motion(imu_motion, rel_pose, cam_sampling_ratio)
 
-# camera = cam.Camera.make_pinhole_camera()
-# camera.intrinsics.radial_dist = np.zeros((1,3))
-# camera.intrinsics.tang_dist = np.zeros((1,2))
+camera = cam.Camera.make_pinhole_camera()
+camera.intrinsics.radial_dist = np.zeros((1,3))
+camera.intrinsics.tang_dist = np.zeros((1,2))
 
 board_dim = (2, 2)
 board_loc = np.array([0, 0.01, -2.]).reshape(3,1)
