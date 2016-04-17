@@ -72,8 +72,8 @@ class Pose:
         """
         Return the corresponding Extrinsics.
         """
-        return cam.Extrinsics.init_with_rotation_matrix(-self.ori.dot(self.loc), \
-            self.ori, self.time)
+        return cam.Extrinsics.init_with_rotation_matrix(-self.ori.T.dot(self.loc), \
+            self.ori.T, self.time)
 
     def transformation(self):
         """
@@ -90,11 +90,18 @@ class Pose:
         loc = loc / matlib.repmat( loc[-1,:], 4, 1)
         loc = loc[0:3,:]
 
-        ori = self.ori.dot(rel_pose.ori)
+        ori = self.ori.T.dot(rel_pose.ori)
 
-        ts = self.time+rel_pose.time
-
-        return Pose(loc, ori, time=ts)
+        if rel_pose.time is None and self.time is None:
+            return Pose(loc, ori)
+        else:
+            if self.time is not None:
+                ts = self.time
+            else:
+                ts = 0
+            if rel_pose.time is not None:
+                ts += rel_pose.time
+            return Pose(loc, ori, time=ts)
 
     @staticmethod
     def motion_regress_vel_acc(motion, window):
