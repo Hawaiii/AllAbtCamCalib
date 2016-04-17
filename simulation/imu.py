@@ -179,15 +179,16 @@ def transform_motion(orig_motion, rel_pose, sample_ratio):
 		new_motion: a list of time-stamped Extrinsics
 	"""
 	new_motion = []
+	cnt = 0
+	tcnt = 0
 	for orig_p in orig_motion:
 		if cnt % sample_ratio == 0:
 			new_p = orig_p.transform(rel_pose)
 			new_motion.append(new_p)
-			pcnt += 1
+			tcnt += 1
 		cnt += 1
-	print 'transform motion has', pcnt, 'poses.'
+	print 'transform motion read', cnt,' poses and transformed', tcnt, 'poses.'
 	return new_motion
-
 # def transform_motion(orig_motion, rel_extrin, sample_ratio):
 # 	"""
 # 	If orig_motion is camera motion and rel_extrin specifies transformation from 

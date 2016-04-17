@@ -17,7 +17,7 @@ import math
 import matplotlib.pyplot as plt
 from cycler import cycler
 
-imu_motion = imu.read_motion('data/pose.csv', sample_ratio=100)
+imu_motion = imu.read_motion('data/pose.csv', sample_ratio=1000)
 # gravity_in_target = np.array([0,0,-9.81])
 # imu.get_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
 
@@ -28,8 +28,10 @@ for i, p in enumerate(imu_motion):
 	ax = p.plot(ax, clr=cm(1.*i/(len(imu_motion)-1)), length=0.2)
 
 # all length in m
-rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([0.2,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
-cam_sampling_ratio = 50 # camera samples once when imu samples 50 times
+# rel_pose = cam.Extrinsics.init_with_rotation_matrix(np.array([0.2,0.,0.]).reshape(3,1), np.eye(3), time_stamp=None)
+rel_loc = np.array([0.2, 0, 0]).reshape(3,1)
+rel_pose = util.Pose(rel_loc, np.eye(3), time=0)
+cam_sampling_ratio = 1 # camera samples once when imu samples 50 times
 cam_motion = imu.transform_motion(imu_motion, rel_pose, cam_sampling_ratio)
 
 camera = cam.Camera.make_pinhole_camera()
@@ -41,10 +43,11 @@ board_loc = np.array([0, 0.01, -2.]).reshape(3,1)
 board_orient = np.array([0,0, math.pi/2])
 board = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_orient, 0)
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# ax = vis.plot_poses(cam_motion, invert=True, fax=ax, clr='r')
-# ax = board.plot(ax, clr='b')
+cm = plt.get_cmap('viridis')
+for i, p in enumerate(cam_motion):
+	ax = p.plot(ax, clr=cm(1.*i/(len(imu_motion)-1)), length=0.2)
+
+ax = board.plot(ax, clr='b')
 ax.set_aspect('equal')
 
 # Generate camera images

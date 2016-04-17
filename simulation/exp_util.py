@@ -1,8 +1,11 @@
 """
 Utility functions for dealing with 3D objects.
 """
+import camera as cam
+
 import cv2
 import numpy as np
+import numpy.matlib as matlib
 import math
 import random
 
@@ -63,20 +66,20 @@ class Pose:
         return cv2.Rodrigues(self.ori)[0]
 
     def loc_homo(self):
-        return np.concatenate((self.loc, np.ones(1,1)), axis=0)
+        return np.concatenate((self.loc, np.ones((1,1))), axis=0)
 
     def extrinsics(self):
         """
         Return the corresponding Extrinsics.
         """
-        return cam.Extrinsics.init_with_rotation_matrix(-self.ori.dot(loc), \
+        return cam.Extrinsics.init_with_rotation_matrix(-self.ori.dot(self.loc), \
             self.ori, self.time)
 
     def transformation(self):
         """
         Returns the 4x4 transformation from pose coordinate to world coordinate.
         """
-        return self.extrinsics.get_homo_trans_matrix()
+        return self.extrinsics().get_homo_trans_matrix()
 
     def transform(self, rel_pose):
         """
@@ -84,10 +87,10 @@ class Pose:
         Only writes location, orientation, and timestamp.
         """
         loc = self.transformation().dot(rel_pose.loc_homo())
-        loc = loc / matlib.repmat( locd[-1,:], 4, 1)
+        loc = loc / matlib.repmat( loc[-1,:], 4, 1)
         loc = loc[0:3,:]
 
-        ori = self.ori().dot(rel_pose.ori())
+        ori = self.ori.dot(rel_pose.ori)
 
         ts = self.time+rel_pose.time
 
