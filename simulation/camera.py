@@ -251,12 +251,13 @@ class Camera:
 						print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
 
-	def calc_homography(self, motion, board):
+	def calc_homography(self, motion, board, im_size):
 		"""
 		Calculates homography that transforms the image to board. Ignores distortion.
 		Args:
 			motion: list of Poses
 			board: a Board
+			im_size: (im_width, im_height)
 		Returns:
 			Hs: a list of 3x3 homography matrices
 		"""
@@ -264,10 +265,10 @@ class Camera:
 
 		# Find image edge points
 		im_edges = np.zeros((4,2), dtype=np.float32)
-		im_edges[1,1] = self.size[0]-1
-		im_edges[2,0] = self.size[1]-1
-		im_edges[3,0] = self.size[1]-1
-		im_edges[3,1] = self.size[0]-1
+		im_edges[1,0] = im_size[0]-1
+		im_edges[2,1] = im_size[1]-1
+		im_edges[3,0] = im_size[0]-1
+		im_edges[3,1] = im_size[1]-1
  
 		# For each pose, project four corner locations onto image
 		for pose in motion:

@@ -20,7 +20,7 @@ from cycler import cycler
 """
 IMU
 """
-imu_motion = imu.read_motion('data/pose.csv', sample_ratio=1)
+imu_motion = imu.read_motion('data/pose.csv', sample_ratio=10)
 gravity_in_target = np.array([0,9.81,0])
 imu.get_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
 
@@ -69,7 +69,7 @@ board.plot(ax, clr='y')
 
 # Generate camera images
 board_img = cv2.imread('data/april_6x6.png')
-Hs = camera.calc_homography(cam_motion, board)
+Hs = camera.calc_homography(cam_motion, board, (board_img.shape[1],board_img.shape[0]))
 for i in xrange(len(Hs)):
 		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time)+'.png')
 
