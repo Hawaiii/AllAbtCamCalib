@@ -51,7 +51,7 @@ camera.intrinsics.tang_dist = np.zeros((1,2))
 Board 
 """
 board_dim = (2, 2)
-board_loc = np.array([0, 0, 0]).reshape(3,1)
+board_loc = np.array([0, 0, 0.6]).reshape(3,1)
 board_ori = np.array([math.pi, 0, 0]).reshape(3,1)
 board = bd.Board.gen_calib_board(board_dim, 0.8, board_loc, board_ori, 0)
 board.plot(ax, clr='y')
@@ -70,8 +70,8 @@ board.plot(ax, clr='y')
 # Generate camera images
 board_img = cv2.imread('data/april_6x6.png')
 Hs = camera.calc_homography(cam_motion, board)
-# for i in xrange(len(Hs)):
-# 		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time_stamp)+'.png')
+for i in xrange(len(Hs)):
+		targets.render_chessboard_homo(board_img, Hs[i], camera.scale_size(2), save_name='results/cam0/'+str(cam_motion[i].time)+'.png')
 
 ax.quiver([0,0,0],[0,0,0],[0,0,0],[1,0,0],[0,1,0],[0,0,1], pivot='tail')
 ax.set_xlabel('x')
