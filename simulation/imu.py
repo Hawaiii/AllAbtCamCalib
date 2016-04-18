@@ -281,9 +281,13 @@ def gen_imu_readings(imu_motion, gravity, save_name='results/imu0.csv'):
 
 	return reading
 
-def get_imu_readings(imu_motion, gravity_in_target, save_name):
+def get_imu_readings(imu_motion, gravity_in_world, save_name):
 	"""
 	Writes imu readings to csv file.
+	Args:
+		imu_motion: a list of Poses
+		gravity_in_world: gravity vector in target
+		save_name: name of csv file to save to
 	"""
 	writer=csv.writer(open(save_name,'wb'))
 	header=['timestamp','omega_x','omega_y','omega_z','alpha_x','alpha_y','alpha_z']
@@ -292,18 +296,43 @@ def get_imu_readings(imu_motion, gravity_in_target, save_name):
 	for i in xrange(len(imu_motion)):
 		to_write = []
 
-		to_write.append(imu_motion[i].time_stamp)
+		to_write.append(imu_motion[i].time)
 
 		# Gyroscope measurements: angular velocity in imu frame
-		gyro = imu_motion[i].rot_mat.dot(imu_motion[i].ang_vel)
+		gyro = imu_motion[i].ori.T.dot(imu_motion[i].ang_vel) #world to pose
 		for j in xrange(3):
 			to_write.append(gyro[j,0])
 
 		# Acceleration - gravity measurements 
-		acc = imu_motion[i].linear_acc # convert back to m/s^2
-		# acc = imu_motion[i].rot_mat.dot(acc)
-		acc = imu_motion[i].rot_mat.dot(acc-gravity_in_target.reshape(3,1))
+		acc = imu_motion[i].lin_acc
+		acc = imu_motion[i].ori.T.dot(acc-gravity_in_world.reshape(3,1)) #world to pose
 		for j in xrange(3):
 			to_write.append(acc[j,0])
 
 		writer.writerow(to_write)
+# def get_imu_readings(imu_motion, gravity_in_target, save_name):
+# 	"""
+# 	Writes imu readings to csv file.
+# 	"""
+# 	writer=csv.writer(open(save_name,'wb'))
+# 	header=['timestamp','omega_x','omega_y','omega_z','alpha_x','alpha_y','alpha_z']
+# 	writer.writerow(header)
+
+# 	for i in xrange(len(imu_motion)):
+# 		to_write = []
+
+# 		to_write.append(imu_motion[i].time_stamp)
+
+# 		# Gyroscope measurements: angular velocity in imu frame
+# 		gyro = imu_motion[i].rot_mat.dot(imu_motion[i].ang_vel)
+# 		for j in xrange(3):
+# 			to_write.append(gyro[j,0])
+
+# 		# Acceleration - gravity measurements 
+# 		acc = imu_motion[i].linear_acc # convert back to m/s^2
+# 		# acc = imu_motion[i].rot_mat.dot(acc)
+# 		acc = imu_motion[i].rot_mat.dot(acc-gravity_in_target.reshape(3,1))
+# 		for j in xrange(3):
+# 			to_write.append(acc[j,0])
+
+# 		writer.writerow(to_write)

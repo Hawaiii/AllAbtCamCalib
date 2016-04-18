@@ -20,9 +20,9 @@ from cycler import cycler
 """
 IMU
 """
-imu_motion = imu.read_motion('data/pose.csv', sample_ratio=100)
-# gravity_in_target = np.array([0,0,-9.81])
-# imu.get_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
+imu_motion = imu.read_motion('data/pose.csv', sample_ratio=1)
+gravity_in_target = np.array([0,9.81,0])
+imu.get_imu_readings(imu_motion, gravity_in_target, save_name='results/imu0.csv')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
