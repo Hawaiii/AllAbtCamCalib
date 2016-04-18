@@ -183,7 +183,7 @@ def transform_motion(orig_motion, rel_pose, sample_ratio):
 	tcnt = 0
 	for orig_p in orig_motion:
 		if cnt % sample_ratio == 0:
-			new_p = orig_p.transform(rel_pose)
+			new_p = orig_p.transform_p2w(rel_pose)
 			new_motion.append(new_p)
 			tcnt += 1
 		cnt += 1
