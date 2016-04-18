@@ -118,6 +118,10 @@ class Extrinsics:
 		"""
 		return -self.rot_mat.T.dot(self.trans_vec)
 
+	def pose(self):
+		return util.Pose(self.get_inv_location(), self.rot_mat.T, self.time_stamp)
+
+
 class Camera:
 	intrinsics = None #Intrinsics
 	extrinsics = {} #dictionary of extrinsics keyed by img number

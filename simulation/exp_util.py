@@ -75,22 +75,30 @@ class Pose:
         return cam.Extrinsics.init_with_rotation_matrix(-self.ori.T.dot(self.loc), \
             self.ori.T, self.time)
 
-    def transformation(self):
+    def transformation_w2p(self):
         """
-        Returns the 4x4 transformation from pose coordinate to world coordinate.
+        Returns the 4x4 transformation from world coordinate to pose coordinate.
         """
         return self.extrinsics().get_homo_trans_matrix()
 
-    def transform(self, rel_pose):
+    def transformation_p2w(self):
+        """
+        Returns the 4x4 transformation from pose coordinate to world coordinate.
+        """
+        return self.extrinsics().get_homo_trans_matrix_inv()
+
+    def transform_p2w(self, rel_pose):
         """
         Transforms relative pose in current coordinate to world coordinate.
         Only writes location, orientation, and timestamp.
         """
-        loc = self.transformation().dot(rel_pose.loc_homo())
+        loc = self.transformation_p2w().dot(rel_pose.loc_homo())
         loc = loc / matlib.repmat( loc[-1,:], 4, 1)
         loc = loc[0:3,:]
 
-        ori = self.ori.T.dot(rel_pose.ori)
+        ori = self.ori.dot(rel_pose.ori)
+
+        # import pdb; pdb.set_trace()
 
         if rel_pose.time is None and self.time is None:
             return Pose(loc, ori)
