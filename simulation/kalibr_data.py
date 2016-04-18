@@ -30,9 +30,9 @@ imu.get_imu_readings(imu_motion, gravity_in_world, save_name='results/imu0.csv')
 # for i, p in enumerate(imu_motion):
 # 	ax = p.plot(ax, clr=cm(1.*i/(len(imu_motion)-1)), length=0.02)
 
-# """
-# Camera
-# """
+"""
+Camera
+"""
 # # all length in m
 # rel_loc = np.array([0, 0, 0]).reshape(3,1)
 # rel_ori = np.array([math.pi, 0, 0]).reshape(3,1) #head pose -z points in the camera view direction
@@ -47,9 +47,9 @@ imu.get_imu_readings(imu_motion, gravity_in_world, save_name='results/imu0.csv')
 # camera.intrinsics.radial_dist = np.zeros((1,3))
 # camera.intrinsics.tang_dist = np.zeros((1,2))
 
-# """
-# Board 
-# """
+"""
+Board 
+"""
 # board_dim = (2, 2)
 # board_loc = np.array([0, 0, 0.6]).reshape(3,1)
 # board_ori = np.array([math.pi, 0, 0]).reshape(3,1)
@@ -67,7 +67,7 @@ imu.get_imu_readings(imu_motion, gravity_in_world, save_name='results/imu0.csv')
 # # board_pose_world = board_ext.pose()
 # # board = bd.Board.gen_calib_board(board_dim, 0.068, board_pose.loc, board_pose.ori, 0)
 
-# # Generate camera images
+# Generate camera images
 # board_img = cv2.imread('data/april_6x6.png')
 # Hs = camera.calc_homography(cam_motion, board, (board_img.shape[1],board_img.shape[0]))
 # for i in xrange(len(Hs)):

@@ -182,13 +182,13 @@ class Camera:
 		Returns:
 			a list of dictionaries, each representing a captured board
 		"""
-		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
+		#mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
 									#np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
-									self.get_opencv_dist_coeffs(), \
-									np.eye(3), \
-									self.intrinsics.intri_mat, \
-									self.size,\
-									cv2.CV_32FC1)		
+		#							self.get_opencv_dist_coeffs(), \
+		#							np.eye(3), \
+		#							self.intrinsics.intri_mat, \
+		#							self.size,\
+		#							cv2.CV_32FC1)		
 		img_pts = list()
 		for chessboard in points:
 			img_pts_per_chessboard = {}
@@ -206,11 +206,12 @@ class Camera:
 				#apply distortion
 				if(pts[0,0] >=0 and pts[0,0] < self.size[0] and pts[1,0] >= 0 and pts[1,0] < self.size[1] ):
 					# final_pts = np.zeros((2,1))
-					x_ = mapx[pts[1,0],pts[0,0]]
-					y_ = mapy[pts[1,0],pts[0,0]]
+					#x_ = mapx[pts[1,0],pts[0,0]]
+					#y_ = mapy[pts[1,0],pts[0,0]]
 					# final_pts[0] = x_ #col
 					# final_pts[1] = y_ #row
-					final_pts = np.array([x_, y_]).reshape(2,1)
+					#final_pts = np.array([x_, y_]).reshape(2,1)
+					final_pts = np.array([pts[0,0], pts[1,0]]).reshape(2,1)					
 					img_pts_per_chessboard[point_id] = final_pts
 					# add noise
 					if noise2d > 0:
