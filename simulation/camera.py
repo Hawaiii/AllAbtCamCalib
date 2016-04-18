@@ -247,14 +247,15 @@ class Camera:
 				for i in xrange(loc.shape[1]):
 					if loc[-1,i] <= 0:
 						loc[:-1,i] = float('nan')
-					print 'point', point,'projects to wrong side of camera'
+						import pdb; pdb.set_trace()
+						print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
 
-	def calc_homography(self, extrins, board):
+	def calc_homography(self, motion, board):
 		"""
 		Calculates homography that transforms the image to board. Ignores distortion.
 		Args:
-			extrins: list of Extrinsics
+			motion: list of Poses
 			board: a Board
 		Returns:
 			Hs: a list of 3x3 homography matrices
@@ -269,9 +270,9 @@ class Camera:
 		im_edges[3,1] = self.size[0]-1
  
 		# For each pose, project four corner locations onto image
-		for extrin in extrins:
+		for pose in motion:
 			corners = board.get_four_corners()
-			edges = self.project_point(extrin, corners, nodistortion=True).T.astype(np.float32)
+			edges = self.project_point(pose.extrinsics(), corners, nodistortion=True).T.astype(np.float32)
 
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)
