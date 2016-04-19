@@ -107,6 +107,7 @@ def circle_motion():
 	z = np.linspace(-3,-1, imu_sample_rate*time_length)
 
 	ra = math.pi/8
+	dtheta_dt = (end_a-start_a)/time_length
 
 	for i in xrange(len(theta)):
 		loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
@@ -117,21 +118,7 @@ def circle_motion():
 		lvel = np.array( [-y[i], x[i], -1.5-(-3)/time_length] ).reshape(3,1)
 		
 		#angular velocity
-		avel = np.zeros((3,1))
-		if i > 0 and i < len(theta)-1:
-			last_ori = cv2.Rodrigues(poses[-1].ori)[0]
-			next_ori = cv2.Rodrigues(np.array([[np.cos(ra)*np.cos(theta[i+1]), np.cos(ra)*np.sin(theta[i+1]), np.sin(ra)], \
-						[-np.sin(theta[i+1]), np.cos(theta[i+1]), 0], \
-						[-np.sin(ra)*np.cos(theta[i+1]), -np.sin(ra)*np.sin(theta[i+1]), np.cos(ra)]]).T)[0]
-			for j in xrange(3):
-				#assume smooth rotation
-				if last_ori[j,0] < -np.pi/2 and next_ori[j,0] > np.pi/2:
-					next_ori[j,0] = next_ori[j,0] - 2*np.pi
-				elif last_ori[j,0] > np.pi/2 and next_ori[j,0] < -np.pi/2:
-					next_ori[j,0] = next_ori[j-0] + 2*np.pi
-				
-			avel = (next_ori - last_ori)*imu_sample_rate/2
-
+		avel = np.array( [0, 0, dtheta_dt] )
 		lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
 		aacc = np.array( [0, 0, 0]).reshape(3,1)
 		pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
