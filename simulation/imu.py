@@ -104,7 +104,7 @@ def circle_motion():
 	x = r * np.cos(theta)
 	y = r * np.sin(theta)
 	# z = -2*r * np.ones(theta.shape)
-	z = np.linspace(-3,-1, imu_sample_rate*time_length)
+	z = np.linspace(-3,-0.5, imu_sample_rate*time_length)
 
 	ra = math.pi/8
 	dtheta_dt = (end_a-start_a)/time_length
