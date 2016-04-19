@@ -7,83 +7,118 @@ import cv2
 import math
 import csv
 
-def spiral_motion(board, board_dim, camera):
+# def spiral_motion(board, board_dim, camera):
+# 	"""
+# 	A hard coded motion.
+# 	Generates location with sine in each axis.
+# 	Generates orientation while keeping target in view.
+# 	Generates even time stamp.
+
+# 	Args:
+# 		board: dictionary keyed by point id whose values are 3D position of 
+# 				control points
+# 		board_dim: (board_width, board_height)
+# 		camera: a Camera
+
+
+# 	Returns:
+# 		extrins: a list of time-stamped extrinsics
+# 	"""
+# 	extrins = []
+	
+# 	# Generate location
+# 	theta = np.linspace(-4 * np.pi, 4 * np.pi, 600)
+# 	r = 150
+# 	x = r * np.sin(theta)
+# 	y = r * np.sin(theta*1.5)
+# 	z = r * np.sin(theta*1.2)
+
+# 	# Generate timestamp: trying even division first?
+# 	tot_length = 3 * 10**9 #10s converted to ns
+# 	ts_s = 1
+# 	ts = np.round(np.linspace(ts_s, tot_length+ts_s, len(theta))).astype(int)
+
+# 	# Generate orientation
+# 	increment_ratio = 0.001
+# 	R_init = np.eye(3)
+# 	R_last = R_init
+# 	boundary = np.concatenate( ( board[0], board[board_dim[0]-1], \
+# 		board[(board_dim[1]-1)*board_dim[0]], board[board_dim[1]*board_dim[0]-1] ), axis=1)
+# 	# fov = (120.0, 80.0) # (x,y)degrees x->width
+# 	# sensor_ratio = 0.8 # height/width
+# 	# fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
+# 	# fake_fy = sensor_ratio / (2 * math.tan( (fov[1]/180)*3.14 /2  ) )
+# 	# fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
+	
+# 	for i in range(len(theta)):
+# 		trans_vec = np.asarray([x[i], y[i], z[i]]).reshape(3,1)
+# 		flag = True
+# 		while flag:
+# 			flag = False
+# 			R_increment = cv2.Rodrigues(np.random.randn(3,1) * increment_ratio)[0]
+# 			R_last_test = R_increment.dot(R_last)
+			
+# 			for j in range(4):
+# 				projection = camera.project_point(\
+# 					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec)), \
+# 															R_last_test), \
+# 												boundary[:,j])
+# 				if projection[0,0] >= camera.size[0] or projection[0,0] < 0 or \
+# 					projection[1,0] >= camera.size[1] or projection[1,0] < 0:
+# 					flag = True
+# 				else:
+# 					R_last = R_last_test
+
+# 			# projection = R_last_test.dot( boundary)  + matlib.repmat(-R_last_test.dot(trans_vec), 4, 1).T
+# 			# projection = fake_k.dot(projection)
+# 			# projection = projection / matlib.repmat( projection[-1,:],3,1)
+# 			# for j in range(4):
+# 			# 	if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
+# 			# 		flag = True
+# 			# 	else:
+# 			# 		R_last = R_last_test
+# 			# 		#print projection
+# 			# 		#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
+# 		ext = cam.Extrinsics.init_with_rotation_matrix(\
+# 			-R_last.dot(trans_vec), R_last, ts[i])		
+# 		extrins.append(ext)
+
+# 	return extrins
+
+def circle_motion():
 	"""
 	A hard coded motion.
-	Generates location with sine in each axis.
-	Generates orientation while keeping target in view.
-	Generates even time stamp.
-
-	Args:
-		board: dictionary keyed by point id whose values are 3D position of 
-				control points
-		board_dim: (board_width, board_height)
-		camera: a Camera
-
-
-	Returns:
-		extrins: a list of time-stamped extrinsics
+	Returns a list of time-stamped poses.
 	"""
-	extrins = []
-	
-	# Generate location
-	theta = np.linspace(-4 * np.pi, 4 * np.pi, 600)
-	r = 150
-	x = r * np.sin(theta)
-	y = r * np.sin(theta*1.5)
-	z = r * np.sin(theta*1.2)
+	poses = []
+	imu_sample_rate = 100 #100Hz
 
-	# Generate timestamp: trying even division first?
-	tot_length = 3 * 10**9 #10s converted to ns
-	ts_s = 1
-	ts = np.round(np.linspace(ts_s, tot_length+ts_s, len(theta))).astype(int)
+	theta = np.linspace(-4 * np.pi, 4 * np.pi, imu_sample_rate*4)
 
-	# Generate orientation
-	increment_ratio = 0.001
-	R_init = np.eye(3)
-	R_last = R_init
-	boundary = np.concatenate( ( board[0], board[board_dim[0]-1], \
-		board[(board_dim[1]-1)*board_dim[0]], board[board_dim[1]*board_dim[0]-1] ), axis=1)
-	# fov = (120.0, 80.0) # (x,y)degrees x->width
-	# sensor_ratio = 0.8 # height/width
-	# fake_fx = 1 / ( 2 * math.tan((fov[0]/180)*3.14 /2) )
-	# fake_fy = sensor_ratio / (2 * math.tan( (fov[1]/180)*3.14 /2  ) )
-	# fake_k = np.asarray([[fake_fx, 0, 1.0/2], [0, fake_fy, sensor_ratio/2], [0,0,1]])
-	
-	for i in range(len(theta)):
-		trans_vec = np.asarray([x[i], y[i], z[i]]).reshape(3,1)
-		flag = True
-		while flag:
-			flag = False
-			R_increment = cv2.Rodrigues(np.random.randn(3,1) * increment_ratio)[0]
-			R_last_test = R_increment.dot(R_last)
-			
-			for j in range(4):
-				projection = camera.project_point(\
-					cam.Extrinsics.init_with_rotation_matrix((-R_last_test.dot(trans_vec)), \
-															R_last_test), \
-												boundary[:,j])
-				if projection[0,0] >= camera.size[0] or projection[0,0] < 0 or \
-					projection[1,0] >= camera.size[1] or projection[1,0] < 0:
-					flag = True
-				else:
-					R_last = R_last_test
+	timestamp = [int(1.46065*(10**18) + (10**9)/imu_sample_rate*t) for t in range(len(theta))]
 
-			# projection = R_last_test.dot( boundary)  + matlib.repmat(-R_last_test.dot(trans_vec), 4, 1).T
-			# projection = fake_k.dot(projection)
-			# projection = projection / matlib.repmat( projection[-1,:],3,1)
-			# for j in range(4):
-			# 	if projection[0,j] > 1 or projection[1,j] > sensor_ratio or projection[0,j] < 0 or projection[1,j] < 0:
-			# 		flag = True
-			# 	else:
-			# 		R_last = R_last_test
-			# 		#print projection
-			# 		#print projection[0,i] > 1, projection[1,i] > sensor_ratio, projection[0,i] < 0, projection[1,i] < 0
-		ext = cam.Extrinsics.init_with_rotation_matrix(\
-			-R_last.dot(trans_vec), R_last, ts[i])		
-		extrins.append(ext)
+	r = 1
+	x = r * np.cos(theta)
+	y = r * np.sin(theta)
+	z = -2*r * np.ones(theta.shape)
 
-	return extrins
+	ra = math.pi/6
+	rx = -ra * np.sin(theta)
+	ry = -ra * np.cos(theta)
+	rz = np.zeros(theta.shape)
+
+	for i in xrange(len(theta)):
+		loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
+		ori = np.array( [rx[i], ry[i], rz[i]] ).reshape(3,1)
+		lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
+		avel = np.array( [ry[i], -rx[i], 0] ).reshape(3,1)
+		lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
+		aacc = np.array( [-rx[i], -ry[i], 0]).reshape(3,1)
+		pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
+		poses.append(pose)
+
+	return poses
+
 
 def read_motion(filename, sample_ratio=1):
 	"""
@@ -166,7 +201,7 @@ def read_motion(filename, sample_ratio=1):
 # 	print 'read', cnt, 'poses, recorded', tcnt,'poses'
 # 	return extrins
 
-def transform_motion(orig_motion, rel_pose, sample_ratio):
+def transform_motion(orig_motion, rel_pose, sample_ratio, transform_deriviatives=False):
 	"""
 	If orig_motion is camera motion and rel_extrin specifies transformation from 
 	camera to imu then this function returns the imu motion.
@@ -183,7 +218,7 @@ def transform_motion(orig_motion, rel_pose, sample_ratio):
 	tcnt = 0
 	for orig_p in orig_motion:
 		if cnt % sample_ratio == 0:
-			new_p = orig_p.transform_p2w(rel_pose)
+			new_p = orig_p.transform_p2w(rel_pose, transform_deriviatives)
 			new_motion.append(new_p)
 			tcnt += 1
 		cnt += 1
@@ -305,7 +340,7 @@ def get_imu_readings(imu_motion, gravity_in_world, save_name):
 
 		# Acceleration - gravity measurements 
 		acc = imu_motion[i].lin_acc
-		acc = imu_motion[i].ori.T.dot(acc-gravity_in_world.reshape(3,1)) #world to pose
+		acc = -imu_motion[i].ori.T.dot(acc-gravity_in_world.reshape(3,1)) #world to pose
 		for j in xrange(3):
 			to_write.append(acc[j,0])
 

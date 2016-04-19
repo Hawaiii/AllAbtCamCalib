@@ -87,7 +87,7 @@ class Pose:
         """
         return self.extrinsics().get_homo_trans_matrix_inv()
 
-    def transform_p2w(self, rel_pose):
+    def transform_p2w(self, rel_pose, transform_deriviatives=False):
         """
         Transforms relative pose in current coordinate to world coordinate.
         Only writes location, orientation, and timestamp.
@@ -96,12 +96,27 @@ class Pose:
         loc = loc / matlib.repmat( loc[-1,:], 4, 1)
         loc = loc[0:3,:]
 
-        ori = self.ori.dot(rel_pose.ori)
+        ori = self.ori.T.dot(rel_pose.ori)
+
+        lin_vel = None
+        ang_vel = None
+        lin_acc = None
+        ang_acc = None
+            
+        if transform_deriviatives:
+            if self.lin_vel is not None:
+                lin_vel = self.ori.T.dot(self.lin_vel)
+            if self.ang_vel is not None:
+                ang_vel = self.ori.T.dot(self.ang_vel)
+            if self.lin_acc is not None:
+                lin_acc = self.ori.T.dot(self.lin_acc)
+            if self.ang_acc is not None:
+                ang_acc = self.ori.T.dot(self.ang_acc) 
 
         # import pdb; pdb.set_trace()
 
         if rel_pose.time is None and self.time is None:
-            return Pose(loc, ori)
+                return Pose(loc, ori, time=None, lvel=lin_vel, avel=ang_vel, lacc=lin_acc, aacc=ang_acc)
         else:
             if self.time is not None:
                 ts = self.time
@@ -109,7 +124,7 @@ class Pose:
                 ts = 0
             if rel_pose.time is not None:
                 ts += rel_pose.time
-            return Pose(loc, ori, time=ts)
+            return Pose(loc, ori, time=ts, lvel=lin_vel, avel=ang_vel, lacc=lin_acc, aacc=ang_acc)
 
     @staticmethod
     def motion_regress_vel_acc(motion, window):

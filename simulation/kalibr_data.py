@@ -20,8 +20,14 @@ from cycler import cycler
 """
 IMU
 """
-imu_motion = imu.read_motion('data/pose.csv', sample_ratio=1)
-gravity_in_world = np.array([9.81,0,0])
+headset_motion = imu.read_motion('data/pose.csv', sample_ratio=1)
+imu_rel_loc = np.array([0,0,0]).reshape(3,1)
+imu_rel_ori = np.array([0,math.pi,0]).reshape(3,1)
+imu_rel_pose = util.Pose(imu_rel_loc, imu_rel_ori, time=0)
+subsample_ratio = 10
+imu_motion = imu.transform_motion(headset_motion, imu_rel_pose, subsample_ratio, transform_deriviatives=True)
+
+gravity_in_world = np.array([0,9.81,0])
 imu.get_imu_readings(imu_motion, gravity_in_world, save_name='results/imu0.csv')
 
 # fig = plt.figure()
