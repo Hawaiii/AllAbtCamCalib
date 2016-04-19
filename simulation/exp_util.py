@@ -24,6 +24,7 @@ class Pose:
         
         assert(ori.size == 3 or ori.size == 9)
         if ori.size == 3:
+            ori = ori.astype(np.float32)
             self.ori = cv2.Rodrigues(ori)[0]
         else:
             self.ori = 1.0 * ori
@@ -96,7 +97,7 @@ class Pose:
         loc = loc / matlib.repmat( loc[-1,:], 4, 1)
         loc = loc[0:3,:]
 
-        ori = self.ori.T.dot(rel_pose.ori)
+        ori = self.ori.dot(rel_pose.ori)
 
         lin_vel = None
         ang_vel = None
@@ -183,6 +184,7 @@ class Pose:
         Plots a arrow of z-axis indicating the pose
         """
         z_vec = self.ori.dot(np.array([0,0,1]).reshape(3,1))
+        x_vec = self.ori.dot(np.array([1,0,0]).reshape(3,1))
         if fax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
@@ -192,10 +194,16 @@ class Pose:
             ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
                 z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
                 length=length)
+            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+                x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail',\
+                length=length)
         else:
             ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
                 z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
                 color=clr, length=length)
+            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+                x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail',\
+                length=length)
 
         if fax is None:
             plt.show()

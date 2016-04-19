@@ -92,30 +92,49 @@ def circle_motion():
 	"""
 	poses = []
 	imu_sample_rate = 100 #100Hz
+	time_length = 10
 
-	theta = np.linspace(-4 * np.pi, 4 * np.pi, imu_sample_rate*4)
+	start_a = -4 * np.pi
+	end_a = 4 * np.pi
+	theta = np.linspace(start_a, end_a, imu_sample_rate*time_length) # 15 seconds of data
 
 	timestamp = [int(1.46065*(10**18) + (10**9)/imu_sample_rate*t) for t in range(len(theta))]
 
-	r = 1
+	r = 0.4
 	x = r * np.cos(theta)
 	y = r * np.sin(theta)
 	z = -2*r * np.ones(theta.shape)
 
-	ra = math.pi/6
-	rx = -ra * np.sin(theta)
-	ry = -ra * np.cos(theta)
-	rz = np.zeros(theta.shape)
+	ra = math.pi/8
 
 	for i in xrange(len(theta)):
 		loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
-		ori = np.array( [rx[i], ry[i], rz[i]] ).reshape(3,1)
+		ori = np.array([[np.cos(ra)*np.cos(theta[i]), np.cos(ra)*np.sin(theta[i]), np.sin(ra)], \
+						[-np.sin(theta[i]), np.cos(theta[i]), 0], \
+						[-np.sin(ra)*np.cos(theta[i]), -np.sin(ra)*np.sin(theta[i]), np.cos(ra)]]).T
+		# print theta[i], cv2.Rodrigues(ori)[0]
 		lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
-		avel = np.array( [ry[i], -rx[i], 0] ).reshape(3,1)
+		#avel = np.array([-ry[i], rx[i], (end_a-start_a)/time_length]).reshape(3,1) #@TODO!!!
+		avel = np.zeros((3,1)) #@TODO
 		lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
-		aacc = np.array( [-rx[i], -ry[i], 0]).reshape(3,1)
+		aacc = np.array( [0, 0, 0]).reshape(3,1)
 		pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
 		poses.append(pose)
+
+	# ra = math.pi/6
+	# rx = -ra * np.sin(theta)
+	# ry = -ra * np.cos(theta)
+	# rz = np.zeros(theta.shape)
+
+	# for i in xrange(len(theta)):
+	# 	loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
+	# 	ori = np.array( [rx[i], ry[i], rz[i]] ).reshape(3,1)
+	# 	lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
+	# 	avel = np.array( [ry[i], -rx[i], 0] ).reshape(3,1)
+	# 	lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
+	# 	aacc = np.array( [-rx[i], -ry[i], 0]).reshape(3,1)
+	# 	pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
+	# 	poses.append(pose)
 
 	return poses
 

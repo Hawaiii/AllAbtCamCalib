@@ -41,6 +41,7 @@ tp = imu_predict[:,0]-imu_reading[0,0]
 # plt.plot(tp, imu_predict[:,3],color='b')
 # plt.title('ang vel z')
 # plt.show()
+
 plt.subplot(3, 1, 1)
 plt.plot(tr, imu_reading[:,4],color='r')
 plt.plot(tp, imu_predict[:,4],color='b')
