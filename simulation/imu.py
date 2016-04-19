@@ -92,10 +92,10 @@ def circle_motion():
 	"""
 	poses = []
 	imu_sample_rate = 100 #100Hz
-	time_length = 10
+	time_length = 30
 
-	start_a = -4 * np.pi
-	end_a = 4 * np.pi
+	start_a = -8 * np.pi
+	end_a = 8 * np.pi
 	theta = np.linspace(start_a, end_a, imu_sample_rate*time_length) # 15 seconds of data
 
 	timestamp = [int(1.46065*(10**18) + (10**9)/imu_sample_rate*t) for t in range(len(theta))]
@@ -103,7 +103,8 @@ def circle_motion():
 	r = 0.4
 	x = r * np.cos(theta)
 	y = r * np.sin(theta)
-	z = -2*r * np.ones(theta.shape)
+	# z = -2*r * np.ones(theta.shape)
+	z = np.linspace(-3,-1, imu_sample_rate*time_length)
 
 	ra = math.pi/8
 
@@ -112,10 +113,25 @@ def circle_motion():
 		ori = np.array([[np.cos(ra)*np.cos(theta[i]), np.cos(ra)*np.sin(theta[i]), np.sin(ra)], \
 						[-np.sin(theta[i]), np.cos(theta[i]), 0], \
 						[-np.sin(ra)*np.cos(theta[i]), -np.sin(ra)*np.sin(theta[i]), np.cos(ra)]]).T
-		# print theta[i], cv2.Rodrigues(ori)[0]
-		lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
-		#avel = np.array([-ry[i], rx[i], (end_a-start_a)/time_length]).reshape(3,1) #@TODO!!!
-		avel = np.zeros((3,1)) #@TODO
+		# lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
+		lvel = np.array( [-y[i], x[i], -1.5-(-3)/time_length] ).reshape(3,1)
+		
+		#angular velocity
+		avel = np.zeros((3,1))
+		if i > 0 and i < len(theta)-1:
+			last_ori = cv2.Rodrigues(poses[-1].ori)[0]
+			next_ori = cv2.Rodrigues(np.array([[np.cos(ra)*np.cos(theta[i+1]), np.cos(ra)*np.sin(theta[i+1]), np.sin(ra)], \
+						[-np.sin(theta[i+1]), np.cos(theta[i+1]), 0], \
+						[-np.sin(ra)*np.cos(theta[i+1]), -np.sin(ra)*np.sin(theta[i+1]), np.cos(ra)]]).T)[0]
+			for j in xrange(3):
+				#assume smooth rotation
+				if last_ori[j,0] < -np.pi/2 and next_ori[j,0] > np.pi/2:
+					next_ori[j,0] = next_ori[j,0] - 2*np.pi
+				elif last_ori[j,0] > np.pi/2 and next_ori[j,0] < -np.pi/2:
+					next_ori[j,0] = next_ori[j-0] + 2*np.pi
+				
+			avel = (next_ori - last_ori)*imu_sample_rate/2
+
 		lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
 		aacc = np.array( [0, 0, 0]).reshape(3,1)
 		pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
