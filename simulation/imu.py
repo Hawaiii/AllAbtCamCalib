@@ -85,62 +85,6 @@ import csv
 
 # 	return extrins
 
-def circle_motion():
-	"""
-	A hard coded motion.
-	Returns a list of time-stamped poses.
-	"""
-	poses = []
-	imu_sample_rate = 100 #100Hz
-	time_length = 30
-
-	start_a = -8 * np.pi
-	end_a = 8 * np.pi
-	theta = np.linspace(start_a, end_a, imu_sample_rate*time_length) # 15 seconds of data
-
-	timestamp = [int(1.46065*(10**18) + (10**9)/imu_sample_rate*t) for t in range(len(theta))]
-
-	r = 0.4
-	x = r * np.cos(theta)
-	y = r * np.sin(theta)
-	# z = -2*r * np.ones(theta.shape)
-	z = np.linspace(-3,-0.5, imu_sample_rate*time_length)
-
-	ra = math.pi/8
-	dtheta_dt = (end_a-start_a)/time_length
-
-	for i in xrange(len(theta)):
-		loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
-		ori = np.array([[np.cos(ra)*np.cos(theta[i]), np.cos(ra)*np.sin(theta[i]), np.sin(ra)], \
-						[-np.sin(theta[i]), np.cos(theta[i]), 0], \
-						[-np.sin(ra)*np.cos(theta[i]), -np.sin(ra)*np.sin(theta[i]), np.cos(ra)]]).T
-		# lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
-		lvel = np.array( [-y[i], x[i], -1.5-(-3)/time_length] ).reshape(3,1)
-		
-		#angular velocity
-		avel = np.array( [0, 0, dtheta_dt] )
-		lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
-		aacc = np.array( [0, 0, 0]).reshape(3,1)
-		pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
-		poses.append(pose)
-
-	# ra = math.pi/6
-	# rx = -ra * np.sin(theta)
-	# ry = -ra * np.cos(theta)
-	# rz = np.zeros(theta.shape)
-
-	# for i in xrange(len(theta)):
-	# 	loc = np.array( [x[i], y[i], z[i]] ).reshape(3,1)
-	# 	ori = np.array( [rx[i], ry[i], rz[i]] ).reshape(3,1)
-	# 	lvel = np.array( [-y[i], x[i], 0] ).reshape(3,1)
-	# 	avel = np.array( [ry[i], -rx[i], 0] ).reshape(3,1)
-	# 	lacc = np.array( [-x[i], -y[i], 0] ).reshape(3,1)
-	# 	aacc = np.array( [-rx[i], -ry[i], 0]).reshape(3,1)
-	# 	pose = util.Pose(loc, ori, timestamp[i], lvel=lvel, avel=avel, lacc=lacc, aacc=aacc)
-	# 	poses.append(pose)
-
-	return poses
-
 
 def read_motion(filename, sample_ratio=1):
 	"""
@@ -186,6 +130,7 @@ def read_motion(filename, sample_ratio=1):
 		cnt += 1
 	print 'read', cnt, 'poses, recorded', tcnt,'poses'
 	return motion
+	
 # def read_motion(filename, sample_ratio=1):
 # 	"""
 # 	All lengths in m.
@@ -362,7 +307,7 @@ def get_imu_readings(imu_motion, gravity_in_world, save_name):
 
 		# Acceleration - gravity measurements 
 		acc = imu_motion[i].lin_acc
-		acc = -imu_motion[i].ori.T.dot(acc-gravity_in_world.reshape(3,1)) #world to pose
+		acc = imu_motion[i].ori.T.dot(acc-gravity_in_world.reshape(3,1)) #world to pose
 		for j in xrange(3):
 			to_write.append(acc[j,0])
 
