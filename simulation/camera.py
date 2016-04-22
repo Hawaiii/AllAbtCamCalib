@@ -252,13 +252,14 @@ class Camera:
 						print 'point', point,'projects to wrong side of camera'
 			return loc[0:2]
 
-	def calc_homography(self, motion, board, im_size):
+	def calc_homography(self, motion, board, im_size, img, scale, save_name):
 		"""
-		Calculates homography that transforms the image to board. Ignores distortion.
+		Calculates homography that transforms the image to board and render target as seen by the camera. Ignores distortion.
 		Args:
 			motion: list of Poses
 			board: a Board
 			im_size: (im_width, im_height)
+			scale: scale up the image to avoid aliasing
 		Returns:
 			Hs: a list of 3x3 homography matrices
 		"""
@@ -272,15 +273,20 @@ class Camera:
 		im_edges[3,1] = im_size[1]-1
  
 		# For each pose, project four corner locations onto image
-		for pose in motion:
+		for i, pose in enumerate(motion):
 			corners = board.get_four_corners()
 			edges = self.project_point(pose.extrinsics(), corners, nodistortion=True).T.astype(np.float32)
-
+			edges = edges * scale
+			
 			# Calculate homography
 			H, mask = cv2.findHomography(im_edges, edges)
 
+			warped = cv2.warpPerspective(img, H, (self.size[0]*scale, self.size[1]*scale), borderValue=np.array([127,127,127]))
+
+			small = cv2.resize(warped, (0,0), fx=1./scale, fy=1./scale)
+			if save_name is not None:
+				cv2.imwrite(save_name+str(pose.time)+'.png', small)
 			# Hd = self.intrinsics.intri_mat.dot(extrin.get_Rt_matrix().dot(board_to_world_T))[:, [0,1,3]]
-			# import pdb; pdb.set_trace()
 			Hs.append(H)
 
 		return Hs		

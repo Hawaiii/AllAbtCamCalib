@@ -8,6 +8,8 @@ import numpy as np
 import numpy.matlib as matlib
 import math
 import random
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 class Pose:
     loc = None # location, 3x1 numpy array
@@ -190,20 +192,21 @@ class Pose:
             ax = fig.add_subplot(111, projection='3d')
         else:
             ax = fax
-        if clr is None:
-            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
-                z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
-                length=length)
-            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
-                x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail',\
-                length=length)
-        else:
-            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
-                z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
-                color=clr, length=length)
-            ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
-                x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail',\
-                length=length)
+        #if clr is None:
+        #    ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+        #        z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail')
+           #     length=length)
+        #    ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+        #        x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail')
+           #     length=length)
+        #else:
+        #    ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+        #        z_vec[0,0], z_vec[1,0], z_vec[2,0], pivot='tail', \
+        #        color=clr)
+	#, length=length)
+        #    ax.quiver(self.loc[0,0], self.loc[1,0], self.loc[2,0], \
+        #        x_vec[0,0], x_vec[1,0], x_vec[2,0], pivot='tail')
+        #        length=length)
 
         if fax is None:
             plt.show()
