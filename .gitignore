@@ -33,3 +33,4 @@
 # generated data
 *.pdf
 results/
+*.bag
