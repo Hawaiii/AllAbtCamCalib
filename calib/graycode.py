@@ -23,9 +23,9 @@ def make_greycode_seq(screen_res, add_invert=False):
     while len(splits) < width+1:
         i = 0
         while i < len(splits)-1:
-            half = (splits[i+1]+splits[i])/2
+            half = (splits[i+1]+splits[i]+1)/2
             #[splits[i], half-1] stays the same, [half, splits[i+1]-1] gets inverted
-            if half+1 < splits[i+1]:
+            if half < splits[i+1] and half < width:
                 im[:,half:splits[i+1]] = ~im[:, half:splits[i+1]]
 
             if splits[i] + 1 < splits[i+1]:
@@ -34,7 +34,8 @@ def make_greycode_seq(screen_res, add_invert=False):
             else:
                 i += 1
         gc_seq.append(np.copy(im))
-        #print splits
+        # print splits
+        # import pdb; pdb.set_trace()
         
     # Horizontal strips
     splits = [0, height]
@@ -44,10 +45,10 @@ def make_greycode_seq(screen_res, add_invert=False):
     while len(splits) < height+1:
         i = 0
         while i < len(splits)-1:
-            half = (splits[i+1]+splits[i])/2
+            half = (splits[i+1]+splits[i]+1)/2
             #[splits[i], half-1] stays the same, [half, splits[i+1]-1] gets inverted
-            if half+1 < splits[i+1]:
-                im[half:splits[i+1],:] = ~im[half:splits[i+1], :]
+            if half < splits[i+1] and half < width:
+                im[half:splits[i+1],:] = ~im[half:splits[i+1],:]
 
             if splits[i] + 1 < splits[i+1]:
                 splits.insert(i+1, half)
@@ -69,7 +70,7 @@ def make_greycode_seq(screen_res, add_invert=False):
             # else:
             #     gc_dict[code] = [(x,y)]
             gc_dict[code] = (x,y)
-    # print gc_dict
+    print gc_dict
 
     return gc_seq, gc_dict
 
@@ -83,10 +84,10 @@ def show_im_seq(imgs, time_interval):
     #cv2.setWindowProperty('calibration', cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
     for i in xrange(len(imgs)):
         cv2.imshow('calibration',imgs[i])
-        # cv2.waitKey(1000*time_interval)
-        cv2.waitKey(0)
+        cv2.waitKey(1000*time_interval)
+        # cv2.waitKey(0)
 
-gc_seq, gc_dict = make_greycode_seq((600,400))
+gc_seq, gc_dict = make_greycode_seq((3,2))
 #gc_seq, gc_dict = make_greycode_seq((600,400))
 show_im_seq(gc_seq, 1)
 
