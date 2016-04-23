@@ -15,7 +15,14 @@ def make_greycode_seq(screen_res, add_invert=False):
     width = screen_res[0]
     height = screen_res[1]
 
+    # Start signal: black, white, black
+    print "Start signal: 0, 1, 0..."
+    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
+    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
+    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
+
     # Vertical strips
+    print "Generating vertical strips..."
     splits = [0, width]
     im = 255*np.ones((height, width), dtype=np.uint8)
     gc_seq.append(np.copy(im))
@@ -34,10 +41,9 @@ def make_greycode_seq(screen_res, add_invert=False):
             else:
                 i += 1
         gc_seq.append(np.copy(im))
-        # print splits
-        # import pdb; pdb.set_trace()
         
     # Horizontal strips
+    print "Generating horizontal strips..."
     splits = [0, height]
     im = 255*np.ones((height, width), dtype=np.uint8)
     gc_seq.append(np.copy(im))
@@ -56,19 +62,21 @@ def make_greycode_seq(screen_res, add_invert=False):
             else:
                 i += 1
         gc_seq.append(np.copy(im))
-        #print splits
+        
+    # End signal: white, black, white
+    print "End signal: 1, 0, 1"
+    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
+    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
+    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
 
     # Build Dictionary
+    print "Generating dictionary"
     n = len(gc_seq)
     for x in range(width):
         for y in range(height):
             code = ""
             for i in range(n):
                 code += str( gc_seq[i][y,x]/255 )
-            # if code in gc_dict:
-            #     gc_dict[code].append((x,y))
-            # else:
-            #     gc_dict[code] = [(x,y)]
             gc_dict[code] = (x,y)
     print len(gc_dict)
 
@@ -85,11 +93,9 @@ def show_im_seq(imgs, time_interval):
     for i in xrange(len(imgs)):
         cv2.imshow('calibration',imgs[i])
         cv2.waitKey(1000*time_interval)
-        # cv2.waitKey(0)
-
-# gc_seq, gc_dict = make_greycode_seq((3,2))
+    
 gc_seq, gc_dict = make_greycode_seq((600,400))
-show_im_seq(gc_seq, 1)
+show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
 
 
     
