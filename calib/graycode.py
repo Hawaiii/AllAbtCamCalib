@@ -70,7 +70,7 @@ def make_greycode_seq(screen_res, add_invert=False):
             # else:
             #     gc_dict[code] = [(x,y)]
             gc_dict[code] = (x,y)
-    print gc_dict
+    print len(gc_dict)
 
     return gc_seq, gc_dict
 
@@ -87,8 +87,8 @@ def show_im_seq(imgs, time_interval):
         cv2.waitKey(1000*time_interval)
         # cv2.waitKey(0)
 
-gc_seq, gc_dict = make_greycode_seq((3,2))
-#gc_seq, gc_dict = make_greycode_seq((600,400))
+# gc_seq, gc_dict = make_greycode_seq((3,2))
+gc_seq, gc_dict = make_greycode_seq((600,400))
 show_im_seq(gc_seq, 1)
 
 
