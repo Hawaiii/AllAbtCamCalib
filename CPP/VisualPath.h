@@ -17,6 +17,7 @@
 #include <highgui.h>
 #include <fstream>
 #include <map>
+#include <string.h>
 struct TreeNode{
 	TreeNode * left_node;
 	TreeNode * right_node;
@@ -42,6 +43,8 @@ struct Chessboard {
 class AppleJuice{
 	private:
 		Chessboard chessboard;
+
+		cv::Point3f SearchPoints(std::string s);
 
 	public:
 		void ReadLookup_table();
