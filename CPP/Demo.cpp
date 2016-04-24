@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
   parse_argv(argc, argv);
 
   std::cout<<"starts from here...\n";
+  AppleJuice* tree = new AppleJuice();
+  juice->ReadLookup_table("../../calib/h600.csv");
    
    return 0;
   }
