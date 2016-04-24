@@ -9,5 +9,5 @@ ADD_DEFINITIONS(
 	-std=c++11
 )
 
-add_executable( Apple_Juice Demo.cpp )
+add_executable( Apple_Juice Demo.cpp AppleJuice.cc )
 target_link_libraries( Apple_Juice ${OpenCV_LIBS} ${CERES_LIBRARIES})

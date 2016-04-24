@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/buil
 CMakeFiles/Apple_Juice.dir/all:
 	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/depend
 	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles  1 2
 	@echo "Built target Apple_Juice"
 .PHONY : CMakeFiles/Apple_Juice.dir/all
 
@@ -69,7 +69,7 @@ all: CMakeFiles/Apple_Juice.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Apple_Juice.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/Apple_Juice.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles 0
 .PHONY : CMakeFiles/Apple_Juice.dir/rule

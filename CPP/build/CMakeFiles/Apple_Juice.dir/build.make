@@ -72,14 +72,39 @@ CMakeFiles/Apple_Juice.dir/Demo.cpp.o.provides: CMakeFiles/Apple_Juice.dir/Demo.
 
 CMakeFiles/Apple_Juice.dir/Demo.cpp.o.provides.build: CMakeFiles/Apple_Juice.dir/Demo.cpp.o
 
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o: CMakeFiles/Apple_Juice.dir/flags.make
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o: ../AppleJuice.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o -c /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleJuice.cc
+
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Apple_Juice.dir/AppleJuice.cc.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleJuice.cc > CMakeFiles/Apple_Juice.dir/AppleJuice.cc.i
+
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Apple_Juice.dir/AppleJuice.cc.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleJuice.cc -o CMakeFiles/Apple_Juice.dir/AppleJuice.cc.s
+
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.requires:
+.PHONY : CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.requires
+
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.provides: CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.requires
+	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.provides.build
+.PHONY : CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.provides
+
+CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.provides.build: CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o
+
 # Object files for target Apple_Juice
 Apple_Juice_OBJECTS = \
-"CMakeFiles/Apple_Juice.dir/Demo.cpp.o"
+"CMakeFiles/Apple_Juice.dir/Demo.cpp.o" \
+"CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o"
 
 # External object files for target Apple_Juice
 Apple_Juice_EXTERNAL_OBJECTS =
 
 Apple_Juice: CMakeFiles/Apple_Juice.dir/Demo.cpp.o
+Apple_Juice: CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o
 Apple_Juice: CMakeFiles/Apple_Juice.dir/build.make
 Apple_Juice: /usr/local/lib/libopencv_videostab.3.1.0.dylib
 Apple_Juice: /usr/local/lib/libopencv_videoio.3.1.0.dylib
@@ -129,6 +154,7 @@ CMakeFiles/Apple_Juice.dir/build: Apple_Juice
 .PHONY : CMakeFiles/Apple_Juice.dir/build
 
 CMakeFiles/Apple_Juice.dir/requires: CMakeFiles/Apple_Juice.dir/Demo.cpp.o.requires
+CMakeFiles/Apple_Juice.dir/requires: CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o.requires
 .PHONY : CMakeFiles/Apple_Juice.dir/requires
 
 CMakeFiles/Apple_Juice.dir/clean:

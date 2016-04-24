@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Apple_Juice.dir/Demo.cpp.o"
+  "CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o"
   "Apple_Juice.pdb"
   "Apple_Juice"
 )

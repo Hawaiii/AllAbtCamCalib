@@ -115,6 +115,30 @@ Apple_Juice/fast:
 	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/build
 .PHONY : Apple_Juice/fast
 
+AppleJuice.o: AppleJuice.cc.o
+.PHONY : AppleJuice.o
+
+# target to build an object file
+AppleJuice.cc.o:
+	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/AppleJuice.cc.o
+.PHONY : AppleJuice.cc.o
+
+AppleJuice.i: AppleJuice.cc.i
+.PHONY : AppleJuice.i
+
+# target to preprocess a source file
+AppleJuice.cc.i:
+	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/AppleJuice.cc.i
+.PHONY : AppleJuice.cc.i
+
+AppleJuice.s: AppleJuice.cc.s
+.PHONY : AppleJuice.s
+
+# target to generate assembly for a file
+AppleJuice.cc.s:
+	$(MAKE) -f CMakeFiles/Apple_Juice.dir/build.make CMakeFiles/Apple_Juice.dir/AppleJuice.cc.s
+.PHONY : AppleJuice.cc.s
+
 Demo.o: Demo.cpp.o
 .PHONY : Demo.o
 
@@ -148,6 +172,9 @@ help:
 	@echo "... Apple_Juice"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... AppleJuice.o"
+	@echo "... AppleJuice.i"
+	@echo "... AppleJuice.s"
 	@echo "... Demo.o"
 	@echo "... Demo.i"
 	@echo "... Demo.s"

@@ -31,8 +31,7 @@ struct Chessboard {
 	double height;	 //phyiscal height
 	double rows; // # of rows
 	double cols; // # of cols
-
-	Chessboard(double r, double c, double x, double y):rows(r),cols(c),width(x), height(y){}
+	Chessboard(double r, double c, double x, double y):rows(r = 5),cols(c = 8),width(x = 0), height(y = 0){}
 };
 
 struct Intrinsic {
@@ -49,8 +48,16 @@ struct Extrinsic {
 };
 
 struct opt {
-	std::string Lookup_table_dir, Image_list_dir, output_dir;
-	opt(std::string a, std::string b, std::string c):Lookup_table_dir(a), Image_list_dir(b), output_dir(c){}
+	std::string Lookup_table_dir, Image_list_dir, output_dir, image_prefix;
+	unsigned int N_shoots, N_poses;
+	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d):
+	 N_shoots(N_shoots = 30),
+	 N_poses(N_poses = 2),
+	 Lookup_table_dir(a = ""),
+	 Image_list_dir(b = ""),
+	 output_dir(c = ""),
+	 image_prefix(d = "")
+		{}
 };
 
 class AppleJuice{
@@ -66,18 +73,18 @@ class AppleJuice{
 		Intrinsic intrinsic;
 
 	public:
-		opt options;
-		//read lookup table from txt 
+		static opt options;
+		//read lookup table from txt
 		// 	>> Chessboard struct
 		void ReadLookup_tables(std::string filename);
-		//read image from DIR 
+		//read image from DIR
 		//	>> ImageLists
-		void ReadImageLists(std::string s = options.Image_list_dir );
-		//Biinarize all images 
+		void ReadImageLists(const opt options);
+		//Biinarize all images
 		//	>> BinaryImages
 		void BinarizeAllImages();
-		//Extract all control pts 
-		//	>> FeaturePools & PatternPtsPool 
+		//Extract all control pts
+		//	>> FeaturePools & PatternPtsPool
 		void ExtractControlPts();
 		//Get Init. Guess from standart OpenCV Camera Calibration
 		//	>> Intrisics >> Extrinsic
@@ -89,8 +96,8 @@ class AppleJuice{
 		void ComputeReprojectionError();
 
 		void ExportResults();
-			
-		
+
+
 
 
 };

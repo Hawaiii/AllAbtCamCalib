@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleJuice.cc
+AppleTree.h
+/Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleTree.h
+
 /Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleTree.h
 stdio.h
 -
@@ -47,10 +51,6 @@ map
 -
 string.h
 -
-
-/Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/Demo.cpp
-AppleTree.h
-/Users/HYJ/Onedrive/Kinect/PhysicProj/AllAbtCamCalib/CPP/AppleTree.h
 
 /usr/local/include/opencv/cv.h
 opencv2/core/core_c.h
