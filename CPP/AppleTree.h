@@ -47,8 +47,14 @@ struct Extrinsic {
 	Extrinsic(cv::Mat r, cv::Mat t): Rot(r), Trans(t){}
 };
 
+struct opt {
+	std::string Lookup_table_dir, Image_list_dir, output_dir;
+	opt(std::string a, std::string b, std::string c):Lookup_table_dir(a), Image_list_dir(b), output_dir(c){}
+};
+
 class AppleJuice{
 	private:
+
 		Chessboard chessboard;
 		std::vector<std::vector<cv::Mat>> ImageLists;
 		std::vector<std::vector<cv::Mat>> BinaryImages;
@@ -58,12 +64,13 @@ class AppleJuice{
 		Intrinsic intrinsic;
 
 	public:
+		opt options;
 		//read lookup table from txt 
 		// 	>> Chessboard struct
-		void ReadLookup_table();
+		void ReadLookup_tables();
 		//read image from DIR 
 		//	>> ImageLists
-		void ReadImageLists();
+		void ReadImageLists(std::string s = options.Image_list_dir );
 		//Biinarize all images 
 		//	>> BinaryImages
 		void BinarizeAllImages();
