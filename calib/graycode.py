@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import csv
 
 def make_greycode_seq(screen_res, add_invert=False):
     """
@@ -9,23 +10,21 @@ def make_greycode_seq(screen_res, add_invert=False):
     Args:
         screen_res: (screen_width, screen_height)
     """
-    gc_seq = []
-    gc_dict = {}
-
     width = screen_res[0]
     height = screen_res[1]
 
     # Start signal: black, white, black
     print "Start signal: 0, 1, 0..."
-    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
-    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
-    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
+    s_seq = []
+    s_seq.append(np.zeros((height, width), dtype=np.uint8))
+    s_seq.append(255*np.ones((height, width), dtype=np.uint8))
+    s_seq.append(np.zeros((height, width), dtype=np.uint8))
 
     # Vertical strips
     print "Generating vertical strips..."
     splits = [0, width]
     im = 255*np.ones((height, width), dtype=np.uint8)
-    gc_seq.append(np.copy(im))
+    v_seq = [np.copy(im)]
 
     while len(splits) < width+1:
         i = 0
@@ -40,13 +39,15 @@ def make_greycode_seq(screen_res, add_invert=False):
                 i += 2
             else:
                 i += 1
-        gc_seq.append(np.copy(im))
+        v_seq.append(np.copy(im))
+    v_dict = record_dict(v_seq, width, height, vertical=True)
+    write_dict_csv(v_dict,'v'+str(width)+'.csv')
         
     # Horizontal strips
     print "Generating horizontal strips..."
     splits = [0, height]
     im = 255*np.ones((height, width), dtype=np.uint8)
-    gc_seq.append(np.copy(im))
+    h_seq = [np.copy(im)]
 
     while len(splits) < height+1:
         i = 0
@@ -61,26 +62,45 @@ def make_greycode_seq(screen_res, add_invert=False):
                 i += 2
             else:
                 i += 1
-        gc_seq.append(np.copy(im))
+        h_seq.append(np.copy(im))
+    h_dict = record_dict(h_seq, width, height, vertical=False)
+    write_dict_csv(h_dict,'h'+str(height)+'.csv')
         
     # End signal: white, black, white
     print "End signal: 1, 0, 1"
-    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
-    gc_seq.append(np.zeros((height, width), dtype=np.uint8))
-    gc_seq.append(255*np.ones((height, width), dtype=np.uint8))
+    e_seq = []
+    e_seq.append(255*np.ones((height, width), dtype=np.uint8))
+    e_seq.append(np.zeros((height, width), dtype=np.uint8))
+    e_seq.append(255*np.ones((height, width), dtype=np.uint8))
+   
 
-    # Build Dictionary
+    return s_seq + v_seq + h_seq + e_seq
+
+def record_dict(gc_seq, width, height, vertical):
     print "Generating dictionary"
-  #  n = len(gc_seq)
-  #  for x in range(width):
-  #      for y in range(height):
-  #          code = ""
-  #          for i in range(n):
-  #              code += str( gc_seq[i][y,x]/255 )
-  #          gc_dict[code] = (x,y)
-    print len(gc_dict)
+    gc_dict = {}
+    n = len(gc_seq)
+    if vertical:
+        for x in range(width):
+           code = ""
+           for i in range(n):
+               code += str( gc_seq[i][0,x]/255 )
+           gc_dict[code] = x
+    else:
+        for y in range(height):
+            code = ""
+            for i in range(n):
+                code += str( gc_seq[i][y,0]/255 )
+            gc_dict[code] = y
+    print 'Done. dictionary length ',len(gc_dict)
+    return gc_dict
 
-    return gc_seq, gc_dict
+def write_dict_csv(gc_dict, filename):
+    csvfile = open(filename, 'w')
+    writer = csv.writer(csvfile, delimiter=',')
+    for code in gc_dict.keys():
+        writer.writerow([code, gc_dict[code]])
+    csvfile.close()
 
 def show_im_seq(imgs, time_interval):
     """
@@ -94,8 +114,8 @@ def show_im_seq(imgs, time_interval):
         cv2.imshow('calibration',imgs[i])
         cv2.waitKey(1000*time_interval)
     
-gc_seq, gc_dict = make_greycode_seq((800,600))
-show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
+gc_seq = make_greycode_seq((800,600))
+#show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
 
 
     
