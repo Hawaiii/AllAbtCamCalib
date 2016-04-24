@@ -21,15 +21,16 @@
 struct TreeNode{
 	TreeNode * left_node;
 	TreeNode * right_node;
-	int val; //swtich to * Data if you want
+	int min;
+	int max;
 };
 
 struct Chessboard {
 	TreeNode * lookup_table;
+	double width; // physical width
 	double height;	 //phyiscal height
 	double rows; // # of rows
 	double cols; // # of cols
-        double width;
 
 	Chessboard(double r, double c, double x, double y){
 		rows = r;
@@ -50,6 +51,7 @@ struct Intrinsic {
 class AppleJuice{
 	private:
 		Chessboard chessboard;
+
 		std::vector<std::vector<cv::Mat>> ImageLists;
 		std::vector<std::vector<cv::Mat>> BinaryImages;
 		std::vector<std::vector<cv::Point2f>> FeaturePool;
@@ -59,7 +61,7 @@ class AppleJuice{
 
 	public:
 		//read lookup table from txt >> Chessboard struct
-		void ReadLookup_table();
+		void ReadLookup_table(std::string filename);
 		//read image from DIR >> ImageLists
 		void ReadImageLists();
 		//Biinarize all images >> BinaryImages
