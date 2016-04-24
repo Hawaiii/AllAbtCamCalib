@@ -48,15 +48,16 @@ struct Extrinsic {
 };
 
 struct opt {
-	std::string Lookup_table_dir, Image_list_dir, output_dir, image_prefix;
+	std::string Lookup_table_dir, Image_list_dir, output_dir, pose_prefix, image_prefix;
 	unsigned int N_shoots, N_poses;
-	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d):
+	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d, std::string e):
 	 N_shoots(N_shoots = 30),
 	 N_poses(N_poses = 2),
 	 Lookup_table_dir(a = ""),
 	 Image_list_dir(b = ""),
 	 output_dir(c = ""),
-	 image_prefix(d = "")
+	 image_prefix(d = ""),
+	 pose_prefix(e = "")
 		{}
 };
 
