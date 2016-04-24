@@ -32,13 +32,7 @@ struct Chessboard {
 	double rows; // # of rows
 	double cols; // # of cols
 
-	Chessboard(double r, double c, double x, double y){
-		rows = r;
-		cols = c;
-	        width = x;
-		height = y;
-	return;	
-	}
+	Chessboard(double r, double c, double x, double y):rows(r),cols(c),width(x), height(y){}
 };
 
 struct Intrinsic {
@@ -46,6 +40,12 @@ struct Intrinsic {
 	double focus_x, focus_y, pptx, ppty;
 	Intrinsic(double f_x, double f_y, double p_x, double p_y):focus_x(f_x), focus_y(f_y),
 	pptx(p_x), ppty(p_y){}
+};
+
+struct Extrinsic {
+	// all in CV rouguious form
+	cv::Mat  Rot, Trans;
+	Extrinsic(cv::Mat r, cv::Mat t): Rot(r), Trans(t){}
 };
 
 class AppleJuice{
@@ -57,20 +57,29 @@ class AppleJuice{
 		std::vector<std::vector<cv::Point2f>> FeaturePool;
 		std::vector<std::vector<cv::Point3f>> PatternPtsPool;
 		cv::Point3f SearchPoints(std::string s);
-
+		Intrinsic intrinsic;
 
 	public:
 		//read lookup table from txt >> Chessboard struct
 		void ReadLookup_table(std::string filename);
 		//read image from DIR >> ImageLists
 		void ReadImageLists();
-		//Biinarize all images >> BinaryImages
+		//Biinarize all images 
+		//	>> BinaryImages
 		void BinarizeAllImages();
-		//Extract all control pts >> FeaturePools & PatternPtsPool 
+		//Extract all control pts 
+		//	>> FeaturePools & PatternPtsPool 
 		void ExtractControlPts();
 		//Get Init. Guess from standart OpenCV Camera Calibration
+		//	>> Intrisics >> Extrinsic
 		void InitCameraCalibration();
+		// Full BundleAdjustment
+		//  >> ???
+		void AppleBundleAdjustment();
 
+		void ComputeReprojectionError();
+
+		void ExportResults();
 			
 		
 
