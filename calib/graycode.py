@@ -71,13 +71,13 @@ def make_greycode_seq(screen_res, add_invert=False):
 
     # Build Dictionary
     print "Generating dictionary"
-    n = len(gc_seq)
-    for x in range(width):
-        for y in range(height):
-            code = ""
-            for i in range(n):
-                code += str( gc_seq[i][y,x]/255 )
-            gc_dict[code] = (x,y)
+  #  n = len(gc_seq)
+  #  for x in range(width):
+  #      for y in range(height):
+  #          code = ""
+  #          for i in range(n):
+  #              code += str( gc_seq[i][y,x]/255 )
+  #          gc_dict[code] = (x,y)
     print len(gc_dict)
 
     return gc_seq, gc_dict
@@ -94,7 +94,7 @@ def show_im_seq(imgs, time_interval):
         cv2.imshow('calibration',imgs[i])
         cv2.waitKey(1000*time_interval)
     
-gc_seq, gc_dict = make_greycode_seq((600,400))
+gc_seq, gc_dict = make_greycode_seq((800,600))
 show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
 
 
