@@ -25,15 +25,19 @@ struct TreeNode{
 
 struct Chessboard {
 	TreeNode * lookup_table;
-	double height //phyiscal height
+	double height;	 //phyiscal height
 	double rows; // # of rows
 	double cols; // # of cols
-        
-	Chessboard(double r, double c, ){
-		rows = x;
-		cols = 
+        double width;
+
+	Chessboard(double r, double c, double x, double y){
+		rows = r;
+		cols = c;
+	        width = x;
+		height = y;
+	return;	
 	}
-}
+};
 
 class AppleJuice{
 	private:
