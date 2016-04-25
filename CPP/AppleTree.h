@@ -23,14 +23,15 @@
 
 
 struct TreeNode{
-	TreeNode * left_node;
-	TreeNode * right_node;
+	TreeNode * left_node; //0
+	TreeNode * right_node; //1
 	int min;
 	int max;
 };
 
 struct Chessboard {
-	TreeNode * lookup_table;
+	TreeNode * lookup_table_x;
+	TreeNode * lookup_table_y;
 	double width; // physical width
 	double height;	 //phyiscal height
 	double rows; // # of rows
@@ -54,19 +55,19 @@ struct Extrinsic {
 };
 
 struct opt {
-	std::string Lookup_table_dir, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
-	unsigned int N_shoots, N_poses, image_width, image_height;
-	opt(unsigned int N_shoots, unsigned int N_poses,unsigned int image_width,unsigned int image_height, std::string a, std::string b, std::string c, std::string d, std::string e, std::string f):
+
+	std::string Lookup_table_dir_x, Lookup_table_dir_y, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
+	unsigned int N_shoots, N_poses;
+	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d, std::string e, std::string f, std::string g):
 	 N_shoots(N_shoots ),
 	 N_poses(N_poses ),
-	 image_width(image_width ),
-	 image_height(image_height ),
-	 Lookup_table_dir(a ),
-	 Image_list_dir(b ),
-	 output_dir(c ),
-	 image_prefix(d ),
-	 pose_prefix(e ),
-	 image_type(f )
+	 Lookup_table_dir_x(a ),
+	 Lookup_table_dir_y(b ),
+	 Image_list_dir(c ),
+	 output_dir(d ),
+	 image_prefix(e ),
+	 pose_prefix(f ),
+	 image_type(g )
 		{}
 };
 
@@ -79,7 +80,7 @@ class AppleJuice{
 		std::vector<std::vector<cv::Mat>> BinaryImages;
 		std::vector<std::vector<cv::Point2f>> FeaturePool;
 		std::vector<std::vector<cv::Point3f>> PatternPtsPool;
-		cv::Point3f SearchPoints(std::string s);
+		std::pair<cv::Point3f, cv::Point3f> SearchPoints(std::string xs, std::string ys);
 		Intrinsic intrinsic;
 		std::vector<arma::cube> ImageBlob;
 
@@ -87,7 +88,7 @@ class AppleJuice{
 		static opt options;
 		//read lookup table from txt
 		// 	>> Chessboard struct
-		void ReadLookup_table(std::string filename);
+		void ReadLookup_table(const opt options);
 		//read image from DIR
 		//	>> ImageLists
 		void ReadImageLists(const opt options, unsigned int display = 0);
