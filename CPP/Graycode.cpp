@@ -29,6 +29,31 @@ void insert(TreeNode* node, string code, int val){
 	}
 }
 
+std::pair<float, float> min_max2center_range(int min, int max){
+	return make_pair(1.0*(max+min)/2, 1.0*(max-min)/2 );
+}
+
+std::pair<float, float> search(TreeNode* tree, std::string s){
+	if (!tree or (s.length() == 0 and tree->min == -1)){
+		return make_pair(-1, -1);
+	}
+
+	int len = s.length();
+	if (len == 0) return min_max2center_range(tree->min, tree->max);
+	if (!(tree->left_node) and !(tree->right_node)){
+		DLOG(INFO) << "Search reaches end of tree but still search code " << s << endl;
+		return min_max2center_range(tree->min, tree->max);
+	}
+
+	if (s[0] == '0')
+		return search(tree->left_node, s.substr(1,string::npos));
+	else if (s[0] == '1')
+		return search(tree->right_node, s.substr(1,string::npos));
+	else
+		throw runtime_error("bad search string:" + s);
+}
+
+
 void print_tree(TreeNode* node){
 	if (!node) return;
 
@@ -37,7 +62,7 @@ void print_tree(TreeNode* node){
 	print_tree(node->right_node);
 }
 
-void AppleJuice::ReadLookup_table(TreeNode* head, std::string filename){
+void readLookup_table(TreeNode* head, std::string filename){
 	head = new TreeNode{NULL, NULL, -1, -1};
 	ifstream file ( filename );
 	string code;
@@ -47,11 +72,28 @@ void AppleJuice::ReadLookup_table(TreeNode* head, std::string filename){
 		getline( file, val );
 
 		insert(head, code, stoi(val));
-		print_tree(head);
 	}
+	print_tree(head);
 	DLOG(INFO) << endl;
 }
 
-cv::Point3f AppleJuice::SearchPoints(std::string s){
+void AppleJuice::ReadLookup_table(const opt options){
+	DLOG(INFO) << "Reading lookup table for x ..." << endl;
+	readLookup_table(chessboard.lookup_table_x, options.Lookup_table_dir_x);
+	DLOG(INFO) << "Reading lookup table for y ..." << endl;
+	readLookup_table(chessboard.lookup_table_y, options.Lookup_table_dir_y);
+}
 
+std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std::string ys){
+	// Returns the center and confidence of the located 3D point
+	//if (!chessboard) throw runtime_error("Cannot SearchPoints because Chessboard is none!");
+	if (!(chessboard.lookup_table_x) or !(chessboard.lookup_table_y))
+		throw runtime_error("Cannot Search points because lookup tables are missing!");
+
+	pair<float, float> x_pt = search(chessboard.lookup_table_x, xs);
+	pair<float, float> y_pt = search(chessboard.lookup_table_y, ys);
+
+	cv::Point3f pt(x_pt.first, y_pt.first, 0);
+	cv::Point3f conf(x_pt.second, y_pt.second, 0);
+	return make_pair(pt, conf);
 }
