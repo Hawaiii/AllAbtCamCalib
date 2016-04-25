@@ -20,6 +20,7 @@
 #include <string.h>
 #include <glog/logging.h>
 
+
 struct TreeNode{
 	TreeNode * left_node;
 	TreeNode * right_node;
