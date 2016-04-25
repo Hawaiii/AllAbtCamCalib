@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
   // parse_argv(argc, argv);
   // Initialize Google's logging library.
-  
+
   google::InitGoogleLogging(argv[0]);
 
   // N_shoots(N_shoots = 30),
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   // output_dir(c = ""),
   // image_prefix(d = ""),
   // pose_prefix(e = "")
-  opt option(29,2,800,600,
+  opt option(29,2,800,600,0.2,
   "../../calib/h600.csv",
   "../../calib/v800.csv",
   "../data/",
@@ -37,10 +37,12 @@ int main(int argc, char** argv) {
   std::cout<<"starts from here...\n";
   AppleJuice* juice = new AppleJuice();
   try{
-  //juice->ReadImageLists(option);
-  juice->ReadLookup_table(option);
+  juice->ReadImageLists(option);
+  // juice->ReadLookup_table(option);
+  juice->BinarizeAllImages();
 } catch (std::exception &e){
   std::cout << e.what() << std::endl;
 }
+
    return 0;
   }
