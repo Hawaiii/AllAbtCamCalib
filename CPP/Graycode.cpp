@@ -37,9 +37,7 @@ void print_tree(TreeNode* node){
 	print_tree(node->right_node);
 }
 
-void AppleJuice::ReadLookup_table(std::string filename){
-	// Writes the lookup_table in Chessboard
-	TreeNode* head = chessboard.lookup_table;
+void AppleJuice::ReadLookup_table(TreeNode* head, std::string filename){
 	head = new TreeNode{NULL, NULL, -1, -1};
 	ifstream file ( filename );
 	string code;
@@ -50,6 +48,10 @@ void AppleJuice::ReadLookup_table(std::string filename){
 
 		insert(head, code, stoi(val));
 		print_tree(head);
-		DLOG(INFO) << endl;
 	}
+	DLOG(INFO) << endl;
+}
+
+cv::Point3f AppleJuice::SearchPoints(std::string s){
+
 }
