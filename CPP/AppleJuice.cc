@@ -23,6 +23,7 @@ Mat Arma2CV_double(arma::mat B){
 
 
 void AppleJuice::ReadImageLists(const opt options, unsigned int display){
+    DLOG(INFO) << "start AppleJuice::ReadImageLists ....\n";
     string base_name = options.Image_list_dir + options.pose_prefix;
 
     for (size_t i = 0; i < options.N_poses; i++) {
@@ -62,11 +63,16 @@ tmp_blob.n_slices <<"\n";
 }
 
 void AppleJuice::BinarizeAllImages(){
-        for (size_t i = 0; i < ImageBlob.n_slices; i++) {
+        assert(ImageBlob.size() != 0);
+        DLOG(INFO) << "start AppleJuice::BinarizeAllImages() ....\n";
+
+        for (size_t i = 0; i < ImageBlob[0].n_slices; i++) {
             // Find the  & min map of each blob
             arma::mat min_map = arma::min(ImageBlob[i],2);
             arma::mat max_map = arma::max(ImageBlob[i],2);
             
+
+
         }
 
 }

@@ -16,9 +16,9 @@ int main(int argc, char** argv) {
   // parse_argv(argc, argv);
   // Initialize Google's logging library.
   google::InitGoogleLogging(argv[0]);
-
   opt option(29,2,800,600,
   "../../calib/h600.csv",
+  "../../calib/v800.csv",
   "../data/",
   "./",
   "image",
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 } catch (std::exception &e){
   std::cout << e.what() << std::endl;
 }
-  juice->ReadLookup_table("");
+  juice->ReadLookup_table(option);
 
    return 0;
   }
