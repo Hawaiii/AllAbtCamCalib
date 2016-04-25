@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
 
   // parse_argv(argc, argv);
   // Initialize Google's logging library.
+  
   google::InitGoogleLogging(argv[0]);
   opt option(29,2,800,600,
   "../../calib/h600.csv",
