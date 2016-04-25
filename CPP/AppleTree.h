@@ -31,12 +31,14 @@ struct Chessboard {
 	double height;	 //phyiscal height
 	double rows; // # of rows
 	double cols; // # of cols
+	Chessboard(){}
 	Chessboard(double r, double c, double x, double y):rows(r = 5),cols(c = 8),width(x = 0), height(y = 0){}
 };
 
 struct Intrinsic {
 	//Intrinsics.. focus_X, focus_Y, pptx, ppty
 	double focus_x, focus_y, pptx, ppty;
+	Intrinsic(){}
 	Intrinsic(double f_x, double f_y, double p_x, double p_y):focus_x(f_x), focus_y(f_y),
 	pptx(p_x), ppty(p_y){}
 };
@@ -48,16 +50,17 @@ struct Extrinsic {
 };
 
 struct opt {
-	std::string Lookup_table_dir, Image_list_dir, output_dir, pose_prefix, image_prefix;
+	std::string Lookup_table_dir, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
 	unsigned int N_shoots, N_poses;
-	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d, std::string e):
-	 N_shoots(N_shoots = 30),
-	 N_poses(N_poses = 2),
-	 Lookup_table_dir(a = ""),
-	 Image_list_dir(b = ""),
-	 output_dir(c = ""),
-	 image_prefix(d = ""),
-	 pose_prefix(e = "")
+	opt(unsigned int N_shoots, unsigned int N_poses, std::string a, std::string b, std::string c, std::string d, std::string e, std::string f):
+	 N_shoots(N_shoots ),
+	 N_poses(N_poses ),
+	 Lookup_table_dir(a ),
+	 Image_list_dir(b ),
+	 output_dir(c ),
+	 image_prefix(d ),
+	 pose_prefix(e ),
+	 image_type(f )
 		{}
 };
 
@@ -77,7 +80,7 @@ class AppleJuice{
 		static opt options;
 		//read lookup table from txt
 		// 	>> Chessboard struct
-		void ReadLookup_tables(std::string filename);
+		void ReadLookup_table(std::string filename);
 		//read image from DIR
 		//	>> ImageLists
 		void ReadImageLists(const opt options);
