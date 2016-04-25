@@ -66,11 +66,15 @@ void AppleJuice::BinarizeAllImages(){
         assert(ImageBlob.size() != 0);
         DLOG(INFO) << "start AppleJuice::BinarizeAllImages() ....\n";
 
-        for (size_t i = 0; i < ImageBlob[0].n_slices; i++) {
+        for (size_t i = 0; i < ImageBlob.size(); i++) {
             // Find the  & min map of each blob
+            DLOG(INFO) << "Blob size: "<<  ImageBlob[0].n_rows <<" | "<< ImageBlob[0].n_cols << " | " << ImageBlob[0].n_slices <<"\n";
             arma::mat min_map = arma::min(ImageBlob[i],2);
             arma::mat max_map = arma::max(ImageBlob[i],2);
+            high_threshold_map = (1 - options.suppression_ratio ) * max_map + 0.2 * min_map;
+            low_threshold_map = (1 - options.suppression_ratio ) * min_map + 0.2 * max_map;
             
+
 
 
         }
