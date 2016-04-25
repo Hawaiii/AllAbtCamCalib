@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
   // image_prefix(d = ""),
   // pose_prefix(e = "")
   opt option(29,2,"../../calib/h600.csv",
+  "../../calib/v800.csv",
   "../data/",
   "./",
   "image",
@@ -34,11 +35,11 @@ int main(int argc, char** argv) {
   std::cout<<"starts from here...\n";
   AppleJuice* juice = new AppleJuice();
   try{
-  juice->ReadImageLists(option);
+  //juice->ReadImageLists(option);
+  juice->ReadLookup_table(option);
 } catch (std::exception &e){
   std::cout << e.what() << std::endl;
 }
-  juice->ReadLookup_table("");
 
    return 0;
   }
