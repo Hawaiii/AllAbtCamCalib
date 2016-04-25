@@ -17,14 +17,8 @@ int main(int argc, char** argv) {
   // Initialize Google's logging library.
   google::InitGoogleLogging(argv[0]);
 
-  // N_shoots(N_shoots = 30),
-  // N_poses(N_poses = 2),
-  // Lookup_table_dir(a = ""),
-  // Image_list_dir(b = ""),
-  // output_dir(c = ""),
-  // image_prefix(d = ""),
-  // pose_prefix(e = "")
-  opt option(29,2,"../../calib/h600.csv",
+  opt option(29,2,800,600,
+  "../../calib/h600.csv",
   "../data/",
   "./",
   "image",
