@@ -4,7 +4,7 @@
 
 using namespace cv;
 void parse_argv(int argc, char** argv) {
-  if(argc != 1) {
+  if(argc > 2) {
     printf("Incorrect usage: Demo image_dir\n");
     exit(-1);
   }
@@ -13,7 +13,10 @@ void parse_argv(int argc, char** argv) {
 
 int main(int argc, char** argv) {
 
-  parse_argv(argc, argv);
+  // parse_argv(argc, argv);
+  // Initialize Google's logging library.
+  google::InitGoogleLogging(argv[0]);
+
   // N_shoots(N_shoots = 30),
   // N_poses(N_poses = 2),
   // Lookup_table_dir(a = ""),

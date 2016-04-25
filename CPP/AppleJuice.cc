@@ -12,7 +12,7 @@ void AppleJuice::ReadImageLists(const opt options){
         for (size_t j = 0; j < options.N_shoots; j++) {
           /* code */
         string reading_name = file_name + options.image_prefix + to_string(j) + options.image_type;
-        std::cout << "/* message */ reading: " << reading_name << std::endl;
+        DLOG(INFO) << "/* message */ reading: " << reading_name << std::endl;
          Mat image = imread(reading_name , CV_LOAD_IMAGE_GRAYSCALE);
          if(! image.data ){
               string ErrMessage = "Cannot read image:" + reading_name ;
