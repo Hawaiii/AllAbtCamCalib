@@ -101,13 +101,23 @@ void AppleJuice::BinarizeAllImages(){
     return;
 }
 
+struct Point3fComp {
+    bool operator()(const Point3f& a, const Point3f& b) const {
+        return a.x == b.x && a.y == b.y;
+    }
+};
+
 void AppleJuice::ExtractControlPts(){
 
     for (size_t i = 0; i < BinaryBlob.size(); i++) {
       /* loop every pose */
         arma::uvec cords = find(Masks[i] == 1);
         DLOG(INFO) << "Search Region Size: " << cords.size() << endl;
+        arma::umat check_map = arma::zeros<arma::umat>(options.image_height, options.image_width);
+
         unsigned int outlier_cnt = 0;
+        map<Point3f, pair<int, Point2f>, Point3fComp> checker;
+
         for (size_t j = 0; j < cords.size(); j++) {
           /* code */
           unsigned int row_ = cords(j) % options.image_height;
@@ -122,17 +132,53 @@ void AppleJuice::ExtractControlPts(){
             // DLOG(INFO) << "target string: " <<"[" << row_ <<" , " << col_ << "]\n"<< target <<"\n";
 
           if(target.substr(0,3) != "010" && target.substr(target.size()-3,3) != "101")
-              DLOG(INFO) << "Outlier...."<< ++outlier_cnt << endl;
-          if(DEBUG)
-              DLOG(INFO) << endl << "X encoding: " << target.substr(3,options.x_encoding_len) << endl
-                         << "Y encoding: " << target.substr(3+options.x_encoding_len,options.y_encoding_len) << endl;
+              DLOG(INFO) << "Outlier....!!!"<< ++outlier_cnt << endl;
+          // if(DEBUG)
+          //     DLOG(INFO) << endl << "X encoding: " << target.substr(3,options.x_encoding_len) << endl
+          //                << "Y encoding: " << target.substr(3+options.x_encoding_len,options.y_encoding_len) << endl;
           pair<Point3f,Point3f> pts = SearchPoints(target.substr(3,options.x_encoding_len), target.substr(3+options.x_encoding_len,options.y_encoding_len));
-          cout<<pts.first <<" | "<< pts.second<<endl;
+          DLOG(INFO) <<pts.first <<" | "<< pts.second<<endl;
+          if(pts.first.x >= 0 && pts.first.y >= 0){
+              auto finder = checker.find(pts.first);
+              if ( finder != checker.end())
+                    checker.insert(make_pair(pts.first,make_pair(1,Point2f(col_,row_))));
+              else
+                    finder->second.first++;
+          }
 
 
         }
-
-
-
+        //Insert into pool....
+        vector<Point2f> single_featurePool;
+        vector<Point3f>  single_PatternPool;
+        for(auto itr = checker.begin(); itr != checker.end(); itr++) {
+              if (itr->second.first == 1) {
+                /* no conflicts */
+                check_map(itr->first.y, itr->first.x) = itr->first.y;
+                single_featurePool.push_back(itr->second.second);
+                single_PatternPool.push_back(itr->first);
+              }else
+                  DLOG(INFO) << "Reject one conflicts!!!  " << itr->first << endl;
+        }
+        this->FeaturePool.push_back(single_featurePool);
+        this->PatternPtsPool.push_back(single_PatternPool);
+        if(DEBUG)
+          check_map.save("check_map" + to_string(i) + ".mat",arma::raw_ascii  );
       }
+
+      assert(FeaturePool.size() == PatternPtsPool.size() && FeaturePool[0].size() == PatternPtsPool[0].size());
+      std::cerr << "/* message */ AppleJuice::ExtractControlPts done..." << std::endl;
+}
+
+void InitCameraCalibration(){
+  //subsample FeaturePool && PatternPtsPool
+  assert(FeaturePool.size() == PatternPtsPool.size() && FeaturePool[0].size() == PatternPtsPool[0].size());
+
+  for (size_t i = 0; i < FeaturePool.size(); i++) {
+    /* loop each pose */
+    for (size_t j = 0; j < FeaturePool[i].size(); j++) {
+      /* subsample points */
+    }
+  }
+
 }
