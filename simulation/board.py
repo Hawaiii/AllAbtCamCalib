@@ -32,6 +32,9 @@ class Board:
 	def height(self):
 		return self.size[1]
 
+	def num_points(self):
+		return self.size[0]*self.size[1]
+
 	@classmethod
 	def gen_calib_board(cls, board_dim, sqsize, \
 					location, orientation, noise3d):
@@ -101,11 +104,7 @@ class Board:
 		self.pose = util.Pose(location, orientation)
 		return self
 
-	def get_points(self):
-		"""
-		Returns the actual location of the points (accounting for the pose) as a 
-		3xN numpy array.
-		"""
+	def get_orig_points(self):
 		npts = len(self.pts)
 		pts_arr = np.empty((3, npts))
 		for i in xrange(self.size[1]):
@@ -113,6 +112,15 @@ class Board:
 				pts_arr[:,i*self.width()+j] = self.pts[(j,i)].reshape(3)
 				# print i,j,i*self.width()+j,pts_arr[:,i*self.width()+j]
 		# pts_arr = np.array([self.pts[k] for k in self.pts]).reshape(3, npts)
+		return pts_arr
+
+	def get_points(self):
+		"""
+		Returns the actual location of the points (accounting for the pose) as a 
+		3xN numpy array.
+		"""
+		npts = len(self.pts)
+		pts_arr = self.get_orig_points()
 		pts_arr = self.pose.ori.dot(pts_arr) + matlib.repmat(self.pose.loc, 1, npts)
 		return pts_arr
 
