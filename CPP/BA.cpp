@@ -24,6 +24,7 @@ void CovarianceWriter(double* mat, string name){
 	cerr <<"]\n";
 }
 
+
 struct VPReprojectionError {
 		VPReprojectionError(double observed_x, double observed_y, double focus, double pptx, double ppty) : observed_x(observed_x), observed_y(observed_y),
 		focus(focus), pptx(pptx), ppty(ppty) {}
