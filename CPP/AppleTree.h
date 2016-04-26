@@ -59,16 +59,19 @@ struct opt_ {
 
 	std::string Lookup_table_dir_x, Lookup_table_dir_y, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
 	unsigned int N_shoots, N_poses, image_width, image_height, split_pos, x_encoding_len, y_encoding_len;
-	double suppression_ratio;
+	double suppression_ratio, board_physical_width, board_physical_height;
 	opt_(){}
 	opt_(unsigned int N_shoots, unsigned int N_poses, unsigned int image_width, unsigned int image_height, double suppression_ratio,
-		unsigned int split_pos,unsigned int x_encoding_len, unsigned int y_encoding_len,
+		unsigned int split_pos,unsigned int x_encoding_len, unsigned int y_encoding_len, double board_physical_width, double board_physical_height;
 		std::string a, std::string b, std::string c, std::string d, std::string e, std::string f, std::string g):
 	 N_shoots(N_shoots ),
 	 N_poses(N_poses ),
 	 image_width(image_width),
 	 image_height(image_height),
 	 suppression_ratio(suppression_ratio),
+	 board_physical_width(board_physical_width),
+	 board_physical_height(board_physical_height),
+
 	 split_pos(split_pos),
 	 x_encoding_len(x_encoding_len),
 	 y_encoding_len(y_encoding_len),
