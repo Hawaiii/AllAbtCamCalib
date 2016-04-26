@@ -8,10 +8,13 @@ find_package(Armadillo REQUIRED)
 
 
 include_directories(${CERES_INCLUDE_DIRS})
+include_directories(${ARMADILLO_INCLUDE_DIRS})
+include_directories(${CERES_INCLUDE_DIRS})
+
 
 ADD_DEFINITIONS(
 	-std=c++11
 )
 
-add_executable( Apple_Juice AppleJuice.cc Demo.cpp Graycode.cpp )
-target_link_libraries( Apple_Juice ${OpenCV_LIBS} ${ARMADILLO_LIBRARIES}  ${CERES_LIBRARIES})
+add_executable( AppleJuice Demo.cpp AppleJuice.cc Graycode.cpp)
+target_link_libraries( AppleJuice ${OpenCV_LIBS} ${ARMADILLO_LIBRARIES} ${CERES_LIBRARIES} )

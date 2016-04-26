@@ -9,7 +9,7 @@ void insert(TreeNode* node, string code, int val){
 	//DLOG(INFO) << code << ":" << val << endl;
 
 	node->min = min(node->min, val);
-	node->max = max(node->max, val);	
+	node->max = max(node->max, val);
 	if (code.length() <= 0){ return; }
 
 	if (code[0] == '0'){
@@ -68,28 +68,42 @@ void print_tree(TreeNode* node){
 }
 
 TreeNode* readLookup_table(std::string filename){
+<<<<<<< HEAD
+	TreeNode* head = new TreeNode{NULL, NULL, -1, -1};
+=======
 	TreeNode *head = new TreeNode{NULL, NULL, -1, -1};
+>>>>>>> origin/master
 	ifstream file ( filename );
 	string code;
 	string val;
-	for (int i = 0; i < 6; i++){
-		getline( file, code, ',');
+	//for (int i = 0; i < 6; i++){
+	while (getline( file, code, ',')){
 		getline( file, val );
 
 		insert(head, code, stoi(val));
 	}
+<<<<<<< HEAD
+	print_tree(head);
+	DLOG(INFO) << endl;
+=======
 	// print_tree(head);
 	// DLOG(INFO) << endl;
+>>>>>>> origin/master
 	return head;
 }
 
-void AppleJuice::ReadLookup_table(const opt options){
+void AppleJuice::ReadLookup_table(const opt_ options){
 	DLOG(INFO) << "Reading lookup table for x ..." << endl;
 	chessboard.lookup_table_x = readLookup_table(options.Lookup_table_dir_x);
+<<<<<<< HEAD
+	DLOG(INFO) << "Reading lookup table for y ..." << endl;
+	chessboard.lookup_table_y = readLookup_table(options.Lookup_table_dir_y);
+=======
 	print_tree(chessboard.lookup_table_x);
 	DLOG(INFO) << "Reading lookup table for y ..." << endl;
 	chessboard.lookup_table_y = readLookup_table(options.Lookup_table_dir_y);
 	print_tree(chessboard.lookup_table_y);
+>>>>>>> origin/master
 }
 
 std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std::string ys){

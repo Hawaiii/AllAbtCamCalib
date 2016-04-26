@@ -21,6 +21,7 @@
 #include <glog/logging.h>
 #include <armadillo>
 
+#define DEBUG 1
 
 struct TreeNode{
 	TreeNode * left_node; //0
@@ -54,18 +55,23 @@ struct Extrinsic {
 	Extrinsic(cv::Mat r, cv::Mat t): Rot(r), Trans(t){}
 };
 
-struct opt {
+struct opt_ {
 
 	std::string Lookup_table_dir_x, Lookup_table_dir_y, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
-	unsigned int N_shoots, N_poses, image_width, image_height;
+	unsigned int N_shoots, N_poses, image_width, image_height, split_pos, x_encoding_len, y_encoding_len;
 	double suppression_ratio;
-	opt(unsigned int N_shoots, unsigned int N_poses, unsigned int image_width, unsigned int image_height, double suppression_ratio,
+	opt_(){}
+	opt_(unsigned int N_shoots, unsigned int N_poses, unsigned int image_width, unsigned int image_height, double suppression_ratio,
+		unsigned int split_pos,unsigned int x_encoding_len, unsigned int y_encoding_len,
 		std::string a, std::string b, std::string c, std::string d, std::string e, std::string f, std::string g):
 	 N_shoots(N_shoots ),
 	 N_poses(N_poses ),
 	 image_width(image_width),
 	 image_height(image_height),
 	 suppression_ratio(suppression_ratio),
+	 split_pos(split_pos),
+	 x_encoding_len(x_encoding_len),
+	 y_encoding_len(y_encoding_len),
 	 Lookup_table_dir_x(a ),
 	 Lookup_table_dir_y(b ),
 	 Image_list_dir(c ),
@@ -88,15 +94,17 @@ class AppleJuice{
 		std::pair<cv::Point3f, cv::Point3f> SearchPoints(std::string xs, std::string ys);
 		Intrinsic intrinsic;
 		std::vector<arma::cube> ImageBlob;
+		std::vector<arma::ucube> BinaryBlob;
+		std::vector<arma::umat> Masks;
 
 	public:
-		static opt options;
+		opt_ options;
 		//read lookup table from txt
 		// 	>> Chessboard struct
-		void ReadLookup_table(const opt options);
+		void ReadLookup_table(const opt_ options);
 		//read image from DIR
 		//	>> ImageLists
-		void ReadImageLists(const opt options, unsigned int display = 0);
+		void ReadImageLists(const opt_ options, unsigned int display = 0);
 		//Biinarize all images
 		//	>> BinaryImages
 		void BinarizeAllImages();
