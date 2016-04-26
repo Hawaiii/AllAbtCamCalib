@@ -7,20 +7,20 @@ using namespace std;
 // Functions for building a tree
 void insert(TreeNode* node, string code, int val){
 	//DLOG(INFO) << code << ":" << val << endl;
-
-	node->min = min(node->min, val);
-	node->max = max(node->max, val);
+	// float fval = (float)val;
+	node->min = min(node->min, val-0.5f);
+	node->max = max(node->max, val+0.5f);
 	if (code.length() <= 0){ return; }
 
 	if (code[0] == '0'){
 		if (!node->left_node){
-			node->left_node = new TreeNode{NULL, NULL, val, val};
+			node->left_node = new TreeNode{NULL, NULL, val-0.5f, val+0.5f};
 		}
 		insert(node->left_node, code.substr(1,string::npos), val);
 		return;
 	} else if (code[0] == '1'){
 		if (!node->right_node){
-			node->right_node = new TreeNode{NULL, NULL, val, val};
+			node->right_node = new TreeNode{NULL, NULL, val-0.5f, val+0.5f};
 		}
 		insert(node->right_node, code.substr(1,string::npos), val);
 		return;

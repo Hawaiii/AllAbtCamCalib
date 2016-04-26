@@ -26,8 +26,8 @@
 struct TreeNode{
 	TreeNode * left_node; //0
 	TreeNode * right_node; //1
-	int min;
-	int max;
+	float min;
+	float max;
 };
 
 struct Chessboard {
