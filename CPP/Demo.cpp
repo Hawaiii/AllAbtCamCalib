@@ -15,9 +15,16 @@ int main(int argc, char** argv) {
 
   // parse_argv(argc, argv);
   // Initialize Google's logging library.
+<<<<<<< HEAD
   google::SetLogDestination(0,"./log.txt");
   google::InitGoogleLogging(argv[0]);
   opt_ option_(28,2,800,600,0.5,14,11,11,
+=======
+  google::InitGoogleLogging(argv[0]);
+
+  opt_ option_(29,2,800,600,0.5,14,11,12, 331.7030/2880*800, 207.3144/1800*600,
+  "../../calib/h600.csv",
+>>>>>>> origin/master
   "../../calib/v800.csv",
   "../../calib/h600.csv",
   "../data/",
@@ -26,9 +33,8 @@ int main(int argc, char** argv) {
   "pose",
   ".png"
 );
-  std::cout<<"starts from here...\n";
   AppleJuice* juice = new AppleJuice();
-  juice->options = option_;
+  juice->SetOptions(option_);
 
   try{
   juice->ReadLookup_table(option_);

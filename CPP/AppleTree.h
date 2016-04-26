@@ -26,8 +26,8 @@
 struct TreeNode{
 	TreeNode * left_node; //0
 	TreeNode * right_node; //1
-	int min;
-	int max;
+	float min;
+	float max;
 };
 
 struct Chessboard {
@@ -38,7 +38,7 @@ struct Chessboard {
 	double rows; // # of rows
 	double cols; // # of cols
 	Chessboard(){}
-	Chessboard(double r, double c, double x, double y):rows(r = 5),cols(c = 8),width(x = 0), height(y = 0){}
+	Chessboard(double r, double c, double x, double y):rows(r), cols(c), width(x), height(y){}
 };
 
 struct Intrinsic {
@@ -59,16 +59,20 @@ struct opt_ {
 
 	std::string Lookup_table_dir_x, Lookup_table_dir_y, Image_list_dir, output_dir, pose_prefix, image_prefix, image_type;
 	unsigned int N_shoots, N_poses, image_width, image_height, split_pos, x_encoding_len, y_encoding_len;
-	double suppression_ratio;
+	double suppression_ratio, board_physical_width, board_physical_height;
+
 	opt_(){}
 	opt_(unsigned int N_shoots, unsigned int N_poses, unsigned int image_width, unsigned int image_height, double suppression_ratio,
-		unsigned int split_pos,unsigned int x_encoding_len, unsigned int y_encoding_len,
+		unsigned int split_pos,unsigned int x_encoding_len, unsigned int y_encoding_len, double board_physical_width, double board_physical_height,
 		std::string a, std::string b, std::string c, std::string d, std::string e, std::string f, std::string g):
 	 N_shoots(N_shoots ),
 	 N_poses(N_poses ),
 	 image_width(image_width),
 	 image_height(image_height),
 	 suppression_ratio(suppression_ratio),
+	 board_physical_width(board_physical_width),
+	 board_physical_height(board_physical_height),
+
 	 split_pos(split_pos),
 	 x_encoding_len(x_encoding_len),
 	 y_encoding_len(y_encoding_len),
@@ -99,6 +103,9 @@ class AppleJuice{
 
 	public:
 		opt_ options;
+		//
+		//
+		void SetOptions(const opt_ options);
 		//read lookup table from txt
 		// 	>> Chessboard struct
 		void ReadLookup_table(const opt_ options);

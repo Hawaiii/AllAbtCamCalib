@@ -125,7 +125,7 @@ class Extrinsics:
 class Camera:
 	intrinsics = None #Intrinsics
 	extrinsics = {} #dictionary of extrinsics keyed by img number
-	size = None #(height, width) of image size, in pixels
+	size = None #(width, height) of image size, in pixels
 	aov = None #(angle_of_view_vertical, angle_of_view_horizontal), in degree
 	name = None #A string that could be used for identifying the camera
 
@@ -164,6 +164,12 @@ class Camera:
 							self.intrinsics.tang_dist[1],\
 							self.intrinsics.radial_dist[2]]])
 
+	def width(self):
+		return self.size[0]
+
+	def height(self):
+		return self.size[1]
+
 	def scale_size(self, scale_factor=1):
 		"""
 		Returns (img_width*scale_factor, img_height*scale_factor).
@@ -180,46 +186,52 @@ class Camera:
 			points: list of dictionaries, each dictionary representing a board
 			nosie2d: std. dev. of point detection
 		Returns:
-			a list of dictionaries, each representing a captured board
+			a list of 2xN numpy array, each representing a captured board
 		"""
-		#mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
-									#np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
-		#							self.get_opencv_dist_coeffs(), \
-		#							np.eye(3), \
-		#							self.intrinsics.intri_mat, \
-		#							self.size,\
-		#							cv2.CV_32FC1)		
-		img_pts = list()
-		for chessboard in points:
-			img_pts_per_chessboard = {}
-			for point_id in chessboard:
-				
-				# # perpare extrinsics matrix
-				# # ext = np.concatenate( (extrin.rot_mat, np.reshape(extrin.trans_vec, (-1, 1))), axis = 1)
-				# ext = extrin.get_Rt_matrix()
-				# #points in camera frame
-				# pts = np.dot(ext, np.append(chessboard[point_id] ,1))
-				# #points in image frame (distortion still !!)
-				# pts = np.dot(self.intrinsics.intri_mat, pts)
-				# pts = np.divide(pts, pts[-1])
-				pts = self.project_point(extrin, chessboard[point_id])
-				#apply distortion
-				if(pts[0,0] >=0 and pts[0,0] < self.size[0] and pts[1,0] >= 0 and pts[1,0] < self.size[1] ):
-					# final_pts = np.zeros((2,1))
-					#x_ = mapx[pts[1,0],pts[0,0]]
-					#y_ = mapy[pts[1,0],pts[0,0]]
-					# final_pts[0] = x_ #col
-					# final_pts[1] = y_ #row
-					#final_pts = np.array([x_, y_]).reshape(2,1)
-					final_pts = np.array([pts[0,0], pts[1,0]]).reshape(2,1)					
-					img_pts_per_chessboard[point_id] = final_pts
-					# add noise
-					if noise2d > 0:
-						# noises = np.concatenate((np.random.normal(0, noise2d, (2,1)),\
-						# 						np.zeros((1,1))), axis=0)
-						noises = np.random.normal(0, noise2d, (2,1))
-						img_pts_per_chessboard[point_id] += noises
-			img_pts.append( img_pts_per_chessboard )
+		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
+									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
+									self.get_opencv_dist_coeffs(), \
+									np.eye(3), \
+									self.intrinsics.intri_mat, \
+									self.size,\
+									cv2.CV_32FC1)
+		img_pts = []
+
+		if isinstance(points[0], dict):
+			print "capture images points argument bad input type", type(points), " of ", type(points[0])
+			# for chessboard in points:
+			# 	img_pts_per_chessboard = {}
+			# 	for point_id in chessboard:
+					
+			# 		pts = self.project_point(extrin, chessboard[point_id])
+			# 		#apply distortion
+			# 		if(pts[0,0] >=0 and pts[0,0] < self.size[0] and pts[1,0] >= 0 and pts[1,0] < self.size[1] ):
+			# 			# final_pts = np.zeros((2,1))
+			# 			x_ = mapx[pts[0,0],pts[1,0]]
+			# 			y_ = mapy[pts[0,0],pts[1,0]]
+			# 			final_pts[0] = x_ #col
+			# 			final_pts[1] = y_ #row
+			# 			final_pts = np.array([x_, y_]).reshape(2,1)
+			# 			# final_pts = np.array([pts[0,0], pts[1,0]]).reshape(2,1)					
+			# 			img_pts_per_chessboard[point_id] = final_pts
+			# 			# add noise
+			# 			if noise2d > 0:
+			# 				# noises = np.concatenate((np.random.normal(0, noise2d, (2,1)),\
+			# 				# 						np.zeros((1,1))), axis=0)
+			# 				noises = np.random.normal(0, noise2d, (2,1))
+			# 				img_pts_per_chessboard[point_id] += noises
+			# 	img_pts.append( img_pts_per_chessboard )
+		elif isinstance(points[0], np.ndarray) and points[0].shape[0] == 3:
+			for chessboard in points: #3xN numpy array
+				img_pts_per_chessboard,_ = cv2.projectPoints(chessboard, \
+						extrin.rot_vec, extrin.trans_vec, \
+						self.intrinsics.intri_mat, self.intrinsics.get_opencv_dist_coeffs())
+				if noise2d > 0:
+					noises = np.random.normal(0, noise2d, img_pts_per_chessboard.shape)
+					img_pts_per_chessboard += noises
+				img_pts.append(img_pts_per_chessboard)
+		else:
+			print "capture images points argument bad input type", type(points), " of ", type(points[0])
 
 		#print "capture_images OK"
 		return img_pts
@@ -359,6 +371,7 @@ class Camera:
 		# Calculate ray from pixel from intrinsics
 		ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
 						.dot(np.concatenate((nodist_loc.reshape(2,1), np.ones((1,1))),axis=0))
+		import pdb; pdb.set_trace()
 		ray_vec = util.unit_vector(ray_vec)
 
 		return pt3d, ray_vec
@@ -369,32 +382,31 @@ class Camera:
 		Given image coordinates of points and actual 3D points, return a list of
 		intrinsics and extrinsics of camera estimated from the point coordinates.
 		Args:
-			img_pts:
-			board:
+			img_pts: list of 2xN np array 
+			board: a Board
 			img_size: (img_width, img_height)
 		"""
 		# Save all seen images to file
 		#vis.plot_all_chessboards_in_camera(img_pts, img_size, save_name='debug_calibrate_camera.pdf')
 
-		board_list = list()
-		img_pts_list = list()
-		view_id = list()
+		board_list = []
+		view_id = []
+		b_pts = board.get_orig_points().astype(np.float32)
 		for i in range(len(img_pts)):
-			pts_id = img_pts[i].keys()
-			if len(pts_id) < len(board):
-				#print 'Cannot see the whole board in image', i
+			#pts_id = img_pts[i].keys()
+			if img_pts[i].shape < board.num_points():
+				print 'Cannot see the whole board in image', i
 				continue
 			view_id.append(i)
-			board_list.append(  np.asarray( [ board[x] for x in pts_id ] , dtype=np.float32) )
-			# board_list.append(  [ np.asarray(board[x].tolist()) for x in pts_id ]  )
-			img_pts_list.append( np.reshape ( np.asarray( [img_pts[i][x][0:2].flatten().tolist() for x in pts_id], dtype=np.float32), (-1,1,2)) )
-			# print str(board_list[-1].shape) + " == " + str(img_pts_list[-1].shape)
+			board_list.append(b_pts.copy())
+			img_pts[i] = img_pts[i].T.astype(np.float32).reshape((-1, 1, 2))
+			# print str(board_list[-1].shape) + " == " + str(img_pts[-1].shape)
 
 		# Inputs format:
 		# board_list list of np(N, 3) float32
 		# img_pts_list list of np(N, 1, 2) float32
 		# (1260, 1080) (x, y)
-		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts_list, (img_size[1], img_size[0]), None, None)
+		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, None)
 		print 'Calibration RMS re-projection error', retval
 
 		# package return vale
@@ -403,8 +415,7 @@ class Camera:
 			distCoeffs[0][2:4])
 		extrinsics_ = dict()
 		for i in range(len(rvecs)):
-			rot_mat_, _ = cv2.Rodrigues(rvecs[i])
-			extrinsics_[view_id[i]] = Extrinsics(tvecs[i][:,0], rvecs[i][:,0], rot_mat_)
+			extrinsics_[view_id[i]] = Extrinsics.init_with_rotation_vec(tvecs[i][:,0], rvecs[i][:,0])
 		
 		size = img_size
 		aov = None
