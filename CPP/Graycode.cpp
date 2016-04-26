@@ -30,6 +30,8 @@ void insert(TreeNode* node, string code, int val){
 }
 
 std::pair<float, float> min_max2center_range(int min, int max){
+	DLOG(INFO) << "min" << min << "max" << max << endl;
+	DLOG(INFO) << 1.0*(max+min)/2 << ", " << 1.0*(max-min)/2 << endl;
 	return make_pair(1.0*(max+min)/2, 1.0*(max-min)/2 );
 }
 
@@ -55,7 +57,10 @@ std::pair<float, float> search(TreeNode* tree, std::string s){
 
 
 void print_tree(TreeNode* node){
-	if (!node) return;
+	if (!node){ 
+		//DLOG(INFO) << "[tree] null" << endl;
+		return;
+	}
 
 	DLOG(INFO) << "[tree]min:" << node->min << ", max:" << node->max << ", left(0):" << node->left_node << ", right(1):" << node->right_node << endl;
 	print_tree(node->left_node);
@@ -63,7 +68,11 @@ void print_tree(TreeNode* node){
 }
 
 TreeNode* readLookup_table(std::string filename){
+<<<<<<< HEAD
 	TreeNode* head = new TreeNode{NULL, NULL, -1, -1};
+=======
+	TreeNode *head = new TreeNode{NULL, NULL, -1, -1};
+>>>>>>> origin/master
 	ifstream file ( filename );
 	string code;
 	string val;
@@ -73,16 +82,28 @@ TreeNode* readLookup_table(std::string filename){
 
 		insert(head, code, stoi(val));
 	}
+<<<<<<< HEAD
 	print_tree(head);
 	DLOG(INFO) << endl;
+=======
+	// print_tree(head);
+	// DLOG(INFO) << endl;
+>>>>>>> origin/master
 	return head;
 }
 
 void AppleJuice::ReadLookup_table(const opt_ options){
 	DLOG(INFO) << "Reading lookup table for x ..." << endl;
 	chessboard.lookup_table_x = readLookup_table(options.Lookup_table_dir_x);
+<<<<<<< HEAD
 	DLOG(INFO) << "Reading lookup table for y ..." << endl;
 	chessboard.lookup_table_y = readLookup_table(options.Lookup_table_dir_y);
+=======
+	print_tree(chessboard.lookup_table_x);
+	DLOG(INFO) << "Reading lookup table for y ..." << endl;
+	chessboard.lookup_table_y = readLookup_table(options.Lookup_table_dir_y);
+	print_tree(chessboard.lookup_table_y);
+>>>>>>> origin/master
 }
 
 std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std::string ys){
@@ -96,5 +117,6 @@ std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std
 
 	cv::Point3f pt(x_pt.first, y_pt.first, 0);
 	cv::Point3f conf(x_pt.second, y_pt.second, 0);
+	DLOG(INFO) << "searching " << xs << ", " << ys << " found " << pt << ", " << conf << endl;
 	return make_pair(pt, conf);
 }
