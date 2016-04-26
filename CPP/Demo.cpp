@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   // Initialize Google's logging library.
   google::InitGoogleLogging(argv[0]);
 
-  opt_ option_(29,2,800,600,0.5, 331.7030/2880*800, 207.3144/1800*600,14,11,12,
+  opt_ option_(29,2,800,600,0.5,14,11,12, 331.7030/2880*800, 207.3144/1800*600,
   "../../calib/h600.csv",
   "../../calib/v800.csv",
   "../data/",
@@ -26,9 +26,8 @@ int main(int argc, char** argv) {
   "pose",
   ".png"
 );
-  std::cout<<"starts from here...\n";
   AppleJuice* juice = new AppleJuice();
-  juice->options = option_;
+  juice->SetOptions(option_);
 
   try{
   juice->ReadLookup_table(option_);

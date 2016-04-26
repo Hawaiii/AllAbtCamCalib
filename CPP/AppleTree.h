@@ -38,7 +38,7 @@ struct Chessboard {
 	double rows; // # of rows
 	double cols; // # of cols
 	Chessboard(){}
-	Chessboard(double r, double c, double x, double y):rows(r = 5),cols(c = 8),width(x = 0), height(y = 0){}
+	Chessboard(double r, double c, double x, double y):rows(r), cols(c), width(x), height(y){}
 };
 
 struct Intrinsic {
@@ -103,6 +103,9 @@ class AppleJuice{
 
 	public:
 		opt_ options;
+		//
+		//
+		void SetOptions(const opt_ options);
 		//read lookup table from txt
 		// 	>> Chessboard struct
 		void ReadLookup_table(const opt_ options);

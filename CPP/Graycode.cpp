@@ -30,8 +30,6 @@ void insert(TreeNode* node, string code, int val){
 }
 
 std::pair<float, float> min_max2center_range(int min, int max){
-	DLOG(INFO) << "min" << min << "max" << max << endl;
-	DLOG(INFO) << 1.0*(max+min)/2 << ", " << 1.0*(max-min)/2 << endl;
 	return make_pair(1.0*(max+min)/2, 1.0*(max-min)/2 );
 }
 
@@ -97,8 +95,19 @@ std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std
 	pair<float, float> x_pt = search(chessboard.lookup_table_x, xs);
 	pair<float, float> y_pt = search(chessboard.lookup_table_y, ys);
 
+	DLOG(INFO) << chessboard.width << chessboard.cols << endl;
 	cv::Point3f pt(x_pt.first * chessboard.width / chessboard.cols, y_pt.first * chessboard.height / chessboard.rows, 0);
 	cv::Point3f conf(x_pt.second * chessboard.width / chessboard.cols, y_pt.second * chessboard.height / chessboard.rows, 0);
 	DLOG(INFO) << "searching " << xs << ", " << ys << " found " << pt << ", " << conf << endl;
 	return make_pair(pt, conf);
 }
+
+void AppleJuice::SetOptions(const opt_ options){
+	// @TODO: add check for options
+	this->options = options;
+	Chessboard bd(options.image_height, options.image_width, options.board_physical_width, options.board_physical_height);
+	this->chessboard = bd;
+	DLOG(INFO) << "Set chessboard (" << this->chessboard.rows << "," << this->chessboard.cols 
+		<< ") of physical size (" << this->chessboard.height << "mm," << this->chessboard.width << "mm)"<< endl;
+}
+
