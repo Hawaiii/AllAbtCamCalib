@@ -235,16 +235,14 @@ class Camera:
 			print "capture images points argument bad input type", type(points), " of ", type(points[0])
 			import pdb; pdb.set_trace()
 
-		#print "capture_images OK"
 		return img_pts
 
-	def project_point(self, extrin, point, nodistortion=True):
+	def project_point(self, extrin, point):
 		"""
 			Project 3D points onto camera.
 			Args:
 				extrin: Extrinsics
 				point: 3xN numpy array, a 3D point
-				nodistortion: ignores distortion coefficients if True
 			Returns: 2xN numpy array
 		"""
 		loc,_ = cv2.projectPoints(point, \
@@ -270,6 +268,16 @@ class Camera:
 		# 				import pdb; pdb.set_trace()
 		# 				print 'point', point,'projects to wrong side of camera'
 		# 	return loc[0:2]
+
+	def all_observable(self, extrin, pts_3d):
+		assert(pts_3d.shape[0] == 3)
+		projections = self.project_point(extrin, pts_3d)
+		assert(pts_2d.shape[0] == 2)
+		if np.any(pts_2d[0,:] < 0) or np.any(pts_2d[0,:] >= self.width()):
+			return False
+		if np.any(pts_2d[1,:] < 0) or np.any(pts_2d[1,:] >= self.height()):
+			return False
+		return True
 
 	def calc_homography(self, motion, board, im_size, img, scale, save_name):
 		"""
