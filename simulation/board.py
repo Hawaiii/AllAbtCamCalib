@@ -74,7 +74,7 @@ class Board:
 		if noise3d > 0:
 			noises = np.random.normal(0, noise3d, (board_dim[1]*board_dim[0],3))
 			for ipt in xrange(len(board_pts)):
-				board_pts[board_pts.keys()[ipt]] += noises[ipt, :]
+				board_pts[board_pts.keys()[ipt]] += noises[ipt, :].reshape(3,1)
 
 		# # Rotate board to given orientation and move to given location
 		# if orientation.size == 3:
@@ -164,6 +164,14 @@ class Board:
 		# 	cnt += 1
 		# print X
 		return X, Y, Z
+
+	def move_board_in_camera(camera, pixel, depth):
+		"""
+		Returns a board whose top-left point is observed at pixel in camera 
+		and is at depth from camera
+		"""
+		# @TODO
+
 
 	def plot(self, fax=None, clr='b'):
 		"""

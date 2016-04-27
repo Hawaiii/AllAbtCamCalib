@@ -22,15 +22,15 @@ def calib_with_random_n_boards(n):
 	distortion, focal length, and center point.
 	"""
 	# parameters
-	exp_repeat_times = 50
-	n = 2
-	noise3d_lvls = [0, 0.5, 1, 2]
-	noise2d_lvls = [0, 0.5, 1, 2]
-	board_height = [2,5]
-	board_width = [3,8]
-	board_sqsize = [0.10, 0.23, 0.48]
-	depth_min = 1 #m
-	depth_max = 4 #m
+	exp_repeat_times = 2
+	noise3d_lvls = [0]
+	# noise3d_lvls = [0, 0.005, 0.01, 0.04]
+	noise2d_lvls = [0]
+	board_height = [5]
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 0.5 #m
+	depth_max = 5#m
 
 	for noise3d in noise3d_lvls:
 		for noise2d in noise2d_lvls:
@@ -68,8 +68,8 @@ def calib_with_random_n_boards(n):
 
 							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
 							esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size)
-							# bd.compare_board_estimations(esti_cam.extrinsics, board, (board_width, board_height), \
-							# 	layered_grids, save_name='compare_board.pdf')
+							vis.plot_camera_with_points(cam_extrin, obs_list)
+							vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs)+'_'+str(iexp)+'.pdf')
 
 							estimations.append(esti_cam)
 
@@ -78,7 +78,7 @@ def calib_with_random_n_boards(n):
 							save_name_pre='results/report_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
 	print "random {0} board experiment DONE".format(n)
 
-calib_with_random_n_boards(5)
+calib_with_random_n_boards(2)
 
 # def rotate_to_match_corners(board, true_cam, cam_loc, detection_noise):
 # 	"""

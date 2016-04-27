@@ -250,6 +250,7 @@ class Camera:
 		loc,_ = cv2.projectPoints(point, \
 						extrin.rot_vec, extrin.trans_vec, \
 						self.intrinsics.intri_mat, self.intrinsics.get_opencv_dist_coeffs())
+		# loc = loc.T.astype(np.float32).reshape((-1, 1, 2))
 		return loc
 		# if not nodistortion:
 		# 	print "project_point with distortion not implemented!"
@@ -413,7 +414,6 @@ class Camera:
 			board_list.append(b_pts.T.copy())
 			img_pts[i] = img_pts[i].T.astype(np.float32).reshape((-1, 1, 2))
 			# print str(board_list[-1].shape) + " == " + str(img_pts[-1].shape)
-		# import pdb; pdb.set_trace()
 
 		# Inputs format:
 		# board_list list of np(N, 3) float32
@@ -421,6 +421,10 @@ class Camera:
 		# (1260, 1080) (x, y)
 		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, None)
 		print 'Calibration RMS re-projection error', retval
+
+		# put img_pts[i] back to 2xN format
+		for i in range(len(img_pts)):
+			img_pts[i] = img_pts[i].reshape(-1, 2).T
 
 		# package return vale
 		intrinsics_ = Intrinsics(cameraMatrix, \
@@ -433,7 +437,6 @@ class Camera:
 		size = img_size
 		aov = None
 		name = "calibrated cam"
-		# print 'calibrate_camera OK'
 		return Camera(intrinsics_, extrinsics_, size, aov, name)
 
 	@staticmethod
