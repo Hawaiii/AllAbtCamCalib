@@ -65,7 +65,7 @@ def calib_with_random_n_boards(n):
 								board.move_board(bd_loc, bd_ori)
 								obs_list.append(board.get_points()) #3xN np array
 
-							img_pts = true_cam.capture_images(cam_loc, layered_grids, noise2d)
+							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
 							esti_cam = cam.Camera.calibrate_camera(img_pts, board, true_cam.size)
 							# bd.compare_board_estimations(esti_cam.extrinsics, board, (board_width, board_height), \
 							# 	layered_grids, save_name='compare_board.pdf')

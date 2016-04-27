@@ -189,7 +189,7 @@ class Camera:
 			a list of 2xN numpy array, each representing a captured board
 		"""
 		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
-									np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
+									#np.concatenate( (self.intrinsics.radial_dist[0:2],self.intrinsics.tang_dist[:], np.asarray([ self.intrinsics.radial_dist[-1] ])) ,axis = 0), \
 									self.get_opencv_dist_coeffs(), \
 									np.eye(3), \
 									self.intrinsics.intri_mat, \
@@ -223,9 +223,10 @@ class Camera:
 			# 	img_pts.append( img_pts_per_chessboard )
 		elif isinstance(points[0], np.ndarray) and points[0].shape[0] == 3:
 			for chessboard in points: #3xN numpy array
-				img_pts_per_chessboard,_ = cv2.projectPoints(chessboard, \
+				#projectPoints expect Nx3 points
+				img_pts_per_chessboard,_ = cv2.projectPoints(chessboard.T, \
 						extrin.rot_vec, extrin.trans_vec, \
-						self.intrinsics.intri_mat, self.intrinsics.get_opencv_dist_coeffs())
+						self.intrinsics.intri_mat, self.get_opencv_dist_coeffs())
 				if noise2d > 0:
 					noises = np.random.normal(0, noise2d, img_pts_per_chessboard.shape)
 					img_pts_per_chessboard += noises
@@ -245,24 +246,28 @@ class Camera:
 				nodistortion: ignores distortion coefficients if True
 			Returns: 2xN numpy array
 		"""
-		if not nodistortion:
-			print "project_point with distortion not implemented!"
-		else:
-			if point.shape[0] != 3:
-				print 'point', point, 'dimension is not 3xN!'
-				return None
-			if len(point.shape) <= 1:
-				point = point.reshape(3,1)
-			point = np.concatenate((point, np.ones((1,point.shape[1]))), axis=0)
-			loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
-			loc = loc / matlib.repmat(loc[-1,:], 3, 1)
-			if len(loc.shape) > 1 and loc.shape[1] > 0:
-				for i in xrange(loc.shape[1]):
-					if loc[-1,i] <= 0:
-						loc[:-1,i] = float('nan')
-						import pdb; pdb.set_trace()
-						print 'point', point,'projects to wrong side of camera'
-			return loc[0:2]
+		loc,_ = cv2.projectPoints(point, \
+						extrin.rot_vec, extrin.trans_vec, \
+						self.intrinsics.intri_mat, self.intrinsics.get_opencv_dist_coeffs())
+		return loc
+		# if not nodistortion:
+		# 	print "project_point with distortion not implemented!"
+		# else:
+		# 	if point.shape[0] != 3:
+		# 		print 'point', point, 'dimension is not 3xN!'
+		# 		return None
+		# 	if len(point.shape) <= 1:
+		# 		point = point.reshape(3,1)
+		# 	point = np.concatenate((point, np.ones((1,point.shape[1]))), axis=0)
+		# 	loc = self.intrinsics.intri_mat.dot( extrin.get_Rt_matrix().dot(point) )
+		# 	loc = loc / matlib.repmat(loc[-1,:], 3, 1)
+		# 	if len(loc.shape) > 1 and loc.shape[1] > 0:
+		# 		for i in xrange(loc.shape[1]):
+		# 			if loc[-1,i] <= 0:
+		# 				loc[:-1,i] = float('nan')
+		# 				import pdb; pdb.set_trace()
+		# 				print 'point', point,'projects to wrong side of camera'
+		# 	return loc[0:2]
 
 	def calc_homography(self, motion, board, im_size, img, scale, save_name):
 		"""
@@ -369,10 +374,16 @@ class Camera:
 		pt3d = -cam_extrin.rot_mat.dot(cam_extrin.trans_vec)
 
 		# Calculate ray from pixel from intrinsics
-		ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
-						.dot(np.concatenate((nodist_loc.reshape(2,1), np.ones((1,1))),axis=0))
-		import pdb; pdb.set_trace()
-		ray_vec = util.unit_vector(ray_vec)
+		# ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
+		# 				.dot(np.concatenate((nodist_loc.reshape(2,1), np.ones((1,1))),axis=0))
+		# ray_vec = util.unit_vector(ray_vec())
+		M = self.intrinsics.intri_mat.dot(cam_extrin.get_Rt_matrix())
+		M1 = np.array([[M[0,0], M[0,1], -nodist_loc[0,0,0]],\
+			[M[1,0], M[1,1], -nodist_loc[0,0,1]],\
+			[M[2,0], M[2,1], -1]])
+		M2 = np.array([[-M[0,2]-M[0,3], -M[1,2]-M[1,3], -M[2,2]-M[2,3]]]).T
+		ray_vec = np.linalg.inv(M1).dot(M2)
+		ray_vec[2,0] = 1
 
 		return pt3d, ray_vec
 
@@ -398,9 +409,10 @@ class Camera:
 				print 'Cannot see the whole board in image', i
 				continue
 			view_id.append(i)
-			board_list.append(b_pts.copy())
+			board_list.append(b_pts.T.copy())
 			img_pts[i] = img_pts[i].T.astype(np.float32).reshape((-1, 1, 2))
 			# print str(board_list[-1].shape) + " == " + str(img_pts[-1].shape)
+		# import pdb; pdb.set_trace()
 
 		# Inputs format:
 		# board_list list of np(N, 3) float32
