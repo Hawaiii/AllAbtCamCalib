@@ -6,11 +6,9 @@ find_package( OpenCV REQUIRED )
 find_package(Ceres REQUIRED)
 find_package(Armadillo REQUIRED)
 
-
 include_directories(${CERES_INCLUDE_DIRS})
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 include_directories(${CERES_INCLUDE_DIRS})
-
 
 ADD_DEFINITIONS(
 	-std=c++11
