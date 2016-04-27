@@ -72,9 +72,9 @@ class Board:
 
 		# Add noise3d
 		if noise3d > 0:
-			noises = np.random.normal(0, noise3d, (board_height*board_width,3))
+			noises = np.random.normal(0, noise3d, (board_dim[1]*board_dim[0],3))
 			for ipt in xrange(len(board_pts)):
-				board[board_pts.keys()[ipt]] += noises[ipt, :]
+				board_pts[board_pts.keys()[ipt]] += noises[ipt, :]
 
 		# # Rotate board to given orientation and move to given location
 		# if orientation.size == 3:

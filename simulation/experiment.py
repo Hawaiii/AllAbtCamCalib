@@ -24,13 +24,11 @@ def calib_with_random_n_boards(n):
 	# parameters
 	exp_repeat_times = 50
 	n = 2
-	noise3d_lvls = [0]
-	noise2d_lvls = [0]
-	# noise3d_lvls = [0, 0.5, 1, 2]
-	# noise2d_lvls = [0, 0.5, 1, 2]
-	board_height = [5]
-	board_width = [7]
-	board_sqsize = [0.23]
+	noise3d_lvls = [0, 0.5, 1, 2]
+	noise2d_lvls = [0, 0.5, 1, 2]
+	board_height = [2,5]
+	board_width = [3,8]
+	board_sqsize = [0.10, 0.23, 0.48]
 	depth_min = 1 #m
 	depth_max = 4 #m
 
@@ -49,6 +47,8 @@ def calib_with_random_n_boards(n):
 							# Generate n boards
 							board = bd.Board.gen_calib_board((bw, bh), bs, \
 								np.zeros((3,1)), np.zeros((3,1)), noise3d)
+							perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+								np.zeros((3,1)), np.zeros((3,1)), 0)
 							obs_list = []
 							for i in xrange(n):
 								# choose a random pixel
@@ -67,7 +67,7 @@ def calib_with_random_n_boards(n):
 								obs_list.append(board.get_points()) #3xN np array
 
 							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
-							esti_cam = cam.Camera.calibrate_camera(img_pts, board, true_cam.size)
+							esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size)
 							# bd.compare_board_estimations(esti_cam.extrinsics, board, (board_width, board_height), \
 							# 	layered_grids, save_name='compare_board.pdf')
 
@@ -75,7 +75,7 @@ def calib_with_random_n_boards(n):
 
 						# Analyze error
 						vis.write_esti_results(estimations, true_cam, \
-							save_name_pre='results/report_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
+							save_name_pre='results/report_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
 	print "random {0} board experiment DONE".format(n)
 
 calib_with_random_n_boards(5)
