@@ -77,7 +77,7 @@ def calib_with_random_n_boards(n):
 							save_name_pre='results/report_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
 	print "random {0} board experiment DONE".format(n)
 
-calib_with_random_n_boards(2)
+calib_with_random_n_boards(5)
 
 # def rotate_to_match_corners(board, true_cam, cam_loc, detection_noise):
 # 	"""

@@ -1,4 +1,5 @@
 import board
+import camera as cam
 
 import numpy as np
 import math
@@ -90,3 +91,23 @@ class TestBoardMethods(unittest.TestCase):
 	def test_dict2array(self):
 		#@TODO
 		pass
+
+	def test_random_board(self):
+		# TODO
+		true_cam = cam.Camera.make_pinhole_camera()
+		cam_loc = np.zeros((3,1))
+		cam_ori = np.zeros((3,1))
+		cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+
+		pxl_x = np.random.random_integers(0, true_cam.width()-1)
+		pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
+		# choose a random depth on ray from pixel
+		pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+		depth = np.random.rand() * (depth_max - depth_min) + depth_min
+		bd_loc = pt3d + depth*ray_vec
+		
+		# choose a random orientation
+		bd_ori = util.random_rotation()
+
+		board.move_board(bd_loc, bd_ori)

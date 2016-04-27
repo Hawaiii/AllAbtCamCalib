@@ -210,7 +210,7 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 		# x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
 		# y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
 		# z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
-		xyz = cam_ext.get_inv_location()
+		xyz = cam_extrin.get_inv_location()
 		x = xyz[0,0]
 		y = xyz[1,0]
 		z = xyz[2,0]
@@ -237,4 +237,40 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 
 	plt.show()
 
+def plot_camera_with_points(cam_loc, pts_at_depth, invert=True):
+	"""
+	Args:
+		cam_loc: Extrinsics
+		pts_at_depth: dictionary keyed by depth whose values are lists of points (3x1 arrays)
+		invert: True for Extrinsics False for Poses
+	"""
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection = '3d')
+	# plot camera
+	if invert:
+		# x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
+		# y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
+		# z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
+		xyz = cam_loc.get_inv_location()
+		x = [xyz[0,0]]
+		y = [xyz[1,0]]
+		z = [xyz[2,0]]
+	else:
+		x = [cam_loc.trans_vec[0,0]]
+		y = [cam_loc.trans_vec[1,0]]
+		z = [cam_loc.trans_vec[2,0]]
+	z_vec = np.asarray([0,0,1])
+	u = [np.dot(cam_loc.rot_mat[0,:],z_vec)]
+	v = [np.dot(cam_loc.rot_mat[1,:],z_vec)]
+	w = [np.dot(cam_loc.rot_mat[2,:],z_vec)]
+	ax.quiver(x,y,z,u,v,w,pivot='tail',length=0.5)
+	ax.text(x[0]+u[0],y[0]+v[0],z[0]+w[0],'camera',None)
+
+	for depth in pts_at_depth:
+		x = [p[0,0] for p in pts_at_depth[depth]]
+		y = [p[1,0] for p in pts_at_depth[depth]]
+		z = [p[2,0] for p in pts_at_depth[depth]]
+		ax.scatter(x, y, z)
+
+	plt.show()
 
