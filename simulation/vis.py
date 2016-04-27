@@ -13,45 +13,48 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
 
-def plot_all_chessboards_in_camera(img_pts, img_size, save_name=None):
+def plot_all_chessboards_in_camera(img_pts, img_size, seperate_plot=True, save_name=None):
 	"""
 	Args:
-		img_pts: list of dictionaries, each representing a captured board
+		img_pts: list of 3xN array, each representing a captured board
 		img_size: (img_width, img_height)
 		save_name: string, filename to save plot pdf to.
 	"""
 	if save_name:
 		pp = PdfPages(save_name)
+	else:
+		pp = None
 	plt.clf()
 
-	for i in range(len(img_pts)):
-		viewed_pts = np.asarray(img_pts[i].values())
-		plt.axis([0, img_size[0], 0, img_size[1]])
-		plt.grid(True)
-		if viewed_pts.size == 0:
-			print "chessboard " + str(i) + " is not seen in camera\n"
-		else:
-			plt.plot(viewed_pts[:,0,:], viewed_pts[:,1,:], 'ro')
-		plt.gca().invert_yaxis()
-		plt.ylabel('chessboard' + str(i))
-		if pp:
-			pp.savefig()
-		else:
-			plt.show()
-		plt.clf()
+	if seperate_plot:
+		for i in range(len(img_pts)):
+			viewed_pts = img_pts[i]
+			plt.axis([0, img_size[0], 0, img_size[1]])
+			plt.grid(True)
+			if viewed_pts.size == 0:
+				print "chessboard " + str(i) + " is not seen in camera\n"
+			else:
+				plt.plot(viewed_pts[0,:], viewed_pts[1,:], 'ro')
+			plt.gca().invert_yaxis()
+			plt.ylabel('chessboard' + str(i))
+			if pp:
+				pp.savefig()
+			else:
+				plt.show()
+			plt.clf()
 
 	# Plot all points on images of whole board on the same page
 	# Assuming at least one saw all points on board
 	tot_pts_num = 0
 	for i in range(len(img_pts)):
-		if len(img_pts[i]) > tot_pts_num:
-			tot_pts_num = len(img_pts[i])
+		if img_pts[i].shape[1] > tot_pts_num:
+			tot_pts_num = img_pts[i].shape[1]
 	plt.axis([0, img_size[0], 0, img_size[1]])
 	plt.grid(True)
 	for i in range(len(img_pts)):
-		if len(img_pts[i]) == tot_pts_num:
-			viewed_pts = np.asarray(img_pts[i].values())
-			plt.plot(viewed_pts[:,0,:], viewed_pts[:,1,:], 'ro')
+		if img_pts[i].shape[1] == tot_pts_num:
+			viewed_pts = img_pts[i]
+			plt.plot(viewed_pts[0,:], viewed_pts[1,:], 'ro')
 	plt.ylabel('all points used')
 	if pp:
 		pp.savefig()
@@ -272,5 +275,32 @@ def plot_camera_with_points(cam_loc, pts_at_depth, invert=True):
 		z = [p[2,0] for p in pts_at_depth[depth]]
 		ax.scatter(x, y, z)
 
+	plt.show()
+
+def plot_camera_with_boards(cam_loc, boards, invert=True):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	# plot camera
+	if invert:
+		# x = [-np.dot(cam_extrin.rot_mat[0,:], cam_extrin.trans_vec) ]
+		# y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
+		# z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
+		xyz = cam_loc.get_inv_location()
+		x = [xyz[0,0]]
+		y = [xyz[1,0]]
+		z = [xyz[2,0]]
+	else:
+		x = [cam_loc.trans_vec[0,0]]
+		y = [cam_loc.trans_vec[1,0]]
+		z = [cam_loc.trans_vec[2,0]]
+	z_vec = np.asarray([0,0,1])
+	u = [np.dot(cam_loc.rot_mat[0,:],z_vec)]
+	v = [np.dot(cam_loc.rot_mat[1,:],z_vec)]
+	w = [np.dot(cam_loc.rot_mat[2,:],z_vec)]
+	ax.quiver(x,y,z,u,v,w,pivot='tail',length=0.5)
+	ax.text(x[0]+u[0],y[0]+v[0],z[0]+w[0],'camera',None)
+
+	for board in boards:
+		board.plot(ax)
 	plt.show()
 

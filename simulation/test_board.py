@@ -1,5 +1,7 @@
 import board
 import camera as cam
+import exp_util as util
+import vis
 
 import numpy as np
 import math
@@ -55,7 +57,7 @@ class TestBoardMethods(unittest.TestCase):
 		bz30 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([0,0,math.pi/6]),0)
 		bz30.plot(ax, clr='b')
 
-		plt.show()
+		# plt.show()
 
 	def test_get_points(self):
 		#@TODO
@@ -93,7 +95,16 @@ class TestBoardMethods(unittest.TestCase):
 		pass
 
 	def test_random_board(self):
-		# TODO
+		depth_min = 1 #m
+		depth_max = 4 #m
+		bw = 8
+		bh = 5
+		bs = 0.23
+		noise3d = 0
+		noise2d = 0
+		B = board.Board.gen_calib_board((bw, bh), bs, \
+								np.zeros((3,1)), np.zeros((3,1)), noise3d)
+
 		true_cam = cam.Camera.make_pinhole_camera()
 		cam_loc = np.zeros((3,1))
 		cam_ori = np.zeros((3,1))
@@ -110,4 +121,13 @@ class TestBoardMethods(unittest.TestCase):
 		# choose a random orientation
 		bd_ori = util.random_rotation()
 
-		board.move_board(bd_loc, bd_ori)
+		B.move_board(bd_loc, bd_ori)
+		img_pts = true_cam.capture_images(cam_extrin, [B.get_points()], noise2d)
+		print "pixel(", pxl_x, ",", pxl_y, ")"
+		print "3D location (", bd_loc[0,0], ",", bd_loc[1,0],",",bd_loc[2,0],")"
+		print "board orientation", bd_ori
+
+		vis.plot_camera_with_boards(cam_extrin, [B])
+		vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=False)
+
+

@@ -230,9 +230,10 @@ class Camera:
 				if noise2d > 0:
 					noises = np.random.normal(0, noise2d, img_pts_per_chessboard.shape)
 					img_pts_per_chessboard += noises
-				img_pts.append(img_pts_per_chessboard)
+				img_pts.append(img_pts_per_chessboard.reshape(-1,2).T)
 		else:
 			print "capture images points argument bad input type", type(points), " of ", type(points[0])
+			import pdb; pdb.set_trace()
 
 		#print "capture_images OK"
 		return img_pts

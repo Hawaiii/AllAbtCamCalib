@@ -30,7 +30,7 @@ def calib_with_random_n_boards(n):
 	# noise2d_lvls = [0, 0.5, 1, 2]
 	board_height = [5]
 	board_width = [7]
-	board_sqsize = [23]
+	board_sqsize = [0.23]
 	depth_min = 1 #m
 	depth_max = 4 #m
 
@@ -54,6 +54,7 @@ def calib_with_random_n_boards(n):
 								# choose a random pixel
 								pxl_x = np.random.random_integers(0, true_cam.width()-1)
 								pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
 								# choose a random depth on ray from pixel
 								pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
 								depth = np.random.rand() * (depth_max - depth_min) + depth_min
