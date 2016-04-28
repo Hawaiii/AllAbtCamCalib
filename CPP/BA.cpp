@@ -205,18 +205,22 @@ void AppleJuice::AppleBundleAdjustment() {
 
 	 DLOG(WARNING) << endl << "=== injecting camera offset_map done === " << endl;
 
-	 assert(FeaturePool.size() == PatternPtsPool.size() && FeaturePool[0].size() == PatternPtsPool[0].size());
+	 assert(FeaturePool.size() == PatternPtsPool.size());
 
 	 unsigned int awesome_counter = 0;
 	 for (size_t i = 0; i < FeaturePool.size(); i++) {
 	 	/* loop every pose */
-				for (size_t j = 0; j < FeaturePool[0].size(); j++) {
+		 assert( FeaturePool[i].size() == PatternPtsPool[i].size() );
+				for (size_t j = 0; j < FeaturePool[i].size(); j++) {
 					/* jump the only one observation pts */
 					if( FeaturePool[i][j].x < 0 || FeaturePool[i][j].y < 0){
 						// std::cerr << "/* jumping */ i: " << i << " j = " << j << std::endl;
 									continue;
 								}
 								auto offset_pair = offset_map.find(FeaturePool[i][j]);
+								if(offset_pair == offset_map.end() ){
+									DLOG(FATAL) << "offset_map has been messed up! ";
+								}
 								// auto offset_pair = offset_map.begin();
 					ceres::CostFunction* cost_function =
 						 DynaimcChessboardReprojectionError::Create(FeaturePool[i][j],
@@ -255,8 +259,8 @@ void AppleJuice::AppleBundleAdjustment() {
 
 		DLOG(WARNING) << " === BA DONE === " << std::endl << "start returning results..." << endl;
 
-		arma::mat result_map_x = arma::zeros<arma::mat>(this->options.image_width, this->options.image_height);
-		arma::mat result_map_y = arma::zeros<arma::mat>(this->options.image_width, this->options.image_height);
+		arma::mat result_map_x = arma::zeros<arma::mat>(this->options.image_height, this->options.image_width);
+		arma::mat result_map_y = arma::zeros<arma::mat>(this->options.image_height, this->options.image_width);
 		for (auto it = offset_map.begin(); it != offset_map.end(); it++) {
 			 result_map_x(it->first.y, it->first.x) = it->second[0];
 			 result_map_y(it->first.y, it->first.x) = it->second[1];

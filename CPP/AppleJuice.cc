@@ -127,13 +127,16 @@ void AppleJuice::ExtractControlPts(){
           // if(DEBUG)
             // DLOG(INFO) << "target string: " <<"[" << row_ <<" , " << col_ << "]\n"<< target <<"\n";
 
-          if(target.substr(0,3) != "010" && target.substr(target.size()-3,3) != "101")
-              DLOG(INFO) << "Outlier....!!!"<< ++outlier_cnt << endl;
+          if(target.substr(0,3) != "010" || target.substr(target.size()-3,3) != "101"){
+            ++outlier_cnt;
+            continue;
+          }
+              // DLOG(INFO) << "Outlier....!!!"<<  << endl;
           // if(DEBUG)
           //     DLOG(INFO) << endl << "X encoding: " << target.substr(3,options.x_encoding_len) << endl
           //                << "Y encoding: " << target.substr(3+options.x_encoding_len,options.y_encoding_len) << endl;
           pair<Point3f,Point3f> pts = SearchPoints(target.substr(3,options.x_encoding_len), target.substr(3+options.x_encoding_len,options.y_encoding_len));
-          DLOG(INFO) <<pts.first <<" | "<< pts.second<<endl;
+          // DLOG(INFO) <<pts.first <<" | "<< pts.second<<endl;
           if(pts.first.x >= 0 && pts.first.y >= 0){
               auto finder = checker.find(pts.first);
               if ( finder == checker.end()){
@@ -217,7 +220,7 @@ void AppleJuice::InitCameraCalibration(){
                                                          |CV_CALIB_FIX_K3|CV_CALIB_FIX_K4
                                                          |CV_CALIB_ZERO_TANGENT_DIST);
 
-  DLOG(WARNING) << "init.. calibration finish......" << endl
+  std::cerr << "init.. calibration finish......" << endl
   <<   "init_cameraMatrix:\n " << init_cameraMatrix << endl
   <<   "fix_distCoeffs:\n " << fix_distCoeffs.t() << endl
   <<   "Rot size: & Trans size: " << rvecs.size() <<" |  " <<  tvecs.size() << endl;
@@ -236,12 +239,13 @@ void AppleJuice::InitCameraCalibration(){
 }
 
 void AppleJuice::CreatingOffsetMap(){
-  assert(FeaturePool.size() == PatternPtsPool.size() && FeaturePool[0].size() == PatternPtsPool[0].size());
+  assert(FeaturePool.size() == PatternPtsPool.size() );
   DLOG(INFO) << "AppleJuice::CreatingOffsetMap starts...." <<endl;
   map<Point2f, Point3f, Point2fComp> checker;
   // Second Point3f: x-> num of observations, y-> pose index, z->point index
   for (size_t i = 0; i < FeaturePool.size(); i++) {
     /* loop each pose */
+    assert(FeaturePool[i].size() == PatternPtsPool[i].size() );
       for (size_t j = 0; j < FeaturePool[i].size(); j++) {
         /* checker checks all observations */
           auto finder = checker.find(FeaturePool[i][j]);
@@ -252,8 +256,7 @@ void AppleJuice::CreatingOffsetMap(){
           }
       }
   }
-  arma::umat Optimizion_pts_check_map = arma::zeros<arma::umat>(options.image_width, options.image_height);
-  DLOG(INFO) << "AppleJuice::CreatingOffsetMap here...." <<endl;
+  arma::umat Optimizion_pts_check_map = arma::zeros<arma::umat>(options.image_height, options.image_width);
 
   for(auto itr = checker.begin(); itr != checker.end(); itr++) {
         if(itr->second.x == 1){
