@@ -8,6 +8,7 @@ import vis
 
 import numpy as np
 import numpy.matlib as matlib
+import scipy.io as sio
 
 import pdb
 
@@ -397,6 +398,24 @@ class Camera:
 
 		return pt3d, ray_vec
 
+	def write_offset_map_from_dist_coeffs(self):
+		"""
+		Args:
+			camera: a Camera with intrinisics and distortion written
+		Writes x and y offset mat to current directory
+		"""
+		mapx,mapy = cv2.initUndistortRectifyMap(self.intrinsics.intri_mat, \
+										self.get_opencv_dist_coeffs(), \
+										np.eye(3), \
+										self.intrinsics.intri_mat, \
+										self.size,\
+										cv2.CV_32FC1)
+		import pdb; pdb.set_trace()
+		mapx = mapx - matlib.repmat(np.linspace(0, self.width(), num=self.width(), endpoint=False).reshape(1,self.width()), self.height(), 1)
+		mapy = mapy - matlib.repmat(np.linspace(0, self.height(), num=self.height(), endpoint=False).reshape(self.height(),1), 1, self.width())
+
+		sio.savemat('distort_map.mat', {'mapx':mapx, 'mapy':mapy})
+
 	@staticmethod
 	def calibrate_camera(img_pts, board, img_size):
 		"""
@@ -477,4 +496,28 @@ class Camera:
 
 		#@TODO: look up actual Ximea camera angle of view
 		return Camera(intri, None, cam_size,(53.8, 84.1),"pinhole")
+
+	@staticmethod
+	def nikon_camera():
+		"""
+		Make a camera whose intrinsics and distortion coefficients are computed
+		from a real experiment.
+		Returns:
+			a Camera.
+		
+		//may be useful:
+		cv2.remap(src, map1, map2, interpolation[, dst[, borderMode[, borderValue]]]) dst
+		"""
+		# Xi camera calibrated on the week of April 11th pinhole-radtan model with Kalibr
+		intri_mat = np.array([[663.128, 0., 401.775], \
+			[0., 882.618, 308.066],\
+			[0., 0., 1.]])
+		#TODO:zeros
+		#radial_dist = np.array([-0.00187587, 0.00898923, 0.0])
+		#tang_dist = np.array([0.0018697, 0.00093728])
+		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
+		cam_size = (800, 600)
+
+		#@TODO: look up actual Ximea camera angle of view
+		return Camera(intri, None, cam_size, None,"pinhole")
 		

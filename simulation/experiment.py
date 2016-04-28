@@ -24,7 +24,7 @@ def calib_with_random_n_boards(n):
 	distortion, focal length, and center point.
 	"""
 	# parameters
-	exp_repeat_times = 2
+	exp_repeat_times = 50
 	noise3d_lvls = [0]
 	# noise3d_lvls = [0, 0.005, 0.01, 0.04]
 	noise2d_lvls = [0]

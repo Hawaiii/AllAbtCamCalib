@@ -12,8 +12,6 @@ import unittest
 
 class TestBoardMethods(unittest.TestCase):
 
-
-
 	def test_gen_calib_board(self):
 		# Board at (0,0,0) on x-y plane
 		b0 = board.Board.gen_calib_board((3,2),1,np.array([0,0,0]), np.array([0,0,0]),0)

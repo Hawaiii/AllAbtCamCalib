@@ -113,6 +113,51 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 	plt.ylabel('principal point y')
 	fpdf.savefig()
 
+	# distortion coefficients
+	#k1
+	k1_arr = np.asarray([est_cam.intrinsics.radial_dist[0] for est_cam in estimations])
+	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.radial_dist[0], np.mean(k1_arr), np.std(k1_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(k1_arr)), k1_arr)
+	plt.ylabel('radial distortion k1')
+	fpdf.savefig()
+
+	#k2
+	k2_arr = np.asarray([est_cam.intrinsics.radial_dist[1] for est_cam in estimations])
+	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.radial_dist[1], np.mean(k2_arr), np.std(k2_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(k2_arr)), k2_arr)
+	plt.ylabel('radial distortion k2')
+	fpdf.savefig()
+
+	#k3
+	k3_arr = np.asarray([est_cam.intrinsics.radial_dist[2] for est_cam in estimations])
+	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.radial_dist[2], np.mean(k3_arr), np.std(k3_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(k3_arr)), k3_arr)
+	plt.ylabel('radial distortion k3')
+	fpdf.savefig()
+
+	#r1
+	r1_arr = np.asarray([est_cam.intrinsics.tang_dist[0] for est_cam in estimations])
+	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.tang_dist[0], np.mean(r1_arr), np.std(r1_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(r1_arr)), r1_arr)
+	plt.ylabel('tangential distortion r1')
+	fpdf.savefig()
+	#r2
+	r2_arr = np.asarray([est_cam.intrinsics.tang_dist[1] for est_cam in estimations])
+	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+		true_cam.intrinsics.tang_dist[1], np.mean(r2_arr), np.std(r2_arr))
+	fig, ax = plt.subplots()
+	bars = plt.bar(range(len(r2_arr)), r2_arr)
+	plt.ylabel('tangential distortion r2')
+	fpdf.savefig()
+
 	# extrinsics diff r1
 	# extrinsics diff r2
 	# extrinsics diff r3
