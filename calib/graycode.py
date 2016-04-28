@@ -114,8 +114,8 @@ def show_im_seq(imgs, time_interval):
         cv2.imshow('calibration',imgs[i])
         cv2.waitKey(1000*time_interval)
     
-gc_seq = make_greycode_seq((800,600))
-#show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
+gc_seq = make_greycode_seq((1440,900))
+show_im_seq(gc_seq, 1) #Change to 0 for keyboard control
 
 
     

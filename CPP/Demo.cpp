@@ -15,22 +15,15 @@ int main(int argc, char** argv) {
 
   // parse_argv(argc, argv);
   // Initialize Google's logging library.
-<<<<<<< HEAD
   google::SetLogDestination(0,"./log.txt");
   google::InitGoogleLogging(argv[0]);
-  opt_ option_(28,2,800,600,0.5,14,11,11,
-=======
-  google::InitGoogleLogging(argv[0]);
-
-  opt_ option_(29,2,800,600,0.5,14,11,12, 331.7030/2880*800, 207.3144/1800*600,
-  "../../calib/h600.csv",
->>>>>>> origin/master
+  opt_ option_(28,4,800,600,0.5,14,11,11, 331.7030/2880*800, 207.3144/1800*600,
   "../../calib/v800.csv",
   "../../calib/h600.csv",
   "../data/",
   "./",
   "image",
-  "pose",
+  "seq",
   ".png"
 );
   AppleJuice* juice = new AppleJuice();
@@ -41,6 +34,10 @@ int main(int argc, char** argv) {
   juice->ReadImageLists(option_);
   juice->BinarizeAllImages();
   juice->ExtractControlPts();
+  juice->InitCameraCalibration();
+  juice->computeReporjectionError();
+  juice->CreatingOffsetMap();
+  juice->AppleBundleAdjustment();
 } catch (std::exception &e){
   std::cout << e.what() << std::endl;
 }
