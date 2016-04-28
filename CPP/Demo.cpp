@@ -17,13 +17,13 @@ int main(int argc, char** argv) {
   // Initialize Google's logging library.
   google::SetLogDestination(0,"./log.txt");
   google::InitGoogleLogging(argv[0]);
-  opt_ option_(28,2,800,600,0.5,14,11,11, 331.7030/2880*800, 207.3144/1800*600,
+  opt_ option_(28,12,800,600,0.5,14,11,11, 331.7030/2880*800, 207.3144/1800*600,
   "../../calib/v800.csv",
   "../../calib/h600.csv",
   "../data/",
   "./",
   "image",
-  "pose",
+  "seq",
   ".png"
 );
   AppleJuice* juice = new AppleJuice();

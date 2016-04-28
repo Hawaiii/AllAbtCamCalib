@@ -92,7 +92,7 @@ void AppleJuice::BinarizeAllImages(){
               // if it is smaller than low_threshold, assign 0
               tmp_blob.slice(x).elem( find(tmp_mat  <= 0 ) ).zeros();
 
-              // if(DEBUG) tmp_blob.slice(x).save("blob" + to_string(i) + " slice " + to_string(x) + ".mat", arma::raw_ascii);
+              if(DEBUG) tmp_blob.slice(x).save("blob" + to_string(i) + " slice " + to_string(x) + ".mat", arma::raw_ascii);
             }
             this->BinaryBlob.push_back(tmp_blob);
             DLOG(INFO) << "Save Blob: " << i << " done!\n";
@@ -164,7 +164,7 @@ void AppleJuice::ExtractControlPts(){
         this->FeaturePool.push_back(single_featurePool);
         this->PatternPtsPool.push_back(single_PatternPool);
         // if(DEBUG)
-        //   check_map.save("check_map" + to_string(i) + ".mat",arma::raw_ascii  );
+          check_map.save("check_map" + to_string(i) + ".mat",arma::raw_ascii  );
       }
 
       assert(FeaturePool.size() == PatternPtsPool.size() && FeaturePool[0].size() == PatternPtsPool[0].size());
@@ -253,12 +253,15 @@ void AppleJuice::CreatingOffsetMap(){
       }
   }
   arma::umat Optimizion_pts_check_map = arma::zeros<arma::umat>(options.image_width, options.image_height);
+  DLOG(INFO) << "AppleJuice::CreatingOffsetMap here...." <<endl;
 
   for(auto itr = checker.begin(); itr != checker.end(); itr++) {
         if(itr->second.x == 1){
             unsigned int i_ = itr->second.y;
             unsigned int j_ = itr->second.z;
             //delete only one observation pts
+            // std::cerr << "/* error message */ i: " << i_ << "  --- j: " << j_<< std::endl;
+
             FeaturePool[i_][j_] = Point2f(-1,-1);
             PatternPtsPool[i_][j_] = Point3f(-1,-1,-1);
         }else if(itr->second.x > 1){
@@ -329,7 +332,7 @@ void AppleJuice::computeReporjectionError(bool flag){
 					//  }
 
 			std::cout<<"Pose ID: " << i<<"  perPoseError: " << perPoseError/ ( PatternPtsPool[i].size() - outlier_cnt) <<
-      " with outlier: " << outlier_cnt << "\n";
+      " with outlier: " << outlier_cnt << "/" << ( PatternPtsPool[i].size())  <<  "\n";
 	 }
 	 double meanError = sumError / nTargetPts;
 	 double rmsError = sqrt(sumSqError / nTargetPts);
