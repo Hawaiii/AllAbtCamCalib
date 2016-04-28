@@ -11,5 +11,5 @@ ADD_DEFINITIONS(
 	-std=c++11
 )
 
-add_executable( AppleJuice Demo.cpp AppleJuice.cc Graycode.cpp)
+add_executable( AppleJuice Demo.cpp AppleJuice.cc Graycode.cpp BA.cpp)
 target_link_libraries( AppleJuice ${OpenCV_LIBS} ${ARMADILLO_LIBRARIES} ${CERES_LIBRARIES} )

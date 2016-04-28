@@ -5,6 +5,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/core/mat.hpp"
 #include <cstdio>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 #include <highgui.h>
 #include <fstream>
 #include <map>
+#include <list>
 #include <string.h>
 #include <glog/logging.h>
 #include <armadillo>
@@ -28,6 +30,18 @@ struct TreeNode{
 	TreeNode * right_node; //1
 	float min;
 	float max;
+};
+
+struct Point3fComp {
+    bool operator()(const cv::Point3f& a, const cv::Point3f& b) const {
+        return a.x * 1000 + a.y < b.x * 1000 + b.y;
+    }
+};
+
+struct Point2fComp {
+    bool operator()(const cv::Point2f& a, const cv::Point2f& b) const {
+        return a.x * 1000 + a.y < b.x * 1000 + b.y;
+    }
 };
 
 struct Chessboard {
@@ -97,9 +111,12 @@ class AppleJuice{
 		std::vector<std::vector<cv::Point3f>> PatternPtsPool;
 		std::pair<cv::Point3f, cv::Point3f> SearchPoints(std::string xs, std::string ys);
 		Intrinsic intrinsic;
+		std::vector<Extrinsic> extrinsic_list;
 		std::vector<arma::cube> ImageBlob;
 		std::vector<arma::ucube> BinaryBlob;
 		std::vector<arma::umat> Masks;
+		// offset_map(x, y)
+		std::map<cv::Point2f,double*, Point2fComp> offset_map;
 
 	public:
 		opt_ options;
@@ -121,11 +138,14 @@ class AppleJuice{
 		//Get Init. Guess from standart OpenCV Camera Calibration
 		//	>> Intrisics >> Extrinsic
 		void InitCameraCalibration();
+		// Based on Observation, each avaible pixel has to obserse two calibration
+		// >> offset_map
+		void CreatingOffsetMap();
 		// Full BundleAdjustment
 		//  >> ???
 		void AppleBundleAdjustment();
 
-		void ComputeReprojectionError();
+		void computeReporjectionError(bool flag = false);
 
 		void ExportResults();
 

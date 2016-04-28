@@ -11,6 +11,9 @@
 
 using namespace std;
 
+double intrinsic_x = 0;
+double intrinsic_y = 0;
+
 pair<double, double>  Proprocessing(std::vector<std::vector<cv::Point3f>>& PatternPtsPool, std::vector<std::vector<cv::Point2f>>& FeaturePool, std::vector<Extrinsic>& extrinsic_list ){
 					//Prepocissing to get the min and max value of r_square for regularization
 					assert(PatternPtsPool.size() == extrinsic_list.size());
@@ -127,8 +130,8 @@ struct DynaimcChessboardReprojectionError{
         // The error is the difference between the predicted and observed position.
         residuals[0] = (predicted_x - observedPoints.x) ;
         residuals[1] = (predicted_y - observedPoints.y) ;
-        residuals[2] = offset_pair[0] * sqrt(lamda);
-        residuals[3] = offset_pair[1] * sqrt(lamda);
+        residuals[2] = (intrinsic_x - intrinsic[0]);
+        residuals[3] = (intrinsic_y - intrinsic[1]);
 						// std::cout << "/* residuals x *m/" << residuals[2]<< std::endl;
         return true;
 			}
@@ -146,7 +149,8 @@ struct DynaimcChessboardReprojectionError{
 void AppleJuice::AppleBundleAdjustment() {
 	/* code */
 	cout << endl << "=== Solving Dynamic Chessboard Bundle Adjustment Problem with CERES ===" << endl;
-
+	intrinsic_x = intrinsic.focus_x;
+	intrinsic_y = intrinsic.focus_y;
 	//Define Problem
 	 ceres::Problem problem;
 	 std::vector<double*> R_list(options.N_poses, NULL);
