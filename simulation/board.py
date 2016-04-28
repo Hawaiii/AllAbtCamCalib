@@ -72,9 +72,9 @@ class Board:
 
 		# Add noise3d
 		if noise3d > 0:
-			noises = np.random.normal(0, noise3d, (board_height*board_width,3))
+			noises = np.random.normal(0, noise3d, (board_dim[1]*board_dim[0],3))
 			for ipt in xrange(len(board_pts)):
-				board[board_pts.keys()[ipt]] += noises[ipt, :]
+				board_pts[board_pts.keys()[ipt]] += noises[ipt, :].reshape(3,1)
 
 		# # Rotate board to given orientation and move to given location
 		# if orientation.size == 3:
@@ -164,6 +164,35 @@ class Board:
 		# 	cnt += 1
 		# print X
 		return X, Y, Z
+
+	def move_board_in_camera(camera, cam_extrin, pixel, depth, ori):
+		"""
+		Returns a board whose top-left point is observed at pixel in camera, 
+		is at depth from camera, and is inside the camera's view (returns None
+		if not all four corners are observed in the camera)
+		Args:
+			camera: a camera
+			cam_extrin: Extrinsics
+			pixel: (pixel_x, pixel_y), column followed by row
+			depth: distance from the camera, in meters
+			ori: 3x3 rotattion matrix or 3x1 rotation vector
+		Returns:
+			a Board, or None if the board is not fully observable in camera
+		"""
+		# Find location
+		pt3d, ray_vec = camera.ray_from_pixel(pixel, cam_extrin)
+		bd_loc = pt3d + depth*ray_vec
+
+		# Copy board
+		new_board = self.deepcopy()
+		new_board.move_board(bd_loc, ori)
+		
+		# Check observable
+		bd_edges = new_board.get_four_corners()
+		if not camera.all_observable(extrin, bd_edges):
+			return False
+		else:
+			return new_board
 
 	def plot(self, fax=None, clr='b'):
 		"""

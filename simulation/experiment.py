@@ -22,17 +22,15 @@ def calib_with_random_n_boards(n):
 	distortion, focal length, and center point.
 	"""
 	# parameters
-	exp_repeat_times = 50
-	n = 2
+	exp_repeat_times = 2
 	noise3d_lvls = [0]
+	# noise3d_lvls = [0, 0.005, 0.01, 0.04]
 	noise2d_lvls = [0]
-	# noise3d_lvls = [0, 0.5, 1, 2]
-	# noise2d_lvls = [0, 0.5, 1, 2]
 	board_height = [5]
-	board_width = [7]
-	board_sqsize = [23]
-	depth_min = 1 #m
-	depth_max = 4 #m
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 0.5 #m
+	depth_max = 5#m
 
 	for noise3d in noise3d_lvls:
 		for noise2d in noise2d_lvls:
@@ -49,11 +47,14 @@ def calib_with_random_n_boards(n):
 							# Generate n boards
 							board = bd.Board.gen_calib_board((bw, bh), bs, \
 								np.zeros((3,1)), np.zeros((3,1)), noise3d)
+							perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+								np.zeros((3,1)), np.zeros((3,1)), 0)
 							obs_list = []
 							for i in xrange(n):
 								# choose a random pixel
 								pxl_x = np.random.random_integers(0, true_cam.width()-1)
 								pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
 								# choose a random depth on ray from pixel
 								pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
 								depth = np.random.rand() * (depth_max - depth_min) + depth_min
@@ -65,16 +66,16 @@ def calib_with_random_n_boards(n):
 								board.move_board(bd_loc, bd_ori)
 								obs_list.append(board.get_points()) #3xN np array
 
-							img_pts = true_cam.capture_images(cam_loc, layered_grids, noise2d)
-							esti_cam = cam.Camera.calibrate_camera(img_pts, board, true_cam.size)
-							# bd.compare_board_estimations(esti_cam.extrinsics, board, (board_width, board_height), \
-							# 	layered_grids, save_name='compare_board.pdf')
+							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+							esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size)
+							vis.plot_camera_with_points(cam_extrin, obs_list)
+							vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs)+'_'+str(iexp)+'.pdf')
 
 							estimations.append(esti_cam)
 
 						# Analyze error
 						vis.write_esti_results(estimations, true_cam, \
-							save_name_pre='results/report_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
+							save_name_pre='results/report_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
 	print "random {0} board experiment DONE".format(n)
 
 calib_with_random_n_boards(2)
