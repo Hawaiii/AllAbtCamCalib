@@ -243,11 +243,11 @@ class Camera:
 			Args:
 				extrin: Extrinsics
 				point: 3xN numpy array, a 3D point
-			Returns: 2xN numpy array
+			Returns: Nx1x2 numpy array
 		"""
-		loc,_ = cv2.projectPoints(point, \
+		loc,_ = cv2.projectPoints(point.T, \
 						extrin.rot_vec, extrin.trans_vec, \
-						self.intrinsics.intri_mat, self.intrinsics.get_opencv_dist_coeffs())
+						self.intrinsics.intri_mat, self.get_opencv_dist_coeffs())
 		# loc = loc.T.astype(np.float32).reshape((-1, 1, 2))
 		return loc
 		# if not nodistortion:
@@ -271,7 +271,7 @@ class Camera:
 
 	def all_observable(self, extrin, pts_3d):
 		assert(pts_3d.shape[0] == 3)
-		projections = self.project_point(extrin, pts_3d)
+		pts_2d = self.project_point(extrin, pts_3d).reshape(-1, 2).T
 		assert(pts_2d.shape[0] == 2)
 		if np.any(pts_2d[0,:] < 0) or np.any(pts_2d[0,:] >= self.width()):
 			return False

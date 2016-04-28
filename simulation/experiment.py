@@ -10,6 +10,8 @@ import vis
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import copy
+
 
 """
 Experiment and related 
@@ -50,25 +52,28 @@ def calib_with_random_n_boards(n):
 							perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
 								np.zeros((3,1)), np.zeros((3,1)), 0)
 							obs_list = []
-							for i in xrange(n):
+							# for i in xrange(n):
+							while len(obs_list) < n:
 								# choose a random pixel
 								pxl_x = np.random.random_integers(0, true_cam.width()-1)
 								pxl_y = np.random.random_integers(0, true_cam.height()-1)
 
 								# choose a random depth on ray from pixel
-								pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
 								depth = np.random.rand() * (depth_max - depth_min) + depth_min
-								bd_loc = pt3d + depth*ray_vec
+								# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+								# bd_loc = pt3d + depth*ray_vec
 								
 								# choose a random orientation
 								bd_ori = util.random_rotation()
 
-								board.move_board(bd_loc, bd_ori)
-								obs_list.append(board.get_points()) #3xN np array
+								# board.move_board(bd_loc, bd_ori)
+								m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+								if m_board is not None:
+									obs_list.append(m_board.get_points()) #3xN np array
 
 							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
 							esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size)
-							vis.plot_camera_with_points(cam_extrin, obs_list)
+							# vis.plot_camera_with_points(cam_extrin, obs_list)
 							vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs)+'_'+str(iexp)+'.pdf')
 
 							estimations.append(esti_cam)

@@ -3,6 +3,7 @@ import exp_util as util
 import numpy as np
 import numpy.matlib as matlib
 import cv2
+import copy
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 import matplotlib.pyplot as plt
@@ -165,7 +166,7 @@ class Board:
 		# print X
 		return X, Y, Z
 
-	def move_board_in_camera(camera, cam_extrin, pixel, depth, ori):
+	def move_board_in_camera(self, camera, cam_extrin, pixel, depth, ori):
 		"""
 		Returns a board whose top-left point is observed at pixel in camera, 
 		is at depth from camera, and is inside the camera's view (returns None
@@ -184,13 +185,13 @@ class Board:
 		bd_loc = pt3d + depth*ray_vec
 
 		# Copy board
-		new_board = self.deepcopy()
+		new_board = copy.deepcopy(self)
 		new_board.move_board(bd_loc, ori)
 		
 		# Check observable
 		bd_edges = new_board.get_four_corners()
-		if not camera.all_observable(extrin, bd_edges):
-			return False
+		if not camera.all_observable(cam_extrin, bd_edges):
+			return None
 		else:
 			return new_board
 
