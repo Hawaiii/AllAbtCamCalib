@@ -270,7 +270,7 @@ class Camera:
 		# 				print 'point', point,'projects to wrong side of camera'
 		# 	return loc[0:2]
 
-	def all_observable(self, extrin, pts_3d):
+	def all_observable(self, extrin, pts_3d, check_dist=True):
 		assert(pts_3d.shape[0] == 3)
 		pts_2d = self.project_point(extrin, pts_3d).reshape(-1, 2).T
 		assert(pts_2d.shape[0] == 2)
@@ -278,6 +278,15 @@ class Camera:
 			return False
 		if np.any(pts_2d[1,:] < 0) or np.any(pts_2d[1,:] >= self.height()):
 			return False
+
+		# Make sure they are far away from each other enough
+		if check_dist:
+			npts = pts_2d.shape[1]
+			thres = 5
+			for i in xrange(npts):
+				for j in xrange(i+1, npts):
+					if np.any(np.abs((pts_2d[:,i] - pts_2d[:,j]))< thres):
+						return False
 		return True
 
 	def calc_homography(self, motion, board, im_size, img, scale, save_name):
@@ -410,14 +419,13 @@ class Camera:
 										self.intrinsics.intri_mat, \
 										self.size,\
 										cv2.CV_32FC1)
-		import pdb; pdb.set_trace()
 		mapx = mapx - matlib.repmat(np.linspace(0, self.width(), num=self.width(), endpoint=False).reshape(1,self.width()), self.height(), 1)
 		mapy = mapy - matlib.repmat(np.linspace(0, self.height(), num=self.height(), endpoint=False).reshape(self.height(),1), 1, self.width())
 
 		sio.savemat('distort_map.mat', {'mapx':mapx, 'mapy':mapy})
 
 	@staticmethod
-	def calibrate_camera(img_pts, board, img_size):
+	def calibrate_camera(img_pts, board, img_size, noDistortion=False):
 		"""
 		Given image coordinates of points and actual 3D points, return a list of
 		intrinsics and extrinsics of camera estimated from the point coordinates.
@@ -446,9 +454,12 @@ class Camera:
 		# board_list list of np(N, 3) float32
 		# img_pts_list list of np(N, 1, 2) float32
 		# (1260, 1080) (x, y)
-		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, None)
+		if noDistortion:
+			retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, np.zeros((8,1)), None, None, 8|32|64|128)
+		else:
+			retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, None)
 		print 'Calibration RMS re-projection error', retval
-
+		
 		# put img_pts[i] back to 2xN format
 		for i in range(len(img_pts)):
 			img_pts[i] = img_pts[i].reshape(-1, 2).T
@@ -465,6 +476,60 @@ class Camera:
 		aov = None
 		name = "calibrated cam"
 		return Camera(intrinsics_, extrinsics_, size, aov, name)
+	
+	@staticmethod
+	def calibrate_camera_(img_pts, board, img_size):
+		"""
+		Given image coordinates of points and actual 3D points, return a list of
+		intrinsics and extrinsics of camera estimated from the point coordinates.
+		Args:
+			img_pts: list of 2xN np array 
+			board: a Board
+			img_size: (img_width, img_height)
+		Returns:
+			camera:
+			rvecs:
+			tvecs:
+		"""
+		# Save all seen images to file
+		#vis.plot_all_chessboards_in_camera(img_pts, img_size, save_name='debug_calibrate_camera.pdf')
+
+		board_list = []
+		view_id = []
+		b_pts = board.get_orig_points().astype(np.float32)
+		for i in range(len(img_pts)):
+			#pts_id = img_pts[i].keys()
+			if img_pts[i].shape < board.num_points():
+				print 'Cannot see the whole board in image', i
+				continue
+			view_id.append(i)
+			board_list.append(b_pts.T.copy())
+			img_pts[i] = img_pts[i].T.astype(np.float32).reshape((-1, 1, 2))
+			# print str(board_list[-1].shape) + " == " + str(img_pts[-1].shape)
+
+		# Inputs format:
+		# board_list list of np(N, 3) float32
+		# img_pts_list list of np(N, 1, 2) float32
+		# (1260, 1080) (x, y)
+		retval, cameraMatrix, distCoeffs, rvecs, tvecs  = cv2.calibrateCamera( board_list, img_pts, (img_size[0], img_size[1]), None, np.zeros((8,1)), None, None, 8|32|64|128)
+		print 'Calibration RMS re-projection error', retval
+		
+		# put img_pts[i] back to 2xN format
+		for i in range(len(img_pts)):
+			img_pts[i] = img_pts[i].reshape(-1, 2).T
+
+		# package return vale
+		intrinsics_ = Intrinsics(cameraMatrix, \
+			np.concatenate( (distCoeffs[0][0:2], distCoeffs[0][4:5]), axis=0 ), \
+			distCoeffs[0][2:4])
+		extrinsics_ = dict()
+		for i in range(len(rvecs)):
+			extrinsics_[view_id[i]] = Extrinsics.init_with_rotation_vec(tvecs[i][:,0], rvecs[i][:,0])
+		
+		size = img_size
+		aov = None
+		name = "calibrated cam"
+		return Camera(intrinsics_, extrinsics_, size, aov, name), rvecs, tvecs
 
 	@staticmethod
 	def make_pinhole_camera():
@@ -508,16 +573,25 @@ class Camera:
 		//may be useful:
 		cv2.remap(src, map1, map2, interpolation[, dst[, borderMode[, borderValue]]]) dst
 		"""
-		# Xi camera calibrated on the week of April 11th pinhole-radtan model with Kalibr
-		intri_mat = np.array([[663.128, 0., 401.775], \
-			[0., 882.618, 308.066],\
+		# Nikon camera calibrated on Apr 27th
+		# intri_mat = np.array([[663.128, 0., 401.775], \
+		# 	[0., 882.618, 308.066],\
+		# 	[0., 0., 1.]])
+		# #TODO:zeros
+		# #radial_dist = np.array([-0.00187587, 0.00898923, 0.0])
+		# #tang_dist = np.array([0.0018697, 0.00093728])
+		# radial_dist = np.zeros()
+		# intri = Intrinsics(intri_mat, radial_dist, tang_dist)
+		# cam_size = (800, 600)
+
+		intri_mat = np.array([[664.935742, 0., 407.062943], \
+			[0., 886.030013, 303.880099],\
 			[0., 0., 1.]])
 		#TODO:zeros
-		#radial_dist = np.array([-0.00187587, 0.00898923, 0.0])
-		#tang_dist = np.array([0.0018697, 0.00093728])
+		radial_dist = np.array([-0.07287841, 0.37697890, -0.55815004])
+		tang_dist = np.array([ -5.51172040e-05, 0.00222906])
 		intri = Intrinsics(intri_mat, radial_dist, tang_dist)
 		cam_size = (800, 600)
 
-		#@TODO: look up actual Ximea camera angle of view
 		return Camera(intri, None, cam_size, None,"pinhole")
 		

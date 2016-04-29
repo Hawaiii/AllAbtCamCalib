@@ -176,7 +176,7 @@ class Board:
 			cam_extrin: Extrinsics
 			pixel: (pixel_x, pixel_y), column followed by row
 			depth: distance from the camera, in meters
-			ori: 3x3 rotattion matrix or 3x1 rotation vector
+			ori: 3x3 rotation matrix or 3x1 rotation vector
 		Returns:
 			a Board, or None if the board is not fully observable in camera
 		"""
@@ -190,7 +190,7 @@ class Board:
 		
 		# Check observable
 		bd_edges = new_board.get_four_corners()
-		if not camera.all_observable(cam_extrin, bd_edges):
+		if not camera.all_observable(cam_extrin, bd_edges) or not camera.all_observable(cam_extrin, new_board.get_points(), check_dist=False):
 			return None
 		else:
 			return new_board

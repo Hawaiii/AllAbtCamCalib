@@ -125,7 +125,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 
 	#k2
 	k2_arr = np.asarray([est_cam.intrinsics.radial_dist[1] for est_cam in estimations])
-	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+	print >> ftxt, 'k2\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
 		true_cam.intrinsics.radial_dist[1], np.mean(k2_arr), np.std(k2_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(k2_arr)), k2_arr)
@@ -134,7 +134,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 
 	#k3
 	k3_arr = np.asarray([est_cam.intrinsics.radial_dist[2] for est_cam in estimations])
-	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+	print >> ftxt, 'k3\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
 		true_cam.intrinsics.radial_dist[2], np.mean(k3_arr), np.std(k3_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(k3_arr)), k3_arr)
@@ -143,7 +143,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 
 	#r1
 	r1_arr = np.asarray([est_cam.intrinsics.tang_dist[0] for est_cam in estimations])
-	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+	print >> ftxt, 'r1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
 		true_cam.intrinsics.tang_dist[0], np.mean(r1_arr), np.std(r1_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(r1_arr)), r1_arr)
@@ -151,7 +151,7 @@ def write_esti_results(estimations, true_cam, save_name_pre):
 	fpdf.savefig()
 	#r2
 	r2_arr = np.asarray([est_cam.intrinsics.tang_dist[1] for est_cam in estimations])
-	print >> ftxt, 'k1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
+	print >> ftxt, 'r1\tground truth:{0}\testimation mean:{1}\testimation std:{2}'.format(\
 		true_cam.intrinsics.tang_dist[1], np.mean(r2_arr), np.std(r2_arr))
 	fig, ax = plt.subplots()
 	bars = plt.bar(range(len(r2_arr)), r2_arr)
@@ -326,7 +326,8 @@ def plot_camera_with_points(cam_loc, pts_at_depth, invert=True):
 			ax.scatter(pts[0,:], pts[1,:], pts[2,:])
 	else:
 		print "bad type", type(pts_at_depth), "for pts_at_depth!"
-	plt.show()
+	# plt.show()
+	return ax
 
 def plot_camera_with_boards(cam_loc, boards, invert=True):
 	fig = plt.figure()
@@ -353,5 +354,6 @@ def plot_camera_with_boards(cam_loc, boards, invert=True):
 
 	for board in boards:
 		board.plot(ax)
-	plt.show()
+	# plt.show()
+	return ax
 

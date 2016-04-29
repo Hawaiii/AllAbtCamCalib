@@ -7,6 +7,7 @@ import camera as cam
 import board as bd
 import vis
 
+import cv2
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -16,6 +17,384 @@ import copy
 """
 Experiment and related 
 """
+def calib_with_angle():
+	angle_change = [0, 0.01, 0.1, 1]
+
+	# parameters
+	exp_repeat_times = 100
+	noise3d_lvls = [0]
+	noise2d_lvls = [0.3]
+	board_height = [5]
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 3 #m
+	depth_max = 5#m
+	n = 3
+
+	for noise3d in noise3d_lvls:
+		for noise2d in noise2d_lvls:
+			true_cam = cam.Camera.nikon_camera()
+
+			# true_cam.intrinsics.radial_dist = 1*true_cam.intrinsics.radial_dist
+			# true_cam.intrinsics.tang_dist = 1*true_cam.intrinsics.tang_dist
+			cam_loc = np.zeros((3,1))
+			cam_ori = np.zeros((3,1))
+			cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+			bh = board_height[0]
+		 	bw = board_width[0]
+			bs = board_sqsize[0]
+			for ac in angle_change:
+					estimations = []
+					start_angle = util.random_rotation()
+
+					#check start_angle works
+					board = bd.Board.gen_calib_board((bw, bh), bs, \
+							np.zeros((3,1)), np.zeros((3,1)), noise3d)
+					m_board = board.move_board_in_camera(true_cam, cam_extrin, \
+						(true_cam.width()/2, true_cam.height()/2), 4, start_angle)
+					while m_board is None:
+						start_angle = util.random_rotation()
+						m_board = board.move_board_in_camera(true_cam, cam_extrin, \
+						(true_cam.width()/2, true_cam.height()/2), 4, start_angle)
+					start_angle = cv2.Rodrigues(start_angle)[0]
+
+					for iexp in xrange(exp_repeat_times):
+						# Generate n boards
+						
+						perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+							np.zeros((3,1)), np.zeros((3,1)), 0)
+						obs_list = []
+						# for i in xrange(n):
+						while len(obs_list) < n:
+							# choose a random pixel
+							pxl_x = np.random.random_integers(0, true_cam.width()-1)
+							pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
+							# choose a random depth on ray from pixel
+							depth = np.random.rand() * (depth_max - depth_min) + depth_min
+							# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+							# bd_loc = pt3d + depth*ray_vec
+							
+							# choose a random orientation
+							bd_ori = start_angle.dot(cv2.Rodrigues(util.random_rot_w_scale(ac))[0])
+
+							# board.move_board(bd_loc, bd_ori)
+							m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+							if m_board is not None:
+								# print 'board at (', pxl_x, ',', pxl_y,',', depth, '), rotation', bd_ori.flatten()
+								obs_list.append(m_board.get_points()) #3xN np array
+
+						img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+						esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=False)
+						# esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=True)
+						# esti_cam.intrinsics.radial_dist = np.zeros((3,))
+						# esti_cam.intrinsics.tang_dist = np.zeros((2,))
+						# vis.plot_camera_with_points(cam_extrin, obs_list)
+						# vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_rot_'+str(ac)+'_'+str(iexp)+'.pdf')
+
+						estimations.append(esti_cam)
+
+					# Analyze error
+					vis.write_esti_results(estimations, true_cam, \
+						save_name_pre='results/rot_'+str(ac)+'_board_'+str(n)+'_2dn_'+str(noise2d))
+	print "depth {0} board experiment DONE".format(n)
+# calib_with_angle()
+
+def calib_with_points():
+	"""
+	Generate n boards at random angle and depth, experiment for calibration result 
+	under different 3d noise, 2d noise, number of control points;
+	distortion, focal length, and center point.
+	"""
+	# parameters
+	exp_repeat_times = 100
+	noise3d_lvls = [0]
+	noise2d_lvls = [0.3]
+	board_height = [5,50,500]
+	board_width = [8,80,800]
+	board_tot_size = 1.64
+	# board_sqsize = []
+	depth_min = 1 #m
+	depth_max = 5#m
+	n = 3
+
+	for noise3d in noise3d_lvls:
+		for noise2d in noise2d_lvls:
+			true_cam = cam.Camera.make_pinhole_camera()
+			cam_loc = np.zeros((3,1))
+			cam_ori = np.zeros((3,1))
+			cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+			for bi in xrange(len(board_height)):
+				bh = board_height[bi]
+				bw = board_width[bi]
+				bs = board_tot_size/bw
+
+				estimations = []
+				for iexp in xrange(exp_repeat_times):
+					# Generate n boards
+					board = bd.Board.gen_calib_board((bw, bh), bs, \
+						np.zeros((3,1)), np.zeros((3,1)), noise3d)
+					perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+						np.zeros((3,1)), np.zeros((3,1)), 0)
+					obs_list = []
+					# for i in xrange(n):
+					while len(obs_list) < n:
+						# choose a random pixel
+						pxl_x = np.random.random_integers(0, true_cam.width()-1)
+						pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
+						# choose a random depth on ray from pixel
+						depth = np.random.rand() * (depth_max - depth_min) + depth_min
+						# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+						# bd_loc = pt3d + depth*ray_vec
+						
+						# choose a random orientation
+						bd_ori = util.random_rotation()
+
+						# board.move_board(bd_loc, bd_ori)
+						m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+						if m_board is not None:
+							obs_list.append(m_board.get_points()) #3xN np array
+
+					img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+					esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size)
+					# vis.plot_camera_with_points(cam_extrin, obs_list)
+					# vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_bn_'+str(bh*bw)+'_2dn_'+str(noise2d)+'_'+str(iexp)+'.pdf')
+
+					estimations.append(esti_cam)
+
+				# Analyze error
+				vis.write_esti_results(estimations, true_cam, \
+					save_name_pre='results/npts_'+str(bh*bw)+'_2dn_'+str(noise2d))
+	print "random {0} board experiment DONE"
+# calib_with_points()
+
+def calib_with_depth():
+	depth_start = [2, 4, 8]
+	depth_range = [0.05]
+	depth_end = 10
+
+	# parameters
+	exp_repeat_times = 50
+	noise3d_lvls = [0]
+	noise2d_lvls = [0.3]
+	board_height = [5]
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 6 #m
+	depth_max = 9#m
+	n = 30
+
+	for noise3d in noise3d_lvls:
+		for noise2d in noise2d_lvls:
+			true_cam = cam.Camera.nikon_camera()
+
+			# true_cam.intrinsics.radial_dist = 1*true_cam.intrinsics.radial_dist
+			# true_cam.intrinsics.tang_dist = 1*true_cam.intrinsics.tang_dist
+			cam_loc = np.zeros((3,1))
+			cam_ori = np.zeros((3,1))
+			cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+			bh = board_height[0]
+		 	bw = board_width[0]
+			bs = board_sqsize[0]
+			for ds in depth_start:
+				for dr in depth_range:
+					if ds + dr > depth_end:
+						continue
+					depth_min = ds
+					depth_max = ds + dr
+
+					estimations = []
+					for iexp in xrange(exp_repeat_times):
+						# Generate n boards
+						board = bd.Board.gen_calib_board((bw, bh), bs, \
+							np.zeros((3,1)), np.zeros((3,1)), noise3d)
+						perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+							np.zeros((3,1)), np.zeros((3,1)), 0)
+						obs_list = []
+						# for i in xrange(n):
+						while len(obs_list) < n:
+							# choose a random pixel
+							pxl_x = np.random.random_integers(0, true_cam.width()-1)
+							pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
+							# choose a random depth on ray from pixel
+							depth = np.random.rand() * (depth_max - depth_min) + depth_min
+							# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+							# bd_loc = pt3d + depth*ray_vec
+							
+							# choose a random orientation
+							bd_ori = util.random_rotation()
+
+							# board.move_board(bd_loc, bd_ori)
+							m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+							if m_board is not None:
+								# print 'board at (', pxl_x, ',', pxl_y,',', depth, '), rotation', bd_ori.flatten()
+								obs_list.append(m_board.get_points()) #3xN np array
+
+						img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+						esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=False)
+						# esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=True)
+						# esti_cam.intrinsics.radial_dist = np.zeros((3,))
+						# esti_cam.intrinsics.tang_dist = np.zeros((2,))
+						# vis.plot_camera_with_points(cam_extrin, obs_list)
+						# vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_depth_'+str(ds)+'_'+str(dr)+'_'+str(iexp)+'.pdf')
+
+						estimations.append(esti_cam)
+
+					# Analyze error
+					vis.write_esti_results(estimations, true_cam, \
+						save_name_pre='results/depth_s'+str(ds)+'_range_'+str(dr)+'_board_'+str(n)+'_2dn_'+str(noise2d))
+	print "depth {0} board experiment DONE".format(n)
+
+def calib_with_covarage():
+	# parameters
+	exp_repeat_times = 50
+	noise3d_lvls = [0]
+	noise2d_lvls = [0.3]
+	board_height = [5]
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 6 #m
+	depth_max = 9#m
+	n = 50
+	coverage = [1.0, 0.5, 0.1]
+
+	for noise3d in noise3d_lvls:
+		for noise2d in noise2d_lvls:
+			true_cam = cam.Camera.nikon_camera()
+
+			# true_cam.intrinsics.radial_dist = 1*true_cam.intrinsics.radial_dist
+			# true_cam.intrinsics.tang_dist = 1*true_cam.intrinsics.tang_dist
+
+			cam_loc = np.zeros((3,1))
+			cam_ori = np.zeros((3,1))
+			cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+			bh = board_height[0]
+		 	bw = board_width[0]
+			bs = board_sqsize[0]
+			for cov in coverage:
+				estimations = []
+				for iexp in xrange(exp_repeat_times):
+					# Generate n boards
+					board = bd.Board.gen_calib_board((bw, bh), bs, \
+						np.zeros((3,1)), np.zeros((3,1)), noise3d)
+					perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+						np.zeros((3,1)), np.zeros((3,1)), 0)
+					obs_list = []
+					# for i in xrange(n):
+					while len(obs_list) < n:
+						# choose a random pixel
+						mid_x = true_cam.width()/2
+						mid_y = true_cam.height()/2
+						pxl_x = np.random.random_integers(int(mid_x-cov*mid_x), int(mid_x+cov*mid_x))
+						pxl_y = np.random.random_integers(int(mid_y-cov*mid_y), int(mid_y+cov*mid_y))
+
+						# choose a random depth on ray from pixel
+						depth = np.random.rand() * (depth_max - depth_min) + depth_min
+						# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+						# bd_loc = pt3d + depth*ray_vec
+						
+						# choose a random orientation
+						bd_ori = util.random_rotation()
+
+						# board.move_board(bd_loc, bd_ori)
+						m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+						if m_board is not None:
+							print 'board at (', pxl_x, ',', pxl_y,',', depth, '), rotation', bd_ori.flatten()
+							obs_list.append(m_board.get_points()) #3xN np array
+
+					img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+					esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=False)
+					# esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=True)
+					# esti_cam.intrinsics.radial_dist = np.zeros((3,))
+					# esti_cam.intrinsics.tang_dist = np.zeros((2,))
+					# vis.plot_camera_with_points(cam_extrin, obs_list)
+					# vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_cov_'+str(cov)+'_'+str(iexp)+'.pdf')
+
+					estimations.append(esti_cam)
+
+				# Analyze error
+				vis.write_esti_results(estimations, true_cam, \
+					save_name_pre='results/coverage_'+str(cov)+'_board_'+str(n)+'_2dn_'+str(noise2d))
+	print "random {0} board experiment DONE".format(n)
+# calib_with_covarage()
+
+def calib_with_distortion_n_boards(n):
+	"""
+	Generate n boards at random angle and depth, experiment for calibration result 
+	under different 3d noise, 2d noise, number of control points;
+	distortion, focal length, and center point.
+	"""
+	# parameters
+	exp_repeat_times = 100
+	noise3d_lvls = [0]
+	# noise3d_lvls = [0, 0.005, 0.01, 0.04]
+	noise2d_lvls = [0]
+	board_height = [5]
+	board_width = [8]
+	board_sqsize = [0.23]
+	depth_min = 0.5 #m
+	depth_max = 5#m
+
+	for noise3d in noise3d_lvls:
+		for noise2d in noise2d_lvls:
+			# @TODO: experiment with different camera parameters?
+			true_cam = cam.Camera.make_pinhole_camera()
+
+			true_cam.intrinsics.radial_dist = 1*true_cam.intrinsics.radial_dist
+			true_cam.intrinsics.tang_dist = 1*true_cam.intrinsics.tang_dist
+
+			cam_loc = np.zeros((3,1))
+			cam_ori = np.zeros((3,1))
+			cam_extrin = util.Pose(cam_loc, cam_ori).extrinsics()
+			for bh in board_height:
+				for bw in board_width:
+					for bs in board_sqsize:
+						estimations = []
+						for iexp in xrange(exp_repeat_times):
+							# Generate n boards
+							board = bd.Board.gen_calib_board((bw, bh), bs, \
+								np.zeros((3,1)), np.zeros((3,1)), noise3d)
+							perfect_board = bd.Board.gen_calib_board((bw, bh), bs, \
+								np.zeros((3,1)), np.zeros((3,1)), 0)
+							obs_list = []
+							# for i in xrange(n):
+							while len(obs_list) < n:
+								# choose a random pixel
+								pxl_x = np.random.random_integers(0, true_cam.width()-1)
+								pxl_y = np.random.random_integers(0, true_cam.height()-1)
+
+								# choose a random depth on ray from pixel
+								depth = np.random.rand() * (depth_max - depth_min) + depth_min
+								# pt3d, ray_vec = true_cam.ray_from_pixel((pxl_x, pxl_y), cam_extrin)
+								# bd_loc = pt3d + depth*ray_vec
+								
+								# choose a random orientation
+								bd_ori = util.random_rotation()
+
+								# board.move_board(bd_loc, bd_ori)
+								m_board = board.move_board_in_camera(true_cam, cam_extrin, (pxl_x, pxl_y), depth, bd_ori)
+								if m_board is not None:
+									print 'board at (', pxl_x, ',', pxl_y,',', depth, '), rotation', bd_ori.flatten()
+									obs_list.append(m_board.get_points()) #3xN np array
+
+							img_pts = true_cam.capture_images(cam_extrin, obs_list, noise2d)
+							esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=False)
+							# esti_cam = cam.Camera.calibrate_camera(img_pts, perfect_board, true_cam.size, noDistortion=True)
+							# esti_cam.intrinsics.radial_dist = np.zeros((3,))
+							# esti_cam.intrinsics.tang_dist = np.zeros((2,))
+							# vis.plot_camera_with_points(cam_extrin, obs_list)
+							# vis.plot_all_chessboards_in_camera(img_pts, true_cam.size, seperate_plot=True, save_name='results/capture_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs)+'_'+str(iexp)+'.pdf')
+
+							estimations.append(esti_cam)
+
+						# Analyze error
+						vis.write_esti_results(estimations, true_cam, \
+							save_name_pre='results/report_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
+	print "random {0} board experiment DONE".format(n)
+
+# calib_with_distortion_n_boards(2)
 
 def calib_with_random_n_boards(n):
 	"""
@@ -83,7 +462,7 @@ def calib_with_random_n_boards(n):
 							save_name_pre='results/report_'+str(n)+'_3dn_'+str(noise3d)+'_2dn_'+str(noise2d)+'_bn_'+str(bh*bw)+'_bs_'+str(bs))
 	print "random {0} board experiment DONE".format(n)
 
-calib_with_random_n_boards(2)
+# calib_with_random_n_boards(2)
 
 # def rotate_to_match_corners(board, true_cam, cam_loc, detection_noise):
 # 	"""
