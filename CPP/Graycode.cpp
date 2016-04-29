@@ -98,12 +98,12 @@ std::pair<cv::Point3f, cv::Point3f> AppleJuice::SearchPoints(std::string xs, std
 	pair<float, float> x_pt = search(chessboard.lookup_table_x, xs);
 	pair<float, float> y_pt = search(chessboard.lookup_table_y, ys);
 
-	DLOG(INFO) << chessboard.width << chessboard.cols << endl;
+	// DLOG(INFO) << chessboard.width << chessboard.cols << endl;
 	// cv::Point3f pt(x_pt.first , y_pt.first , 0);
 	// cv::Point3f conf(x_pt.second , y_pt.second , 0);
 	cv::Point3f pt(x_pt.first * chessboard.width / chessboard.cols, y_pt.first * chessboard.height / chessboard.rows, 0);
 	cv::Point3f conf(x_pt.second * chessboard.width / chessboard.cols, y_pt.second * chessboard.height / chessboard.rows, 0);
-	DLOG(INFO) << "searching " << xs << ", " << ys << " found " << pt << ", " << conf << endl;
+	// DLOG(INFO) << "searching " << xs << ", " << ys << " found " << pt << ", " << conf << endl;
 	return make_pair(pt, conf);
 }
 
