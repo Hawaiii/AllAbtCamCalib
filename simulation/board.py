@@ -1,3 +1,4 @@
+
 import exp_util as util
 
 import numpy as np
@@ -194,6 +195,10 @@ class Board:
 			return None
 		else:
 			return new_board
+
+	def min_depth_fit_cam(self, camera):
+		# @TODO
+		pass
 
 	def plot(self, fax=None, clr='b'):
 		"""

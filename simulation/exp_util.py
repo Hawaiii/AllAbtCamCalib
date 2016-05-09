@@ -71,6 +71,13 @@ class Pose:
     def loc_homo(self):
         return np.concatenate((self.loc, np.ones((1,1))), axis=0)
 
+    def T_pose2world(self):
+        """
+        Returns 4x4 transformation matrix from pose to world frame
+        """
+        Rt = np.concatenate((ori, loc), axis=1)
+        return np.concatenate((Rt,np.array([[0,0,0,1]])), axis=0)
+
     def extrinsics(self):
         """
         Return the corresponding Extrinsics.
