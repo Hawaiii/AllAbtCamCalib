@@ -260,9 +260,9 @@ def plot_camera_with_rays(cam_extrin, rays, invert=True):
 		# y = [-np.dot(cam_extrin.rot_mat[1,:], cam_extrin.trans_vec) ]
 		# z = [-np.dot(cam_extrin.rot_mat[2,:], cam_extrin.trans_vec) ]
 		xyz = cam_extrin.get_inv_location()
-		x = xyz[0,0]
-		y = xyz[1,0]
-		z = xyz[2,0]
+		x = [xyz[0,0]]
+		y = [xyz[1,0]]
+		z = [xyz[2,0]]
 	else:
 		x = [cam_extrin.trans_vec[0,0]]
 		y = [cam_extrin.trans_vec[1,0]]
@@ -327,6 +327,7 @@ def plot_camera_with_points(cam_loc, pts_at_depth, invert=True):
 	else:
 		print "bad type", type(pts_at_depth), "for pts_at_depth!"
 	# plt.show()
+	ax.axis('equal')
 	return ax
 
 def plot_camera_with_boards(cam_loc, boards, invert=True):

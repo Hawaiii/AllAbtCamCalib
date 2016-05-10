@@ -75,8 +75,11 @@ class Pose:
         """
         Returns 4x4 transformation matrix from pose to world frame
         """
-        Rt = np.concatenate((ori, loc), axis=1)
+        Rt = np.concatenate((self.ori, self.loc), axis=1)
         return np.concatenate((Rt,np.array([[0,0,0,1]])), axis=0)
+
+    def extrin(self):
+        return cam.Extrinsics.init_with_rotation_matrix(self.loc, self.ori, self.time)
 
     def extrinsics(self):
         """

@@ -391,7 +391,8 @@ class Camera:
 							 + self.intrinsics.cy()
 
 		# Camera center is at -Rt from extrinsics
-		pt3d = -cam_extrin.rot_mat.dot(cam_extrin.trans_vec)
+		pt3d = cam_extrin.get_inv_location()
+		# pt3d = cam_extrin.trans_vec
 
 		# Calculate ray from pixel from intrinsics
 		# ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
@@ -404,6 +405,8 @@ class Camera:
 		M2 = np.array([[-M[0,2]-M[0,3], -M[1,2]-M[1,3], -M[2,2]-M[2,3]]]).T
 		ray_vec = np.linalg.inv(M1).dot(M2)
 		ray_vec[2,0] = 1
+		# import pdb; pdb.set_trace()
+
 
 		return pt3d, ray_vec
 
