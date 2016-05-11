@@ -392,22 +392,12 @@ class Camera:
 
 		# Camera center is at -Rt from extrinsics
 		pt3d = cam_extrin.get_inv_location()
-		# pt3d = cam_extrin.trans_vec
 
 		# Calculate ray from pixel from intrinsics
-		# ray_vec = cam_extrin.get_Rt_matrix_inv().dot(np.linalg.inv(self.intrinsics.intri_mat))\
-		# 				.dot(np.concatenate((nodist_loc.reshape(2,1), np.ones((1,1))),axis=0))
-		# ray_vec = util.unit_vector(ray_vec())
-		M = self.intrinsics.intri_mat.dot(cam_extrin.get_Rt_matrix())
-		M1 = np.array([[M[0,0], M[0,1], -nodist_loc[0,0,0]],\
-			[M[1,0], M[1,1], -nodist_loc[0,0,1]],\
-			[M[2,0], M[2,1], -1]])
-		M2 = np.array([[-M[0,2]-M[0,3], -M[1,2]-M[1,3], -M[2,2]-M[2,3]]]).T
-		ray_vec = np.linalg.inv(M1).dot(M2)
-		ray_vec[2,0] = 1
-		# import pdb; pdb.set_trace()
-
-
+		a = (pixel[0] - self.intrinsics.cx()) / self.intrinsics.fx()
+		b = (pixel[1] - self.intrinsics.cy()) / self.intrinsics.fy()
+		ray_pt = cam_extrin.rot_mat.T.dot(np.array([a,b,1]).reshape(3,1)-cam_extrin.trans_vec)
+		ray_vec = ray_pt - pt3d
 		return pt3d, ray_vec
 
 	def write_offset_map_from_dist_coeffs(self):
