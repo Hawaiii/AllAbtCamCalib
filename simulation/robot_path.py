@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 def robot_pose_from_board_pixel_align(camera, camera_loc, board, robot2board_pose, depth, pxl, align_point):
 	pt3d, ray_vec = camera.ray_from_pixel(pxl, camera_loc.extrinsics())
 	board_loc = pt3d + depth * ray_vec # board align point location
-	board_ori = -ray_vec # board orientation
+	z_vec = np.array([0,0,1]).reshape(3,1)
+	board_ori = util.rot_mat_vec2vec(z_vec, -ray_vec) # board orientation
+	# vis.plot_camera_with_rays(camera_loc.extrinsics(), [(pt3d, -ray_vec), (pt3d, board_ori.dot(z_vec))])
 	align2base = util.Pose(board_loc, board_ori)
 	T_align2base = align2base.T_pose2world()
 
@@ -131,7 +133,7 @@ def experiment_intrinsics_calib():
 	robot2board_pose = util.Pose(np.zeros((3,1)), np.zeros((3,1)))
 
 	samples = (2,2)
-	r_poses = robot_calibrate_cam_intrinsics(camera, camera_pose, board, robot2board_pose, samples)
+	r_poses = robot_calibrate_cam_intrinsics(camera, camera_pose, board, robot2board_pose, samples, border_pxl=100)
 	#print r_poses
 
 	obs = []
@@ -140,7 +142,7 @@ def experiment_intrinsics_calib():
 		obs.append(board.get_points())
 	vis.plot_camera_with_points(camera_pose.extrinsics(), obs)
 	plt.show()
-	# img_pts = camera.capture_images(camera_pose.extrinsics(), obs, 0)
-	# vis.plot_all_chessboards_in_camera(img_pts, camera.size, seperate_plot=True, save_name='results/capture_intrin_calib.pdf')
+	img_pts = camera.capture_images(camera_pose.extrinsics(), obs, 0)
+	vis.plot_all_chessboards_in_camera(img_pts, camera.size, seperate_plot=True, save_name='results/capture_intrin_calib.pdf')
 
 experiment_intrinsics_calib()

@@ -6,6 +6,7 @@ import camera as cam
 import cv2
 import numpy as np
 import numpy.matlib as matlib
+from scipy.linalg import expm3, norm
 import math
 import random
 import matplotlib.pyplot as plt
@@ -78,8 +79,8 @@ class Pose:
         Rt = np.concatenate((self.ori, self.loc), axis=1)
         return np.concatenate((Rt,np.array([[0,0,0,1]])), axis=0)
 
-    def extrin(self):
-        return cam.Extrinsics.init_with_rotation_matrix(self.loc, self.ori, self.time)
+    # def extrin(self):
+        # return cam.Extrinsics.init_with_rotation_matrix(self.loc, self.ori, self.time)
 
     def extrinsics(self):
         """
@@ -300,6 +301,20 @@ class ExpConfig:
     board_sqsize = 0.23
     depth_min = 0.5 #m
     depth_max = 5#m
+
+def rot_mat_vec2vec(fro, to):
+    # rotation matrix to rotate vector fro to vector to
+    # both fro, to are 3x1 numpy arrays
+    fro = unit_vector(fro)
+    to = unit_vector(to)
+
+    v = np.cross(fro.T, to.T).reshape(3,1)
+    s = np.linalg.norm(v)
+    c = np.dot(fro, to.T)
+    v_cross = np.array([[0, -v[2,0], v[1,0]], [0, 0, -v[0,0]],[0, 0, 0]])
+    v_cross = v_cross - v_cross.T
+
+    return np.eye(3) + v_cross + v_cross.dot(v_cross)*(1-c)/(s*s)
     
 # def euler2mat(e_angles):
 #     """
